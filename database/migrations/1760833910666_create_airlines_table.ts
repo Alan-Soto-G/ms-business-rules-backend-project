@@ -4,8 +4,8 @@ export default class extends BaseSchema {
   protected tableName = 'airlines'
 
   async up() {
-    console.log('Creating table airlines...');
-    await this.schema.createTable(this.tableName, (table) => {
+    console.log('Creating table airlines...')
+    this.schema.createTable(this.tableName, (table) => {
       table.increments('id')
       table.string('name', 255).notNullable().comment('Airline name')
       table.string('code_iata', 2).notNullable().unique().comment('IATA code')
@@ -41,65 +41,12 @@ export default class extends BaseSchema {
       // Audit
       table.timestamp('created_at')
       table.timestamp('updated_at')
+
+      console.log('Table airlines created.')
     })
-    console.log('Table airlines created.');
-
-    // Add CHECK constraints in a Postgres-compatible way: create them only when not present
-    // This avoids relying on "ADD CONSTRAINT IF NOT EXISTS" which may not be supported in all PG versions
-    await this.schema.raw(`
-      DO $$
-      BEGIN
-        IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'chk_service_rating_range') THEN
-          ALTER TABLE ${this.tableName} ADD CONSTRAINT chk_service_rating_range CHECK (service_rating >= 0.0 AND service_rating <= 5.0);
-        END IF;
-      END$$;
-    `)
-
-    await this.schema.raw(`
-      DO $$
-      BEGIN
-        IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'chk_on_time_performance_range') THEN
-          ALTER TABLE ${this.tableName} ADD CONSTRAINT chk_on_time_performance_range CHECK (on_time_performance >= 0.0 AND on_time_performance <= 100.0);
-        END IF;
-      END$$;
-    `)
-
-    await this.schema.raw(`
-      DO $$
-      BEGIN
-        IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'chk_aircraft_count_nonneg') THEN
-          ALTER TABLE ${this.tableName} ADD CONSTRAINT chk_aircraft_count_nonneg CHECK (aircraft_count >= 0);
-        END IF;
-      END$$;
-    `)
-
-    await this.schema.raw(`
-      DO $$
-      BEGIN
-        IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'chk_number_destinations_nonneg') THEN
-          ALTER TABLE ${this.tableName} ADD CONSTRAINT chk_number_destinations_nonneg CHECK (number_destinations >= 0);
-        END IF;
-      END$$;
-    `)
   }
 
   async down() {
-    // Remove the check constraints if they exist, then drop table
-    const constraints = [
-      'chk_service_rating_range',
-      'chk_on_time_performance_range',
-      'chk_aircraft_count_nonneg',
-      'chk_number_destinations_nonneg',
-    ]
-
-    for (const name of constraints) {
-      try {
-        await this.schema.raw(`ALTER TABLE ${this.tableName} DROP CONSTRAINT IF EXISTS ${name}`)
-      } catch (error) {
-        // ignore errors (DB-specific syntax differences)
-      }
-    }
-
     this.schema.dropTable(this.tableName)
   }
 }
