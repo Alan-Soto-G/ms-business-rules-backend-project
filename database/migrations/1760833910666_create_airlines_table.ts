@@ -4,7 +4,6 @@ export default class extends BaseSchema {
   protected tableName = 'airlines'
 
   async up() {
-    console.log('Creating table airlines...')
     this.schema.createTable(this.tableName, (table) => {
       table.increments('id')
       table.string('name', 255).notNullable().comment('Airline name')
@@ -42,7 +41,6 @@ export default class extends BaseSchema {
       table.timestamp('created_at')
       table.timestamp('updated_at')
 
-      console.log('Table airlines created.')
     })
   }
 

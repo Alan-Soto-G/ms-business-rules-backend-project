@@ -9,6 +9,7 @@ const dbConfig = defineConfig({
       connection: env.get('DATABASE_URL'),
       migrations: {
         naturalSort: true,
+        paths: ['database/migrations'],
       },
     },
   },

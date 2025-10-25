@@ -4,7 +4,8 @@ import env from '#start/env'
 export default class Security {
   public async handle({ request, response }: HttpContext, next: () => Promise<void>) {
     let theRequest = request.toJSON()
-    console.log(theRequest)
+    // Optionally log only non-sensitive request info for debugging
+    // console.log({ url: theRequest.url, method: theRequest.method })
     if (theRequest.headers.authorization) {
       let token = theRequest.headers.authorization.replace('Bearer ', '')
       let thePermission: object = {
@@ -27,14 +28,14 @@ export default class Security {
           await next()
         } else {
           console.log('no puede ingresar')
-          return response.status(401)
+          return response.status(401).json({ message: 'Unauthorized: Insufficient permissions' })
         }
       } catch (error) {
         console.error(error)
-        return response.status(401)
+        return response.status(401).json({ message: 'Unauthorized: Insufficient permissions' })
       }
     } else {
-      return response.status(401)
+      return response.status(401).json({ message: 'Unauthorized: Insufficient permissions' })
     }
   }
 }

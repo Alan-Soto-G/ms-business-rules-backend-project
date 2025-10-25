@@ -47,14 +47,14 @@ export default class Airline extends BaseModel {
   declare aircraftCount: number
 
   @column({ columnName: 'aircraft_models' })
-  // Postgres returns JSON objects directly; use any for flexibility
-  declare aircraftModels?: any | null
+  // Postgres returns JSON arrays directly; use string[] for type safety
+  declare aircraftModels?: string[] | null
 
   @column({ columnName: 'number_destinations' })
   declare numberDestinations: number
 
   @column({ columnName: 'main_hubs' })
-  declare mainHubs?: any | null
+  declare mainHubs?: string[] | null
 
   @column({ columnName: 'alliance' })
   declare alliance?: string | null
