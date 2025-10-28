@@ -1,4 +1,4 @@
-**📋 TO-DO: Reparto de responsabilidades — CRUDs, Validadores y Migraciones![](Aspose.Words.ca80d513-ce50-4217-a675-a629fa8b9f33.001.png)**
+*📋 TO-DO: Reparto de responsabilidades — CRUDs, Validadores y Migraciones![](Aspose.Words.ca80d513-ce50-4217-a675-a629fa8b9f33.001.png)**
 
 **Proyecto:** Sistema turístico — Reparto de CRUDs entre 3 personas
 
