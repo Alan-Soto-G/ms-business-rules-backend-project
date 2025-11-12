@@ -12,4 +12,4 @@ router
     router.delete('/:id', [TripsController, 'destroy'])
   })
   .prefix('/api/trips')
-  .use([middleware.Security()]) // 👈 ESTA ES LA FORMA CORRECTA EN V6
+  .use([middleware.Security()])

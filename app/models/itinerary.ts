@@ -1,0 +1,39 @@
+import { DateTime } from 'luxon'
+import { BaseModel, column, belongsTo } from '@adonisjs/lucid/orm'
+import type { BelongsTo } from '@adonisjs/lucid/types/relations'
+import Municipality from './municipality.js'
+
+export default class Itinerary extends BaseModel {
+  @column({ isPrimary: true })
+  declare id: number
+
+  @column({ columnName: 'origin_municipality_id' })
+  declare originMunicipalityId: number
+
+  @column({ columnName: 'destination_municipality_id' })
+  declare destinationMunicipalityId: number
+
+  @column({ columnName: 'distance' })
+  declare distance: number | null
+
+  @column({ columnName: 'estimated_time' })
+  declare estimatedTime: number | null
+
+  // Relación con el municipio de origen
+  @belongsTo(() => Municipality, {
+    foreignKey: 'originMunicipalityId',
+  })
+  declare originMunicipality: BelongsTo<typeof Municipality>
+
+  // Relación con el municipio de destino
+  @belongsTo(() => Municipality, {
+    foreignKey: 'destinationMunicipalityId',
+  })
+  declare destinationMunicipality: BelongsTo<typeof Municipality>
+
+  @column.dateTime({ autoCreate: true, columnName: 'created_at' })
+  declare createdAt: DateTime
+
+  @column.dateTime({ autoCreate: true, autoUpdate: true, columnName: 'updated_at' })
+  declare updatedAt: DateTime
+}
