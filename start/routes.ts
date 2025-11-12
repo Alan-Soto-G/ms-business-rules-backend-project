@@ -1,9 +1,14 @@
-// start/routes.ts
-import router from '@adonisjs/core/services/router'
+/*
+|--------------------------------------------------------------------------
+| Routes file
+|--------------------------------------------------------------------------
+|
+| The routes file is used for defining the HTTP routes.
+|
+*/
 
-router.get('/', async () => ({ hello: 'world' }))
-
-// Importa cada archivo de rutas
+import './routes/aircrafts.js'
+import './routes/airlines.js'
 import './routes/trips.js'
 import './routes/invoices.js'
 import './routes/fees.js'
