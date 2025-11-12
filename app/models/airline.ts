@@ -1,5 +1,7 @@
 import { DateTime } from 'luxon'
-import { BaseModel, column } from '@adonisjs/lucid/orm'
+import { BaseModel, column, hasMany } from '@adonisjs/lucid/orm'
+import type { HasMany } from '@adonisjs/lucid/types/relations'
+import Aircraft from './aircraft.js'
 
 export default class Airline extends BaseModel {
   @column({ isPrimary: true })
@@ -17,57 +19,12 @@ export default class Airline extends BaseModel {
   @column({ columnName: 'country_of_origin' })
   declare countryOfOrigin: string
 
-  @column({ columnName: 'founding_year' })
-  declare foundingYear?: number | null
-
   @column({ columnName: 'is_active' })
   declare isActive: boolean
 
-  // Contact
-  @column({ columnName: 'address' })
-  declare address?: string | null
-
-  @column({ columnName: 'phone' })
-  declare phone?: string | null
-
-  @column({ columnName: 'email' })
-  declare email?: string | null
-
-  @column({ columnName: 'website' })
-  declare website?: string | null
-
-  @column({ columnName: 'headquarter_city' })
-  declare headquarterCity?: string | null
-
-  @column({ columnName: 'ceo' })
-  declare ceo?: string | null
-
-  // Operations
-  @column({ columnName: 'aircraft_count' })
-  declare aircraftCount: number
-
-  @column({ columnName: 'aircraft_models' })
-  // Postgres returns JSON arrays directly; use string[] for type safety
-  declare aircraftModels?: string[] | null
-
-  @column({ columnName: 'number_destinations' })
-  declare numberDestinations: number
-
-  @column({ columnName: 'main_hubs' })
-  declare mainHubs?: string[] | null
-
-  @column({ columnName: 'alliance' })
-  declare alliance?: string | null
-
-  @column({ columnName: 'frequent_flyer_program' })
-  declare frequentFlyerProgram?: string | null
-
-  // Service / reputation
-  @column({ columnName: 'on_time_performance' })
-  declare onTimePerformance?: number | null
-
-  @column({ columnName: 'service_rating' })
-  declare serviceRating: number
+  // Relación 1 a N con Aircraft
+  @hasMany(() => Aircraft)
+  declare aircrafts: HasMany<typeof Aircraft>
 
   @column.dateTime({ autoCreate: true, columnName: 'created_at' })
   declare createdAt: DateTime

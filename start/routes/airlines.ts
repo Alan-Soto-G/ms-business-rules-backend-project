@@ -2,7 +2,7 @@ import router from '@adonisjs/core/services/router'
 import { middleware } from '#start/kernel'
 const AirlinesController = () => import('#controllers/airlines_controller')
 
-router
+export default router
   .group(() => {
     router.get('/', [AirlinesController, 'find'])
     router.get('/:id', [AirlinesController, 'find'])
