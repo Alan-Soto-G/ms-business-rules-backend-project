@@ -5,10 +5,22 @@ export default class extends BaseSchema {
 
   async up() {
     this.schema.createTable(this.tableName, (table) => {
-      table.increments('id')
+      table.increments('id').primary()
 
-      table.timestamp('created_at')
-      table.timestamp('updated_at')
+      // Atributos principales
+      table.dateTime('start_date').notNullable()
+      table.dateTime('end_date').notNullable()
+      table.string('destination', 255).notNullable()
+      table.string('name', 255).notNullable()
+      table.text('description').nullable()
+      table.decimal('price', 10, 2).notNullable().defaultTo(0)
+      table.integer('capacity').unsigned().notNullable().defaultTo(0)
+      table.integer('available_seats').unsigned().notNullable().defaultTo(0)
+      table.string('status', 50).notNullable().defaultTo('active')
+
+      // Auditoría
+      table.timestamp('created_at', { useTz: true }).notNullable()
+      table.timestamp('updated_at', { useTz: true }).notNullable()
     })
   }
 

@@ -1,27 +1,19 @@
-// app/models/bank_card.ts
+// app/models/trip_route.ts
 import { DateTime } from 'luxon'
 import { BaseModel, column, belongsTo } from '@adonisjs/lucid/orm'
 import type { BelongsTo } from '@adonisjs/lucid/types/relations'
-import Client from './client.js'
+import Trip from './trip.js'
+import Route from './route.js'
 
-export default class BankCard extends BaseModel {
+export default class TripRoute extends BaseModel {
   @column({ isPrimary: true })
   declare id: number
 
   @column()
-  declare clientId: number
+  declare tripId: number
 
   @column()
-  declare cardNumber: string
-
-  @column()
-  declare cvv: string
-
-  @column.dateTime()
-  declare expirationDate: DateTime
-
-  @column()
-  declare cardHolderName: string
+  declare routeId: number
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
@@ -29,8 +21,13 @@ export default class BankCard extends BaseModel {
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime
 
-  @belongsTo(() => Client, {
-    foreignKey: 'clientId',
+  @belongsTo(() => Trip, {
+    foreignKey: 'tripId',
   })
-  declare client: BelongsTo<typeof Client>
+  declare trip: BelongsTo<typeof Trip>
+
+  @belongsTo(() => Route, {
+    foreignKey: 'routeId',
+  })
+  declare route: BelongsTo<typeof Route>
 }
