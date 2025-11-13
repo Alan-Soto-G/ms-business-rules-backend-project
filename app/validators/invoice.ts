@@ -1,32 +1,32 @@
-// app/validators/invoice.ts
+// ============================================
+// VALIDADOR: app/validators/invoice.ts
+// ============================================
 import vine from '@vinejs/vine'
-import { DateTime } from 'luxon'
 
+/**
+ * Validator para crear un Invoice (Factura)
+ */
 export const createInvoiceValidator = vine.compile(
   vine.object({
     feeId: vine.number().positive(),
-    invoiceNumber: vine.string().trim().minLength(3).maxLength(50),
-    totalAmount: vine.number().positive().decimal([0, 2]),
-    issueDate: vine.date().transform((value) => DateTime.fromJSDate(value)),
-    paymentDate: vine
-      .date()
-      .nullable()
-      .transform((value) => (value ? DateTime.fromJSDate(value) : undefined) as DateTime | undefined),
-    paymentMethod: vine.string().trim().minLength(3).maxLength(50),
+    invoiceNumber: vine.string().trim().minLength(3).maxLength(255),
+    totalAmount: vine.number().min(0),
+    issueDate: vine.string(), // 🚀 enviar como string ISO (YYYY-MM-DD)
+    paymentDate: vine.string().optional(), // 🚀 enviar como string ISO (YYYY-MM-DD)
+    paymentMethod: vine.enum(['cash', 'credit_card', 'debit_card', 'bank_transfer', 'paypal', 'other']),
   })
 )
 
+/**
+ * Validator para actualizar un Invoice (Factura)
+ */
 export const updateInvoiceValidator = vine.compile(
   vine.object({
     feeId: vine.number().positive().optional(),
-    invoiceNumber: vine.string().trim().minLength(3).maxLength(50).optional(),
-    totalAmount: vine.number().positive().decimal([0, 2]).optional(),
-    issueDate: vine.date().transform((value) => DateTime.fromJSDate(value)).optional(),
-    paymentDate: vine
-      .date()
-      .nullable()
-      .optional()
-      .transform((value) => (value ? DateTime.fromJSDate(value) : undefined) as DateTime | undefined),
-    paymentMethod: vine.string().trim().minLength(3).maxLength(50).optional(),
+    invoiceNumber: vine.string().trim().minLength(3).maxLength(255).optional(),
+    totalAmount: vine.number().min(0).optional(),
+    issueDate: vine.string().optional(), // 🚀 enviar como string ISO (YYYY-MM-DD)
+    paymentDate: vine.string().optional(), // 🚀 enviar como string ISO (YYYY-MM-DD)
+    paymentMethod: vine.enum(['cash', 'credit_card', 'debit_card', 'bank_transfer', 'paypal', 'other']).optional(),
   })
 )

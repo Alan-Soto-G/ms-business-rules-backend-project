@@ -1,6 +1,8 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Trip from '#models/trip'
 import { createTripValidator, updateTripValidator } from '#validators/trip'
+import { DateTime } from 'luxon'
+
 
 export default class TripsController {
 
@@ -26,18 +28,37 @@ export default class TripsController {
   // CREATE
   public async store({ request, response }: HttpContext) {
     const body = await request.validateUsing(createTripValidator)
-    const trip = await Trip.create(body)
+
+    // 🔁 Convertir fechas y asegurar nombres coherentes
+const data = {
+  name: body.name,
+  description: body.description,
+  destination: body.destination,
+  start_date: DateTime.fromISO(`${body.startDate}T00:00:00`),
+  end_date: DateTime.fromISO(`${body.endDate}T00:00:00`),
+  price: Number(body.price),
+  capacity: Number(body.capacity),
+  available_seats: Number(body.availableSeats),
+ status: body.status,
+}
+
+
+    console.log('📦 Datos a insertar:', data)
+
+    const trip = await Trip.create(data)
     return response.created(trip)
   }
 
-  // UPDATE
-  public async update({ params, request, response }: HttpContext) {
-    const trip = await Trip.findOrFail(params.id)
-    const updates = await request.validateUsing(updateTripValidator)
-    trip.merge(updates)
-    await trip.save()
-    return response.ok(trip)
-  }
+public async update({ params, request, response }: HttpContext) {
+  const trip = await Trip.findOrFail(params.id)
+  const updates = await request.validateUsing(updateTripValidator)
+
+  // ⚡ Force merge sin que TypeScript se queje
+  trip.merge(updates as any)
+  await trip.save()
+  return response.ok(trip)
+}
+
 
   // DELETE
   public async destroy({ params, response }: HttpContext) {

@@ -4,22 +4,14 @@ import { middleware } from '#start/kernel'
 
 const FeesController = () => import('#controllers/fees_controller')
 
-
 router
   .group(() => {
-    router.get('/', [FeesController, 'find'])
-    router.get('/:id', [FeesController, 'find'])
-    router.post('/', [FeesController, 'create'])
-    router.put('/:id', [FeesController, 'update'])
-    router.delete('/:id', [FeesController, 'delete'])
+    router.get('/', [FeesController, 'index'])      // ✅ index en vez de find
+    router.get('/:id', [FeesController, 'show'])    // ✅ show en vez de find
+    router.post('/', [FeesController, 'store'])     // ✅ store en vez de create
+    router.put('/:id', [FeesController, 'update'])  // ✅ update (correcto)
+    router.delete('/:id', [FeesController, 'destroy']) // ✅ destroy en vez de delete
   })
-  .prefix('/fees')
-  .use(middleware.Security)
+  .prefix('/api/fees')  // ✅ Agregué /api para consistencia con trips
+  .use([middleware.Security()]) // ✅ Igual que trips (con paréntesis y array)
 
-  // Ruta especial: Obtener cuotas de un viaje específico
-router
-  .group(() => {
-    router.get('/:tripId/fees', [FeesController, 'findByTrip'])
-  })
-  .prefix('/api/trips')
-  .use(middleware.Security)
