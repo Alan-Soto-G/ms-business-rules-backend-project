@@ -1,5 +1,5 @@
 import router from '@adonisjs/core/services/router'
-import { middleware } from '#start/kernel'
+//import { middleware } from '#start/kernel'
 
 const PlanTouristActivitiesController = () =>
   import('#controllers/plan_tourist_activities_controller')
@@ -10,7 +10,7 @@ router
     router.get('/', [PlanTouristActivitiesController, 'index'])
   })
   .prefix('/api/plans/:planId/activities')
-  .use([middleware.Security()])
+//.use([middleware.Security()])
 
 // Rutas para asociar/desasociar una actividad específica
 router
@@ -19,4 +19,4 @@ router
     router.delete('/', [PlanTouristActivitiesController, 'destroy'])
   })
   .prefix('/api/plans/:planId/activities/:activityId')
-  .use([middleware.Security()])
+//.use([middleware.Security()])

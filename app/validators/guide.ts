@@ -1,4 +1,5 @@
 import vine from '@vinejs/vine'
+import { DateTime } from 'luxon'
 
 export const createGuideValidator = vine.compile(
   vine.object({
@@ -7,7 +8,7 @@ export const createGuideValidator = vine.compile(
     email: vine.string().trim().email().normalizeEmail(),
     fullName: vine.string().trim().minLength(3).maxLength(255),
     phone: vine.string().trim().optional(),
-    birthDate: vine.date().optional(),
+    birthDate: vine.date().transform((value) => (value ? DateTime.fromJSDate(value) : value)).optional(),
     address: vine.string().trim().optional(),
 
     // Guide specific fields
@@ -25,7 +26,7 @@ export const updateGuideValidator = vine.compile(
     email: vine.string().trim().email().normalizeEmail().optional(),
     fullName: vine.string().trim().minLength(3).maxLength(255).optional(),
     phone: vine.string().trim().optional(),
-    birthDate: vine.date().optional(),
+    birthDate: vine.date().transform((value) => (value ? DateTime.fromJSDate(value) : value)).optional(),
     address: vine.string().trim().optional(),
 
     // Guide specific fields

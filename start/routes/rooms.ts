@@ -1,5 +1,5 @@
 import router from '@adonisjs/core/services/router'
-import { middleware } from '#start/kernel'
+//import { middleware } from '#start/kernel'
 const RoomsController = () => import('#controllers/rooms_controller')
 
 export default router
@@ -11,4 +11,5 @@ export default router
     router.delete('/:id', [RoomsController, 'deleteRoom'])
   })
   .prefix('/api/rooms')
-  .use(middleware.Security)
+//.use(middleware.Security)
+

@@ -4,7 +4,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import BankCard from '#models/bank_card'
 import { createBankCardValidator, updateBankCardValidator } from '#validators/bank_card'
-import { DateTime } from 'luxon'
 
 export default class BankCardsController {
   // GET ALL
@@ -28,21 +27,7 @@ export default class BankCardsController {
 
   // CREATE
   public async store({ request, response }: HttpContext) {
-    const body = await request.validateUsing(createBankCardValidator)
-
-    const data = {
-      clientId: body.clientId,
-      cardNumber: body.cardNumber,
-      cvv: body.cvv,
-      expirationDate: DateTime.fromISO(`${body.expirationDate}T00:00:00`),
-      cardHolderName: body.cardHolderName,
-    }
-
-    console.log('📦 Datos a insertar BankCard:', {
-      ...data,
-      cardNumber: '****' + data.cardNumber.slice(-4), // Log seguro
-      cvv: '***', // Log seguro
-    })
+    const data = await request.validateUsing(createBankCardValidator)
 
     // ⚠️ RECOMENDACIÓN: Encriptar cardNumber y CVV antes de guardar
     const bankCard = await BankCard.create(data)

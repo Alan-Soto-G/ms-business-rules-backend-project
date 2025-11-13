@@ -1,5 +1,5 @@
 import router from '@adonisjs/core/services/router'
-import { middleware } from '#start/kernel'
+//import { middleware } from '#start/kernel'
 const MunicipalitiesController = () => import('#controllers/municipalities_controller')
 
 router
@@ -20,4 +20,4 @@ router
     router.get('/:id/origins', [MunicipalitiesController, 'getOrigins'])
   })
   .prefix('/api/municipalities')
-  .use(middleware.Security)
+//.use(middleware.Security)
