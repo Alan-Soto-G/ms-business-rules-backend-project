@@ -40,7 +40,6 @@ export default class Security {
 
       const result = await axios.post(url, thePermission, {
         headers: { Authorization: `Bearer ${token}` },
-        
       })
 
       console.log('✅ Respuesta del microservicio:', result.data)

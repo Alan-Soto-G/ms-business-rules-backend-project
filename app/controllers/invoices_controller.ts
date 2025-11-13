@@ -14,7 +14,6 @@ import { createInvoiceValidator, updateInvoiceValidator } from '#validators/invo
  * - findByFee: obtener facturas de una cuota específica
  */
 export default class InvoicesController {
-
   /**
    * Obtener lista de facturas (paginada opcionalmente).
    */

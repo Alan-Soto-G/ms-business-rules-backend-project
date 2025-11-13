@@ -4,7 +4,6 @@ import { middleware } from '#start/kernel'
 
 const FeesController = () => import('#controllers/fees_controller')
 
-
 router
   .group(() => {
     router.get('/', [FeesController, 'find'])
@@ -16,7 +15,7 @@ router
   .prefix('/fees')
   .use(middleware.Security)
 
-  // Ruta especial: Obtener cuotas de un viaje específico
+// Ruta especial: Obtener cuotas de un viaje específico
 router
   .group(() => {
     router.get('/:tripId/fees', [FeesController, 'findByTrip'])

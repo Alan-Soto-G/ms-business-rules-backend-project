@@ -18,8 +18,14 @@ export const createTripValidator = vine.compile(
  */
 export const updateTripValidator = vine.compile(
   vine.object({
-    startDate: vine.date().transform((value) => (value ? DateTime.fromJSDate(value) : value)).optional(),
-    endDate: vine.date().transform((value) => (value ? DateTime.fromJSDate(value) : value)).optional(),
+    startDate: vine
+      .date()
+      .transform((value) => (value ? DateTime.fromJSDate(value) : value))
+      .optional(),
+    endDate: vine
+      .date()
+      .transform((value) => (value ? DateTime.fromJSDate(value) : value))
+      .optional(),
     destination: vine.string().trim().minLength(3).maxLength(255).optional(),
   })
 )

@@ -8,6 +8,12 @@ export default class extends BaseSchema {
     this.schema.createTable(this.tableName, (table) => {
       table.increments('id').primary()
       table.integer('fee_id').unsigned().references('fees.id').onDelete('CASCADE')
+      table
+        .integer('bank_card_id')
+        .unsigned()
+        .references('bank_cards.id')
+        .onDelete('SET NULL')
+        .nullable()
       table.string('invoice_number', 50).notNullable().unique()
       table.decimal('total_amount', 10, 2).notNullable()
       table.dateTime('issue_date').notNullable()

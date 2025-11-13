@@ -4,7 +4,6 @@ import { middleware } from '#start/kernel'
 
 const InvoicesController = () => import('#controllers/invoices_controller')
 
-
 router
   .group(() => {
     router.get('/', [InvoicesController, 'index'])

@@ -40,4 +40,3 @@ router.use([() => import('@adonisjs/core/bodyparser_middleware')])
 export const middleware = router.named({
   Security: () => import('#middleware/security'),
 })
-

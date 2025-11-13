@@ -1,6 +1,8 @@
 import { DateTime } from 'luxon'
-import { BaseModel, column, manyToMany } from '@adonisjs/lucid/orm'
-import type { ManyToMany } from '@adonisjs/lucid/types/relations'
+import { BaseModel, column, manyToMany, hasMany } from '@adonisjs/lucid/orm'
+import type { ManyToMany, HasMany } from '@adonisjs/lucid/types/relations'
+import Hotel from './hotel.js'
+import TouristActivity from './tourist_activity.js'
 
 export default class Municipality extends BaseModel {
   @column({ isPrimary: true })
@@ -34,6 +36,18 @@ export default class Municipality extends BaseModel {
     pivotRelatedForeignKey: 'origin_municipality_id',
   })
   declare origins: ManyToMany<typeof Municipality>
+
+  // Relación 1 a N con Hotel
+  @hasMany(() => Hotel, {
+    foreignKey: 'municipalityId',
+  })
+  declare hotels: HasMany<typeof Hotel>
+
+  // Relación 1 a N con TouristActivity
+  @hasMany(() => TouristActivity, {
+    foreignKey: 'municipalityId',
+  })
+  declare touristActivities: HasMany<typeof TouristActivity>
 
   @column.dateTime({ autoCreate: true, columnName: 'created_at' })
   declare createdAt: DateTime

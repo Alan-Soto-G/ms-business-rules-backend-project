@@ -1,9 +1,11 @@
 // app/models/vehicle.ts
 import { DateTime } from 'luxon'
-import { BaseModel, column, hasOne } from '@adonisjs/lucid/orm'
-import type { HasOne } from '@adonisjs/lucid/types/relations'
+import { BaseModel, column, hasOne, hasMany } from '@adonisjs/lucid/orm'
+import type { HasOne, HasMany } from '@adonisjs/lucid/types/relations'
 import Aircraft from './aircraft.js'
 import Gps from './gps.js'
+import Car from './car.js'
+import Itinerary from './itinerary.js'
 
 export default class Vehicle extends BaseModel {
   @column({ isPrimary: true })
@@ -40,6 +42,16 @@ export default class Vehicle extends BaseModel {
   // Relación 1 a 1 con GPS
   @hasOne(() => Gps)
   declare gps: HasOne<typeof Gps>
+
+  // Relación 1 a 1 con Car
+  @hasOne(() => Car)
+  declare car: HasOne<typeof Car>
+
+  // Relación 1 a N con Itinerary
+  @hasMany(() => Itinerary, {
+    foreignKey: 'vehicleId',
+  })
+  declare itineraries: HasMany<typeof Itinerary>
 
   @column.dateTime({ autoCreate: true, columnName: 'created_at' })
   declare createdAt: DateTime

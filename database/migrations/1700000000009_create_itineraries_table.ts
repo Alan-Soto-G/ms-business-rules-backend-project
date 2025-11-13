@@ -22,6 +22,24 @@ export default class extends BaseSchema {
         .inTable('municipalities')
         .onDelete('CASCADE')
 
+      // Relación con vehicle (1 vehicle tiene N itineraries)
+      table
+        .integer('vehicle_id')
+        .unsigned()
+        .notNullable()
+        .references('id')
+        .inTable('vehicles')
+        .onDelete('RESTRICT')
+
+      // Relación con trip (1 itinerary pertenece a 1 trip)
+      table
+        .integer('trip_id')
+        .unsigned()
+        .notNullable()
+        .references('id')
+        .inTable('trips')
+        .onDelete('CASCADE')
+
       // Evitar duplicados de la misma ruta
       table.unique(['origin_municipality_id', 'destination_municipality_id'])
 

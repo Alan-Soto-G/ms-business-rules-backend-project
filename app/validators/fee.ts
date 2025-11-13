@@ -17,7 +17,10 @@ export const updateFeeValidator = vine.compile(
     tripId: vine.number().positive().optional(),
     amount: vine.number().positive().decimal([0, 2]).optional(),
     description: vine.string().trim().minLength(3).maxLength(255).optional(),
-    dueDate: vine.date().transform((value) => (value ? DateTime.fromJSDate(value) : value)).optional(),
+    dueDate: vine
+      .date()
+      .transform((value) => (value ? DateTime.fromJSDate(value) : value))
+      .optional(),
     status: vine.enum(['pending', 'paid', 'overdue']).optional(),
   })
 )

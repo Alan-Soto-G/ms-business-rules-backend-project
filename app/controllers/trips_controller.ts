@@ -3,7 +3,6 @@ import Trip from '#models/trip'
 import { createTripValidator, updateTripValidator } from '#validators/trip'
 
 export default class TripsController {
-
   // GET ALL
   public async index({ request, response }: HttpContext) {
     const page = request.input('page', 1)
