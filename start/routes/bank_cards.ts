@@ -16,11 +16,3 @@ router
   })
   .prefix('/bank-cards')
   .use(middleware.Security)
-
-// Ruta especial: Obtener tarjetas de un cliente específico
-router
-  .group(() => {
-    router.get('/:clientId/bank-cards', [BankCardsController, 'findByClient'])
-  })
-  .prefix('/api/clients')
-  .use(middleware.Security)

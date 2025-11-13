@@ -6,19 +6,19 @@ const FeesController = () => import('#controllers/fees_controller')
 
 router
   .group(() => {
-    router.get('/', [FeesController, 'find'])
-    router.get('/:id', [FeesController, 'find'])
-    router.post('/', [FeesController, 'create'])
+    router.get('/', [FeesController, 'index'])
+    router.get('/:id', [FeesController, 'show'])
+    router.post('/', [FeesController, 'store'])
     router.put('/:id', [FeesController, 'update'])
-    router.delete('/:id', [FeesController, 'delete'])
+    router.delete('/:id', [FeesController, 'destroy'])
   })
-  .prefix('/fees')
-  .use(middleware.Security)
+  .prefix('/api/fees')
+  .use([middleware.Security()])
 
-// Ruta especial: Obtener cuotas de un viaje específico
+/*/ Ruta especial: Obtener cuotas de un viaje específico
 router
   .group(() => {
     router.get('/:tripId/fees', [FeesController, 'findByTrip'])
   })
   .prefix('/api/trips')
-  .use(middleware.Security)
+  .use(middleware.Security)*/

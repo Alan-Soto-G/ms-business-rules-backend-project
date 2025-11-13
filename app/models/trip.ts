@@ -5,12 +5,12 @@ import type { HasMany, HasOne, ManyToMany } from '@adonisjs/lucid/types/relation
 import Fee from './fee.js'
 import TripClient from './trip_client.js'
 import TripPlan from './trip_plan.js'
-import TripRoute from './trip_route.js'
 import TripRoom from './trip_room.js'
 import Itinerary from './itinerary.js'
 import Client from './client.js'
 import Room from './room.js'
 import Plan from './plan.js'
+
 
 export default class Trip extends BaseModel {
   @column({ isPrimary: true })
@@ -64,11 +64,6 @@ export default class Trip extends BaseModel {
     foreignKey: 'tripId',
   })
   declare tripPlans: HasMany<typeof TripPlan>
-
-  @hasMany(() => TripRoute, {
-    foreignKey: 'tripId',
-  })
-  declare tripRoutes: HasMany<typeof TripRoute>
 
   @hasMany(() => TripRoom, {
     foreignKey: 'tripId',
