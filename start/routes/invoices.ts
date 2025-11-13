@@ -13,13 +13,6 @@ router
     router.put('/:id', [InvoicesController, 'update'])
     router.delete('/:id', [InvoicesController, 'destroy'])
   })
-  .prefix('/invoices')
-  .use(middleware.Security)
+  .prefix('api/invoices')
+ .use([middleware.Security()])
 
-// Ruta especial: Obtener facturas de una cuota específica
-router
-  .group(() => {
-    router.get('/:feeId/invoices', [InvoicesController, 'findByFee'])
-  })
-  .prefix('/api/fees')
-  .middleware(middleware.Security)

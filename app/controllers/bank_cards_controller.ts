@@ -1,58 +1,68 @@
+// ============================================
+// CONTROLADOR: app/controllers/bank_cards_controller.ts
+// ============================================
 import type { HttpContext } from '@adonisjs/core/http'
 import BankCard from '#models/bank_card'
 import { createBankCardValidator, updateBankCardValidator } from '#validators/bank_card'
+import { DateTime } from 'luxon'
 
 export default class BankCardsController {
-  /** GET /bank-cards  */
-  public async index({ response, request }: HttpContext) {
-    const data = request.all()
 
-    if ('page' in data && 'per_page' in data) {
-      const page = request.input('page', 1)
-      const perPage = request.input('per_page', 20)
-      const bankCards = await BankCard.query().preload('client').paginate(page, perPage)
-      return response.status(200).json(bankCards)
-    }
-
-    const allBankCards = await BankCard.query().preload('client')
-    return response.status(200).json(allBankCards)
+  // GET ALL
+  public async index({ request, response }: HttpContext) {
+    const page = request.input('page', 1)
+    const perPage = request.input('per_page', 20)
+    
+    // ⚠️ SEGURIDAD: No devolver información sensible completa
+    const bankCards = await BankCard.query().paginate(page, perPage)
+    return response.ok(bankCards)
   }
 
-  /** GET /bank-cards/:id */
+  // GET BY ID
   public async show({ params, response }: HttpContext) {
     const bankCard = await BankCard.findOrFail(params.id)
     await bankCard.load('client')
-    return response.status(200).json(bankCard)
+    
+    // ⚠️ SEGURIDAD: Considera ocultar CVV y mostrar solo últimos 4 dígitos
+    return response.ok(bankCard)
   }
 
-  /** POST /bank-cards */
+  // CREATE
   public async store({ request, response }: HttpContext) {
     const body = await request.validateUsing(createBankCardValidator)
-    const bankCard = await BankCard.create(body)
-    return response.status(201).json(bankCard)
+
+    const data = {
+      clientId: body.clientId,
+      cardNumber: body.cardNumber,
+      cvv: body.cvv,
+      expirationDate: DateTime.fromISO(`${body.expirationDate}T00:00:00`),
+      cardHolderName: body.cardHolderName,
+    }
+
+    console.log('📦 Datos a insertar BankCard:', {
+      ...data,
+      cardNumber: '****' + data.cardNumber.slice(-4), // Log seguro
+      cvv: '***' // Log seguro
+    })
+
+    // ⚠️ RECOMENDACIÓN: Encriptar cardNumber y CVV antes de guardar
+    const bankCard = await BankCard.create(data)
+    return response.created(bankCard)
   }
 
-  /** PUT/PATCH /bank-cards/:id */
+  // UPDATE
   public async update({ params, request, response }: HttpContext) {
     const bankCard = await BankCard.findOrFail(params.id)
     const updates = await request.validateUsing(updateBankCardValidator)
-
-    bankCard.merge(updates)
+    bankCard.merge(updates as any)
     await bankCard.save()
-
-    return response.status(200).json(bankCard)
+    return response.ok(bankCard)
   }
 
-  /** DELETE /bank-cards/:id */
+  // DELETE
   public async destroy({ params, response }: HttpContext) {
     const bankCard = await BankCard.findOrFail(params.id)
     await bankCard.delete()
-    return response.status(200).json({ message: 'Bank card deleted successfully' })
-  }
-
-  /** ⚠ Ruta extra (fuera del resource): GET /bank-cards/client/:clientId */
-  public async findByClient({ params, response }: HttpContext) {
-    const bankCards = await BankCard.query().where('client_id', params.clientId)
-    return response.status(200).json(bankCards)
+    return response.ok({ message: 'Bank card deleted successfully' })
   }
 }

@@ -8,6 +8,7 @@ import TripPlan from './trip_plan.js'
 import TripRoute from './trip_route.js'
 import TripRoom from './trip_room.js'
 
+
 export default class Trip extends BaseModel {
   @column({ isPrimary: true })
   declare id: number
