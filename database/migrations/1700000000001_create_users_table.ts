@@ -14,6 +14,7 @@ export default class extends BaseSchema {
       table.date('birth_date').nullable()
       table.text('address').nullable()
       table.enum('user_type', ['guide', 'client', 'admin']).notNullable()
+      table.enum('status', ['active', 'inactive']).defaultTo('active')
 
       table.timestamp('created_at')
       table.timestamp('updated_at')

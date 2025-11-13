@@ -11,4 +11,4 @@ export default router
     router.delete('/:id', [AirlinesController, 'delete'])
   })
   .prefix('/api/airlines')
-  .use(middleware.Security)
+//.use(middleware.Security)

@@ -13,9 +13,12 @@ export default class Hotel extends BaseModel {
   @column({ columnName: 'hotel_admin_id' })
   declare hotelAdminId: number
 
-  // Atributos básicos del hotel
   @column({ columnName: 'municipality_id' })
   declare municipalityId: number
+
+  // Atributos básicos del hotel
+  @column({ columnName: 'name' })
+  declare name: string
 
   @column({ columnName: 'address' })
   declare address: string

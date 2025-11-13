@@ -31,6 +31,7 @@ export default class HotelsController {
 
     const hotelData = {
       hotelAdminId: data.hotelAdminId,
+      municipalityId: data.municipalityId,
       name: data.name,
       address: data.address,
       phone: data.phone,
@@ -55,6 +56,7 @@ export default class HotelsController {
 
     const hotelData: any = {}
     if (data.hotelAdminId !== undefined) hotelData.hotelAdminId = data.hotelAdminId
+    if (data.municipalityId !== undefined) hotelData.municipalityId = data.municipalityId
     if (data.name !== undefined) hotelData.name = data.name
     if (data.address !== undefined) hotelData.address = data.address
     if (data.phone !== undefined) hotelData.phone = data.phone
