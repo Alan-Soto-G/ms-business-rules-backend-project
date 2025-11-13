@@ -35,6 +35,12 @@ export default class Vehicle extends BaseModel {
   @column({ columnName: 'status' })
   declare status: string
 
+  @column.dateTime({ autoCreate: true, columnName: 'created_at' })
+  declare createdAt: DateTime
+
+  @column.dateTime({ autoCreate: true, autoUpdate: true, columnName: 'updated_at' })
+  declare updatedAt: DateTime
+
   // Relación 1 a 1 con Aircraft
   @hasOne(() => Aircraft)
   declare aircraft: HasOne<typeof Aircraft>
@@ -52,10 +58,4 @@ export default class Vehicle extends BaseModel {
     foreignKey: 'vehicleId',
   })
   declare itineraries: HasMany<typeof Itinerary>
-
-  @column.dateTime({ autoCreate: true, columnName: 'created_at' })
-  declare createdAt: DateTime
-
-  @column.dateTime({ autoCreate: true, autoUpdate: true, columnName: 'updated_at' })
-  declare updatedAt: DateTime
 }

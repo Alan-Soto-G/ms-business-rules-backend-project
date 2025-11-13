@@ -7,9 +7,15 @@ import { DateTime } from 'luxon'
  */
 export const createTripValidator = vine.compile(
   vine.object({
+    name: vine.string().trim().minLength(3).maxLength(255),
+    description: vine.string().trim().minLength(3).maxLength(1000),
+    destination: vine.string().trim().minLength(3).maxLength(255),
     startDate: vine.date().transform((value) => (value ? DateTime.fromJSDate(value) : value)),
     endDate: vine.date().transform((value) => (value ? DateTime.fromJSDate(value) : value)),
-    destination: vine.string().trim().minLength(3).maxLength(255),
+    price: vine.number().min(0),
+    capacity: vine.number().min(1),
+    availableSeats: vine.number().min(0),
+    status: vine.enum(['active', 'cancelled', 'completed', 'pending']),
   })
 )
 
@@ -18,6 +24,9 @@ export const createTripValidator = vine.compile(
  */
 export const updateTripValidator = vine.compile(
   vine.object({
+    name: vine.string().trim().minLength(3).maxLength(255).optional(),
+    description: vine.string().trim().minLength(3).maxLength(1000).optional(),
+    destination: vine.string().trim().minLength(3).maxLength(255).optional(),
     startDate: vine
       .date()
       .transform((value) => (value ? DateTime.fromJSDate(value) : value))
@@ -26,6 +35,9 @@ export const updateTripValidator = vine.compile(
       .date()
       .transform((value) => (value ? DateTime.fromJSDate(value) : value))
       .optional(),
-    destination: vine.string().trim().minLength(3).maxLength(255).optional(),
+    price: vine.number().min(0).optional(),
+    capacity: vine.number().min(1).optional(),
+    availableSeats: vine.number().min(0).optional(),
+    status: vine.enum(['active', 'cancelled', 'completed', 'pending']).optional(),
   })
 )

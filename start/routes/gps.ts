@@ -10,5 +10,5 @@ export default router
     router.put('/:id', [GpsController, 'update'])
     router.delete('/:id', [GpsController, 'delete'])
   })
-  .prefix('/gps')
+  .prefix('/api/gps')
   .use(middleware.Security)

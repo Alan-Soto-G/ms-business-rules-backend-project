@@ -10,5 +10,5 @@ export default router
     router.put('/:id', [CarsController, 'updateCar'])
     router.delete('/:id', [CarsController, 'deleteCar'])
   })
-  .prefix('/cars')
+  .prefix('/api/cars')
   .use(middleware.Security)

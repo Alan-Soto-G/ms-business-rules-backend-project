@@ -1,0 +1,164 @@
+{
+  "user": {
+    "idCard": "1234567890",
+    "email": "usuario@example.com",
+    "fullName": "Juan Pérez García",
+    "phone": "3001234567",
+    "birthDate": "1990-05-15",
+    "address": "Calle 123 #45-67",
+    "userType": "client",
+    "status": "active"
+  },
+  "municipality": {
+    "name": "Medellín",
+    "department": "Antioquia",
+    "code": "05001"
+  },
+  "airline": {
+    "name": "Avianca",
+    "codeIata": "AV",
+    "codeIcao": "AVA",
+    "countryOfOrigin": "Colombia",
+    "isActive": true
+  },
+  "vehicle": {
+    "licensePlate": "ABC123",
+    "brand": "Toyota",
+    "model": "Land Cruiser",
+    "year": 2023,
+    "color": "Blanco",
+    "numberOfSeats": 7,
+    "vehicleType": "suv",
+    "status": "available"
+  },
+  "trip": {
+    "name": "Tour Medellín 2025",
+    "description": "Recorrido completo por la ciudad de Medellín con todas las actividades incluidas",
+    "destination": "Medellín, Antioquia",
+    "startDate": "2025-12-01",
+    "endDate": "2025-12-05",
+    "price": 2000000,
+    "capacity": 30,
+    "availableSeats": 30,
+    "status": "active"
+  },
+  "client": {
+    "userId": 1,
+    "emergencyContactName": "María Pérez",
+    "emergencyContactPhone": "3009876543",
+    "allergies": "Ninguna",
+    "loyaltyPoints": 0,
+    "isVip": false
+  },
+  "guide": {
+    "userId": 2,
+    "licenseNumber": "LIC-2023-001",
+    "specialties": "Historia, Cultura, Gastronomía",
+    "rating": 4.8,
+    "isAvailable": true
+  },
+  "hotelAdmin": {
+    "userId": 3,
+    "isVerified": true
+  },
+  "aircraft": {
+    "vehicleId": 1,
+    "airlineId": 1,
+    "registrationCountry": "Colombia",
+    "maxAltitude": 41000
+  },
+  "gps": {
+    "vehicleId": 2,
+    "serialNumber": "GPS-2023-001",
+    "brand": "Garmin",
+    "model": "DriveSmart 65"
+  },
+  "hotel": {
+    "hotelAdminId": 1,
+    "municipalityId": 1,
+    "address": "Carrera 43A #1-50, El Poblado",
+    "phone": "6043121234",
+    "email": "info@hotelelpoblado.com",
+    "starRating": 5,
+    "status": "active"
+  },
+  "car": {
+    "vehicleId": 3,
+    "hotelId": 1,
+    "fuelType": "gasoline",
+    "transmissionType": "automatic"
+  },
+  "room": {
+    "hotelId": 1,
+    "roomNumber": "501",
+    "roomType": "suite",
+    "capacity": 2,
+    "pricePerNight": 350000,
+    "status": "available"
+  },
+  "itinerary": {
+    "originMunicipalityId": 1,
+    "destinationMunicipalityId": 2,
+    "distance": 125.5,
+    "vehicleId": 1,
+    "tripId": 1
+  },
+  "fee": {
+    "tripId": 1,
+    "amount": 500000,
+    "description": "Primera cuota del viaje",
+    "dueDate": "2025-11-20",
+    "status": "pending"
+  },
+  "bankCard": {
+    "clientId": 1,
+    "cardNumber": "4111111111111111",
+    "cvv": "123",
+    "expirationDate": "2027-12-31",
+    "cardHolderName": "Juan Pérez García"
+  },
+  "invoice": {
+    "feeId": 1,
+    "bankCardId": 1,
+    "invoiceNumber": "INV-2025-001",
+    "totalAmount": 500000,
+    "issueDate": "2025-11-13",
+    "paymentDate": "2025-11-13",
+    "paymentMethod": "credit_card"
+  },
+  "touristActivity": {
+    "municipalityId": 1,
+    "name": "Tour por el Parque Arví",
+    "description": "Recorrido ecológico por el Parque Arví con guía especializado",
+    "price": 80000,
+    "duration": 4,
+    "category": "adventure"
+  },
+  "plan": {
+    "name": "Plan Completo Medellín",
+    "description": "Incluye todas las actividades turísticas principales de la ciudad",
+    "price": 450000,
+    "duration": 8
+  },
+  "tripClient": {
+    "tripId": 1,
+    "clientId": 1
+  },
+  "tripRoom": {
+    "tripId": 1,
+    "roomId": 1
+  },
+  "tripPlan": {
+    "tripId": 1,
+    "planId": 1
+  },
+  "guideTouristActivity": {
+    "guideId": 1,
+    "touristActivityId": 1
+  },
+  "planTouristActivity": {
+    "planId": 1,
+    "touristActivityId": 1
+  }
+}
+

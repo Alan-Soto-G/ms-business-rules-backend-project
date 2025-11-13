@@ -11,6 +11,8 @@ export default class ItinerariesController {
       const theItinerary: Itinerary = await Itinerary.findOrFail(params.id)
       await theItinerary.load('originMunicipality')
       await theItinerary.load('destinationMunicipality')
+      await theItinerary.load('vehicle')
+      await theItinerary.load('trip')
       return response.status(200).json(theItinerary)
     } else {
       const dataItineraries = request.all()
@@ -20,6 +22,8 @@ export default class ItinerariesController {
         const itineraries = await Itinerary.query()
           .preload('originMunicipality')
           .preload('destinationMunicipality')
+          .preload('vehicle')
+          .preload('trip')
           .paginate(page, perPage)
         return response.status(200).json(itineraries)
       }
@@ -27,6 +31,8 @@ export default class ItinerariesController {
       const allItineraries = await Itinerary.query()
         .preload('originMunicipality')
         .preload('destinationMunicipality')
+        .preload('vehicle')
+        .preload('trip')
       return response.status(200).json(allItineraries)
     }
   }
@@ -47,6 +53,8 @@ export default class ItinerariesController {
     const theItinerary: Itinerary = await Itinerary.create(data)
     await theItinerary.load('originMunicipality')
     await theItinerary.load('destinationMunicipality')
+    await theItinerary.load('vehicle')
+    await theItinerary.load('trip')
     return response.status(201).json(theItinerary)
   }
 
@@ -65,6 +73,8 @@ export default class ItinerariesController {
     await theItinerary.save()
     await theItinerary.load('originMunicipality')
     await theItinerary.load('destinationMunicipality')
+    await theItinerary.load('vehicle')
+    await theItinerary.load('trip')
 
     return response.status(200).json(theItinerary)
   }
@@ -80,35 +90,5 @@ export default class ItinerariesController {
     const theItinerary: Itinerary = await Itinerary.findOrFail(params.id)
     await theItinerary.delete()
     return response.status(200).json({ message: 'Itinerary deleted successfully' })
-  }
-
-  /**
-   * Obtener itinerarios por municipio de origen.
-   */
-  public async findByOrigin({ params, response }: HttpContext) {
-    if (!params.municipalityId) {
-      return response.status(400).json({ message: 'Missing municipality id' })
-    }
-
-    const itineraries = await Itinerary.query()
-      .where('origin_municipality_id', params.municipalityId)
-      .preload('destinationMunicipality')
-
-    return response.status(200).json(itineraries)
-  }
-
-  /**
-   * Obtener itinerarios por municipio de destino.
-   */
-  public async findByDestination({ params, response }: HttpContext) {
-    if (!params.municipalityId) {
-      return response.status(400).json({ message: 'Missing municipality id' })
-    }
-
-    const itineraries = await Itinerary.query()
-      .where('destination_municipality_id', params.municipalityId)
-      .preload('originMunicipality')
-
-    return response.status(200).json(itineraries)
   }
 }

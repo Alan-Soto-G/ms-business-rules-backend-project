@@ -10,5 +10,5 @@ export default router
     router.put('/:id', [GuidesController, 'updateGuide'])
     router.delete('/:id', [GuidesController, 'deleteGuide'])
   })
-  .prefix('/guides')
+  .prefix('/api/guides')
   .use(middleware.Security)

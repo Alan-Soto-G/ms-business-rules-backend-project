@@ -19,5 +19,5 @@ router
     router.get('/:id/destinations', [MunicipalitiesController, 'getDestinations'])
     router.get('/:id/origins', [MunicipalitiesController, 'getOrigins'])
   })
-  .prefix('/municipalities')
+  .prefix('/api/municipalities')
   .use(middleware.Security)

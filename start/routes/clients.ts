@@ -10,5 +10,5 @@ export default router
     router.put('/:id', [ClientsController, 'updateClient'])
     router.delete('/:id', [ClientsController, 'deleteClient'])
   })
-  .prefix('/clients')
+  .prefix('/api/clients')
   .use(middleware.Security)

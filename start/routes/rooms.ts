@@ -10,5 +10,5 @@ export default router
     router.put('/:id', [RoomsController, 'updateRoom'])
     router.delete('/:id', [RoomsController, 'deleteRoom'])
   })
-  .prefix('/rooms')
+  .prefix('/api/rooms')
   .use(middleware.Security)

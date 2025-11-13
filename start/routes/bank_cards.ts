@@ -14,5 +14,5 @@ router
     router.put('/:id', [BankCardsController, 'update'])
     router.delete('/:id', [BankCardsController, 'destroy'])
   })
-  .prefix('/bank-cards')
+  .prefix('/api/bank-cards')
   .use(middleware.Security)

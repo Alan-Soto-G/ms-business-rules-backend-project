@@ -3,8 +3,8 @@ import { BaseModel, column, belongsTo, hasMany } from '@adonisjs/lucid/orm'
 import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
 import HotelAdmin from './hotel_admin.js'
 import Municipality from './municipality.js'
-import Car from './car.js'
 import Room from './room.js'
+import Car from '#models/car'
 
 export default class Hotel extends BaseModel {
   @column({ isPrimary: true })
@@ -13,12 +13,9 @@ export default class Hotel extends BaseModel {
   @column({ columnName: 'hotel_admin_id' })
   declare hotelAdminId: number
 
+  // Atributos básicos del hotel
   @column({ columnName: 'municipality_id' })
   declare municipalityId: number
-
-  // Atributos básicos del hotel
-  @column({ columnName: 'name' })
-  declare name: string
 
   @column({ columnName: 'address' })
   declare address: string

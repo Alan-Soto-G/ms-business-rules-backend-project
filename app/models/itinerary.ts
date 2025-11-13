@@ -15,17 +15,20 @@ export default class Itinerary extends BaseModel {
   @column({ columnName: 'destination_municipality_id' })
   declare destinationMunicipalityId: number
 
+  @column({ columnName: 'distance' })
+  declare distance: number | null
+
   @column({ columnName: 'vehicle_id' })
   declare vehicleId: number
 
   @column({ columnName: 'trip_id' })
   declare tripId: number
 
-  @column({ columnName: 'distance' })
-  declare distance: number | null
+  @column.dateTime({ autoCreate: true, columnName: 'created_at' })
+  declare createdAt: DateTime
 
-  @column({ columnName: 'estimated_time' })
-  declare estimatedTime: number | null
+  @column.dateTime({ autoCreate: true, autoUpdate: true, columnName: 'updated_at' })
+  declare updatedAt: DateTime
 
   // Relación con el municipio de origen
   @belongsTo(() => Municipality, {
@@ -45,15 +48,9 @@ export default class Itinerary extends BaseModel {
   })
   declare vehicle: BelongsTo<typeof Vehicle>
 
-  // Relación 1 a 1 con Trip
+  // Relación N a 1 con Trip (aunque el diagrama dice 1-1, itinerary tiene foreign key)
   @belongsTo(() => Trip, {
     foreignKey: 'tripId',
   })
   declare trip: BelongsTo<typeof Trip>
-
-  @column.dateTime({ autoCreate: true, columnName: 'created_at' })
-  declare createdAt: DateTime
-
-  @column.dateTime({ autoCreate: true, autoUpdate: true, columnName: 'updated_at' })
-  declare updatedAt: DateTime
 }
