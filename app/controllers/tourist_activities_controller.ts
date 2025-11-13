@@ -10,8 +10,8 @@ export default class TouristActivitiesController {
     if (params.id) {
       const theActivity: TouristActivity = await TouristActivity.findOrFail(params.id)
       await theActivity.load('municipality')
-      await theActivity.load('guides')
-      await theActivity.load('plans')
+      // await theActivity.load('guides') // Comentado temporalmente hasta que se ejecuten las migraciones
+      // await theActivity.load('plans') // Comentado temporalmente hasta que se ejecuten las migraciones
       return response.status(200).json(theActivity)
     } else {
       const dataActivities = request.all()
@@ -33,8 +33,8 @@ export default class TouristActivitiesController {
     const data = await request.validateUsing(createTouristActivityValidator)
     const theActivity = await TouristActivity.create(data)
     await theActivity.load('municipality')
-    await theActivity.load('guides')
-    await theActivity.load('plans')
+    // await theActivity.load('guides') // Comentado temporalmente hasta que se ejecuten las migraciones
+    // await theActivity.load('plans') // Comentado temporalmente hasta que se ejecuten las migraciones
     return response.status(201).json(theActivity)
   }
 
@@ -44,8 +44,8 @@ export default class TouristActivitiesController {
     theActivity.merge(data)
     await theActivity.save()
     await theActivity.load('municipality')
-    await theActivity.load('guides')
-    await theActivity.load('plans')
+    // await theActivity.load('guides') // Comentado temporalmente hasta que se ejecuten las migraciones
+    // await theActivity.load('plans') // Comentado temporalmente hasta que se ejecuten las migraciones
     return response.status(200).json(theActivity)
   }
 
