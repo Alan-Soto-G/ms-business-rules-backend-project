@@ -41,7 +41,7 @@ export default class HotelAdminsController {
     }
 
     if (data.phone) userData.phone = data.phone
-    if (data.birthDate) userData.birthDate = DateTime.fromJSDate(data.birthDate)
+    if (data.birthDate) userData.birthDate = data.birthDate
     if (data.address) userData.address = data.address
 
     const user = await User.create(userData)
@@ -75,7 +75,7 @@ export default class HotelAdminsController {
     if (data.email) userData.email = data.email
     if (data.fullName) userData.fullName = data.fullName
     if (data.phone !== undefined) userData.phone = data.phone
-    if (data.birthDate !== undefined) userData.birthDate = DateTime.fromJSDate(data.birthDate)
+    if (data.birthDate !== undefined) userData.birthDate = data.birthDate
     if (data.address !== undefined) userData.address = data.address
 
     if (Object.keys(userData).length > 0) {

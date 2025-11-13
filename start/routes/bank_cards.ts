@@ -1,6 +1,6 @@
 // start/routes.ts
 import router from '@adonisjs/core/services/router'
-import { middleware } from '#start/kernel'
+//import { middleware } from '#start/kernel'
 
 const BankCardsController = () => import('#controllers/bank_cards_controller')
 
@@ -15,4 +15,4 @@ router
     router.delete('/:id', [BankCardsController, 'destroy'])
   })
   .prefix('/api/bank-cards')
-  .use(middleware.Security)
+//.use(middleware.Security)

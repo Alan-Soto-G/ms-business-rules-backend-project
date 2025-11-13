@@ -1,5 +1,5 @@
 import router from '@adonisjs/core/services/router'
-import { middleware } from '#start/kernel'
+//import { middleware } from '#start/kernel'
 
 const TouristActivitiesController = () => import('#controllers/tourist_activities_controller')
 
@@ -12,4 +12,4 @@ router
     router.delete('/:id', [TouristActivitiesController, 'deleteTouristActivity'])
   })
   .prefix('/api/tourist-activities')
-  .use([middleware.Security()])
+//.use([middleware.Security()])

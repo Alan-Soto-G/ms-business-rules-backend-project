@@ -1,7 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Fee from '#models/fee'
 import { createFeeValidator, updateFeeValidator } from '#validators/fee'
-import { DateTime } from 'luxon'
 
 export default class FeesController {
   // GET ALL or GET BY ID
@@ -26,16 +25,7 @@ export default class FeesController {
 
   // CREATE
   public async create({ request, response }: HttpContext) {
-    const body = await request.validateUsing(createFeeValidator)
-
-    const data = {
-      tripId: body.tripId,
-      amount: Number(body.amount),
-      description: body.description,
-      dueDate: DateTime.fromISO(`${body.dueDate}T00:00:00`),
-      status: body.status,
-    }
-
+    const data = await request.validateUsing(createFeeValidator)
     const fee = await Fee.create(data)
     await fee.load('trip')
     return response.status(201).json(fee)

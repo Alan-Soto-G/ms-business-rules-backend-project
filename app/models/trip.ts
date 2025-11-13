@@ -11,7 +11,6 @@ import Client from './client.js'
 import Room from './room.js'
 import Plan from './plan.js'
 
-
 export default class Trip extends BaseModel {
   @column({ isPrimary: true })
   declare id: number

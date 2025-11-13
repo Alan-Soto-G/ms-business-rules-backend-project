@@ -1,6 +1,6 @@
 // start/routes.ts
 import router from '@adonisjs/core/services/router'
-import { middleware } from '#start/kernel'
+//import { middleware } from '#start/kernel'
 
 const FeesController = () => import('#controllers/fees_controller')
 
@@ -13,7 +13,7 @@ router
     router.delete('/:id', [FeesController, 'delete'])
   })
   .prefix('/api/fees')
-  .use([middleware.Security()])
+//.use([middleware.Security()])
 
 /*/ Ruta especial: Obtener cuotas de un viaje específico
 router

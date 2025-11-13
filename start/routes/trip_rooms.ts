@@ -1,5 +1,5 @@
 import router from '@adonisjs/core/services/router'
-import { middleware } from '#start/kernel'
+//import { middleware } from '#start/kernel'
 
 const TripRoomsController = () => import('#controllers/trip_rooms_controller')
 
@@ -9,7 +9,7 @@ router
     router.get('/', [TripRoomsController, 'index'])
   })
   .prefix('/api/trips/:tripId/rooms')
-  .use([middleware.Security()])
+//.use([middleware.Security()])
 
 // Rutas para asociar/desasociar una habitación específica
 router
@@ -18,4 +18,4 @@ router
     router.delete('/', [TripRoomsController, 'destroy'])
   })
   .prefix('/api/trips/:tripId/rooms/:roomId')
-  .use([middleware.Security()])
+//.use([middleware.Security()])
