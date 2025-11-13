@@ -1,29 +1,38 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Client from '#models/client'
-import User from '#models/user'
 import { createClientValidator, updateClientValidator } from '#validators/client'
-import { DateTime } from 'luxon'
+import axios from 'axios'
+
+const SECURITY_MS_URL = 'http://localhost:8081'
 
 export default class ClientsController {
   public async findClient({ response, request, params }: HttpContext) {
     if (params.id) {
-      const theClient: Client = await Client.query()
-        .where('id', params.id)
-        .preload('user' as any)
-        .firstOrFail()
-      return response.status(200).json(theClient)
+      const theClient = await Client.findOrFail(params.id)
+
+      // Obtener información del usuario del MS de seguridad
+      try {
+        const userResponse = await axios.get(`${SECURITY_MS_URL}/api/users/${theClient.userId}`)
+        return response.status(200).json({
+          ...theClient.toJSON(),
+          user: userResponse.data,
+        })
+      } catch (error) {
+        return response.status(200).json({
+          ...theClient.toJSON(),
+          user: null,
+        })
+      }
     } else {
       const dataClients = request.all()
       if ('page' in dataClients && 'per_page' in dataClients) {
         const page = request.input('page', 1)
         const perPage = request.input('per_page', 20)
-        const clients = await Client.query()
-          .preload('user' as any)
-          .paginate(page, perPage)
+        const clients = await Client.query().paginate(page, perPage)
         return response.status(200).json(clients)
       }
 
-      const allClients: Client[] = await Client.query().preload('user' as any)
+      const allClients = await Client.all()
       return response.status(200).json(allClients)
     }
   }
@@ -31,24 +40,9 @@ export default class ClientsController {
   public async createClient({ request, response }: HttpContext) {
     const data = await request.validateUsing(createClientValidator)
 
-    // Primero crear el usuario con los datos correspondientes
-    const userData: any = {
-      idCard: data.idCard,
-      email: data.email,
-      fullName: data.fullName,
-      userType: 'client' as const,
-      status: 'active' as const,
-    }
-
-    if (data.phone) userData.phone = data.phone
-    if (data.birthDate) userData.birthDate = data.birthDate
-    if (data.address) userData.address = data.address
-
-    const user = await User.create(userData)
-
-    // Luego crear el cliente con el userId y los datos específicos
+    // El usuario debe existir en el MS de seguridad (debe ser creado allí previamente)
     const clientData = {
-      userId: user.id,
+      userId: data.user_id,
       emergencyContactName: data.emergencyContactName,
       emergencyContactPhone: data.emergencyContactPhone,
       allergies: data.allergies,
@@ -57,7 +51,6 @@ export default class ClientsController {
     }
 
     const theClient = await Client.create(clientData)
-    await theClient.load('user' as any)
 
     return response.status(201).json(theClient)
   }
@@ -68,41 +61,18 @@ export default class ClientsController {
     }
 
     const data = await request.validateUsing(updateClientValidator)
-    const client: Client = await Client.query()
-      .where('id', params.id)
-      .preload('user' as any)
-      .firstOrFail()
+    const client = await Client.findOrFail(params.id)
 
-    // Actualizar el usuario si hay datos de usuario
-    const userData: any = {}
-    if (data.idCard) userData.idCard = data.idCard
-    if (data.email) userData.email = data.email
-    if (data.fullName) userData.fullName = data.fullName
-    if (data.phone !== undefined) userData.phone = data.phone
-    if (data.birthDate !== undefined) userData.birthDate = data.birthDate
-    if (data.address !== undefined) userData.address = data.address
-
-    if (Object.keys(userData).length > 0) {
-      client.user.merge(userData)
-      await client.user.save()
-    }
-
-    // Actualizar el cliente con datos específicos
-    const clientData: any = {}
+    // Solo actualizamos datos específicos del cliente
     if (data.emergencyContactName !== undefined)
-      clientData.emergencyContactName = data.emergencyContactName
+      client.emergencyContactName = data.emergencyContactName
     if (data.emergencyContactPhone !== undefined)
-      clientData.emergencyContactPhone = data.emergencyContactPhone
-    if (data.allergies !== undefined) clientData.allergies = data.allergies
-    if (data.loyaltyPoints !== undefined) clientData.loyaltyPoints = data.loyaltyPoints
-    if (data.isVip !== undefined) clientData.isVip = data.isVip
+      client.emergencyContactPhone = data.emergencyContactPhone
+    if (data.allergies !== undefined) client.allergies = data.allergies
+    if (data.loyaltyPoints !== undefined) client.loyaltyPoints = data.loyaltyPoints
+    if (data.isVip !== undefined) client.isVip = data.isVip
 
-    if (Object.keys(clientData).length > 0) {
-      client.merge(clientData)
-      await client.save()
-    }
-
-    await client.load('user' as any)
+    await client.save()
 
     return response.status(200).json(client)
   }
@@ -111,13 +81,9 @@ export default class ClientsController {
     if (!params.id) {
       return response.status(400).json({ message: 'Client ID not provided' })
     }
-    const client: Client = await Client.query()
-      .where('id', params.id)
-      .preload('user' as any)
-      .firstOrFail()
 
-    // Eliminar el usuario (esto también eliminará el cliente por CASCADE)
-    await client.user.delete()
+    const client = await Client.findOrFail(params.id)
+    await client.delete()
 
     return response.status(200).json({ message: 'Client deleted successfully' })
   }

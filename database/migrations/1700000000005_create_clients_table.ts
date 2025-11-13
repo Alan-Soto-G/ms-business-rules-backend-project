@@ -7,14 +7,9 @@ export default class extends BaseSchema {
     this.schema.createTable(this.tableName, (table) => {
       table.increments('id')
 
-      table
-        .integer('user_id')
-        .unsigned()
-        .notNullable()
-        .unique()
-        .references('id')
-        .inTable('users')
-        .onDelete('CASCADE')
+      // Referencia al user_id del MS de seguridad (sin foreign key)
+      table.integer('user_id').unsigned().notNullable().unique()
+
       table.string('emergency_contact_name').nullable()
       table.string('emergency_contact_phone').nullable()
       table.text('allergies').nullable()

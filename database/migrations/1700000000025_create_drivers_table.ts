@@ -1,16 +1,15 @@
 import { BaseSchema } from '@adonisjs/lucid/schema'
 
 export default class extends BaseSchema {
-  protected tableName = 'hotel_admins'
+  protected tableName = 'drivers_mp'
 
   async up() {
     this.schema.createTable(this.tableName, (table) => {
       table.increments('id')
 
-      // Referencia al user_id del MS de seguridad (sin foreign key)
-      table.integer('user_id').unsigned().notNullable().unique()
-
-      table.boolean('is_verified').defaultTo(false)
+      // Referencia al user_id del microservicio de seguridad
+      table.string('user_id').notNullable().unique()
+      table.integer('experience_years').notNullable().defaultTo(0)
 
       table.timestamp('created_at')
       table.timestamp('updated_at')

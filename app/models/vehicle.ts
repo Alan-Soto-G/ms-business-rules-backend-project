@@ -1,11 +1,12 @@
 // app/models/vehicle.ts
 import { DateTime } from 'luxon'
-import { BaseModel, column, hasOne, hasMany } from '@adonisjs/lucid/orm'
-import type { HasOne, HasMany } from '@adonisjs/lucid/types/relations'
+import { BaseModel, column, hasOne, hasMany, manyToMany } from '@adonisjs/lucid/orm'
+import type { HasOne, HasMany, ManyToMany } from '@adonisjs/lucid/types/relations'
 import Aircraft from './aircraft.js'
 import Gps from './gps.js'
 import Car from './car.js'
 import Itinerary from './itinerary.js'
+import Driver from './driver.js'
 
 export default class Vehicle extends BaseModel {
   @column({ isPrimary: true })
@@ -58,4 +59,15 @@ export default class Vehicle extends BaseModel {
     foreignKey: 'vehicleId',
   })
   declare itineraries: HasMany<typeof Itinerary>
+
+  // Relación N:M con Driver a través de Shift
+  @manyToMany(() => Driver, {
+    pivotTable: 'shifts_mp',
+    localKey: 'id',
+    pivotForeignKey: 'vehicle_id',
+    relatedKey: 'id',
+    pivotRelatedForeignKey: 'driver_id',
+    pivotColumns: ['start_date', 'end_date'],
+  })
+  declare drivers: ManyToMany<typeof Driver>
 }

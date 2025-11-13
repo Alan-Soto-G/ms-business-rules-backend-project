@@ -1,7 +1,6 @@
 import { DateTime } from 'luxon'
-import { BaseModel, column, belongsTo, hasMany, manyToMany } from '@adonisjs/lucid/orm'
-import type { BelongsTo, HasMany, ManyToMany } from '@adonisjs/lucid/types/relations'
-import User from './user.js'
+import { BaseModel, column, hasMany, manyToMany } from '@adonisjs/lucid/orm'
+import type { HasMany, ManyToMany } from '@adonisjs/lucid/types/relations'
 import BankCard from './bank_card.js'
 import Trip from './trip.js'
 
@@ -34,12 +33,6 @@ export default class Client extends BaseModel {
 
   @column.dateTime({ autoCreate: true, autoUpdate: true, columnName: 'updated_at' })
   declare updatedAt: DateTime
-
-  // Relación 1 a 1 con User
-  @belongsTo(() => User, {
-    foreignKey: 'userId',
-  })
-  declare user: BelongsTo<typeof User>
 
   // Relación 1 a N con BankCard
   @hasMany(() => BankCard, {
