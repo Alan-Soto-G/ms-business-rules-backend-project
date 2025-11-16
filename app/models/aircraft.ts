@@ -1,34 +1,37 @@
 import { DateTime } from 'luxon'
 import { BaseModel, column, belongsTo } from '@adonisjs/lucid/orm'
 import type { BelongsTo } from '@adonisjs/lucid/types/relations'
-import Vehicle from './vehicle.js'
-import Airline from './airline.js'
+import Vehicle from '#models/vehicle'
+import Airline from '#models/airline'
 
 export default class Aircraft extends BaseModel {
-  static table = 'aircrafts'
-
   @column({ isPrimary: true })
   declare id: number
 
+  // Foreign keys
   @column({ columnName: 'vehicle_id' })
   declare vehicleId: number
 
   @column({ columnName: 'airline_id' })
   declare airlineId: number
 
-  // Atributos específicos de aeronave
+  // Specific attributes of Aircraft
   @column({ columnName: 'registration_country' })
   declare registrationCountry: string
 
   @column({ columnName: 'max_altitude' })
   declare maxAltitude: number | null
 
-  // Relación 1 a 1 con Vehicle
-  @belongsTo(() => Vehicle)
+  // Relation 1 to 1 with Vehicle
+  @belongsTo(() => Vehicle, {
+    foreignKey: 'vehicleId',
+  })
   declare vehicle: BelongsTo<typeof Vehicle>
 
-  // Relación N a 1 con Airline
-  @belongsTo(() => Airline)
+  // Relation N to 1 with Airline
+  @belongsTo(() => Airline, {
+    foreignKey: 'airlineId',
+  })
   declare airline: BelongsTo<typeof Airline>
 
   // Timestamps

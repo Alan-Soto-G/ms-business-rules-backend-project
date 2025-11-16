@@ -1,11 +1,10 @@
-// app/models/trip_room.ts
 import { DateTime } from 'luxon'
 import { BaseModel, column, belongsTo } from '@adonisjs/lucid/orm'
 import type { BelongsTo } from '@adonisjs/lucid/types/relations'
-import Trip from './trip.js'
-import Room from './room.js'
+import Trip from '#models/trip'
+import Room from '#models/room'
 
-export default class TripRoom extends BaseModel {
+export default class Booking extends BaseModel {
   @column({ isPrimary: true })
   declare id: number
 

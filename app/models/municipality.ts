@@ -1,13 +1,15 @@
 import { DateTime } from 'luxon'
-import { BaseModel, column, manyToMany, hasMany } from '@adonisjs/lucid/orm'
-import type { ManyToMany, HasMany } from '@adonisjs/lucid/types/relations'
-import Hotel from './hotel.js'
-import TouristActivity from './tourist_activity.js'
+import { BaseModel, column, hasMany } from '@adonisjs/lucid/orm'
+import type { HasMany } from '@adonisjs/lucid/types/relations'
+import Hotel from '#models/hotel'
+import TouristActivity from '#models/tourist_activity'
+import Journey from '#models/journey'
 
 export default class Municipality extends BaseModel {
   @column({ isPrimary: true })
   declare id: number
 
+  // Specific attributes of Municipality
   @column({ columnName: 'name' })
   declare name: string
 
@@ -17,25 +19,17 @@ export default class Municipality extends BaseModel {
   @column({ columnName: 'code' })
   declare code: string
 
-  // Relación N a N reflexiva - municipios de origen
-  @manyToMany(() => Municipality, {
-    pivotTable: 'itineraries',
-    localKey: 'id',
-    pivotForeignKey: 'origin_municipality_id',
-    relatedKey: 'id',
-    pivotRelatedForeignKey: 'destination_municipality_id',
+  // Relation 1 to N reflexive - origin municipalities --> Journey
+  @hasMany(() => Journey, {
+    foreignKey: 'originMunicipalityId',
   })
-  declare destinations: ManyToMany<typeof Municipality>
+  declare originJourneys: HasMany<typeof Journey>
 
-  // Relación N a N reflexiva - municipios de destino
-  @manyToMany(() => Municipality, {
-    pivotTable: 'itineraries',
-    localKey: 'id',
-    pivotForeignKey: 'destination_municipality_id',
-    relatedKey: 'id',
-    pivotRelatedForeignKey: 'origin_municipality_id',
+  // Relation 1 to N reflexive - destination municipalities --> Journey
+  @hasMany(() => Journey, {
+    foreignKey: 'destinationMunicipalityId',
   })
-  declare origins: ManyToMany<typeof Municipality>
+  declare destinationJourneys: HasMany<typeof Journey>
 
   // Relación 1 a N con Hotel
   @hasMany(() => Hotel, {
@@ -49,6 +43,7 @@ export default class Municipality extends BaseModel {
   })
   declare touristActivities: HasMany<typeof TouristActivity>
 
+  // Timestamps
   @column.dateTime({ autoCreate: true, columnName: 'created_at' })
   declare createdAt: DateTime
 

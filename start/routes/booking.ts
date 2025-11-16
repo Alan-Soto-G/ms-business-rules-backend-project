@@ -1,7 +1,7 @@
 import router from '@adonisjs/core/services/router'
 //import { middleware } from '#start/kernel'
 
-const TripRoomsController = () => import('#controllers/trip_rooms_controller')
+const TripRoomsController = () => import('#controllers/bookings_controller')
 
 // Rutas para listar habitaciones de un viaje
 router

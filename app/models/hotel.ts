@@ -1,22 +1,23 @@
 import { DateTime } from 'luxon'
 import { BaseModel, column, belongsTo, hasMany } from '@adonisjs/lucid/orm'
 import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
-import HotelAdmin from './hotel_admin.js'
-import Municipality from './municipality.js'
-import Room from './room.js'
+import HotelAdmin from '#models/hotel_admin'
+import Municipality from '#models/municipality'
+import Room from '#models/room'
 import Car from '#models/car'
 
 export default class Hotel extends BaseModel {
   @column({ isPrimary: true })
   declare id: number
 
+  // Foreign keys
   @column({ columnName: 'hotel_admin_id' })
   declare hotelAdminId: number
 
   @column({ columnName: 'municipality_id' })
   declare municipalityId: number
 
-  // Atributos básicos del hotel
+  // Specific attributes of Hotel
   @column({ columnName: 'name' })
   declare name: string
 
@@ -35,34 +36,34 @@ export default class Hotel extends BaseModel {
   @column({ columnName: 'status' })
   declare status: 'active' | 'inactive'
 
+  // Relation N to 1 with HotelAdmin
+  @belongsTo(() => HotelAdmin, {
+    foreignKey: 'hotelAdminId',
+  })
+  declare hotelAdmin: BelongsTo<typeof HotelAdmin>
+
+  // Relation N to 1 with Municipality
+  @belongsTo(() => Municipality, {
+    foreignKey: 'municipalityId',
+  })
+  declare municipality: BelongsTo<typeof Municipality>
+
+  // Relation 1 to N with Car
+  @hasMany(() => Car, {
+    foreignKey: 'hotelId',
+  })
+  declare cars: HasMany<typeof Car>
+
+  // Relation 1 to N with Room
+  @hasMany(() => Room, {
+    foreignKey: 'hotelId',
+  })
+  declare rooms: HasMany<typeof Room>
+
   // Timestamps
   @column.dateTime({ autoCreate: true, columnName: 'created_at' })
   declare createdAt: DateTime
 
   @column.dateTime({ autoCreate: true, autoUpdate: true, columnName: 'updated_at' })
   declare updatedAt: DateTime
-
-  // Relación N a 1 con HotelAdmin
-  @belongsTo(() => HotelAdmin, {
-    foreignKey: 'hotelAdminId',
-  })
-  declare hotelAdmin: BelongsTo<typeof HotelAdmin>
-
-  // Relación N a 1 con Municipality
-  @belongsTo(() => Municipality, {
-    foreignKey: 'municipalityId',
-  })
-  declare municipality: BelongsTo<typeof Municipality>
-
-  // Relación 1 a N con Car
-  @hasMany(() => Car, {
-    foreignKey: 'hotelId',
-  })
-  declare cars: HasMany<typeof Car>
-
-  // Relación 1 a N con Room
-  @hasMany(() => Room, {
-    foreignKey: 'hotelId',
-  })
-  declare rooms: HasMany<typeof Room>
 }

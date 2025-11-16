@@ -1,16 +1,16 @@
-// app/models/vehicle.ts
 import { DateTime } from 'luxon'
 import { BaseModel, column, hasOne, hasMany } from '@adonisjs/lucid/orm'
 import type { HasOne, HasMany } from '@adonisjs/lucid/types/relations'
-import Aircraft from './aircraft.js'
-import Gps from './gps.js'
-import Car from './car.js'
-import Itinerary from './itinerary.js'
+import Aircraft from '#models/aircraft'
+import Gps from '#models/gps'
+import Car from '#models/car'
+import TransportationService from '#models/transportation_service'
 
 export default class Vehicle extends BaseModel {
   @column({ isPrimary: true })
   declare id: number
 
+  // Specific attributes of Vehicle
   @column({ columnName: 'license_plate' })
   declare licensePlate: string
 
@@ -35,27 +35,34 @@ export default class Vehicle extends BaseModel {
   @column({ columnName: 'status' })
   declare status: string
 
+  // Relación 1 a 1 con Aircraft
+  @hasOne(() => Aircraft, {
+    foreignKey: 'vehicleId',
+  })
+  declare aircraft: HasOne<typeof Aircraft>
+
+  // Relación 1 a 1 con GPS
+  @hasOne(() => Gps, {
+    foreignKey: 'vehicleId',
+  })
+  declare gps: HasOne<typeof Gps>
+
+  // Relación 1 a 1 con Car
+  @hasOne(() => Car, {
+    foreignKey: 'vehicleId',
+  })
+  declare car: HasOne<typeof Car>
+
+  // Relation 1 to N with Transportation Service
+  @hasMany(() => TransportationService, {
+    foreignKey: 'vehicleId',
+  })
+  declare transportationServices: HasMany<typeof TransportationService>
+
+  // Timestamps
   @column.dateTime({ autoCreate: true, columnName: 'created_at' })
   declare createdAt: DateTime
 
   @column.dateTime({ autoCreate: true, autoUpdate: true, columnName: 'updated_at' })
   declare updatedAt: DateTime
-
-  // Relación 1 a 1 con Aircraft
-  @hasOne(() => Aircraft)
-  declare aircraft: HasOne<typeof Aircraft>
-
-  // Relación 1 a 1 con GPS
-  @hasOne(() => Gps)
-  declare gps: HasOne<typeof Gps>
-
-  // Relación 1 a 1 con Car
-  @hasOne(() => Car)
-  declare car: HasOne<typeof Car>
-
-  // Relación 1 a N con Itinerary
-  @hasMany(() => Itinerary, {
-    foreignKey: 'vehicleId',
-  })
-  declare itineraries: HasMany<typeof Itinerary>
 }

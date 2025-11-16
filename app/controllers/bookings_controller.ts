@@ -1,5 +1,5 @@
 import type { HttpContext } from '@adonisjs/core/http'
-import TripRoom from '#models/trip_room'
+import TripRoom from '#models/booking'
 import Trip from '#models/trip'
 import Room from '#models/room'
 

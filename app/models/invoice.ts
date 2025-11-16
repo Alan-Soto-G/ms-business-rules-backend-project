@@ -1,20 +1,21 @@
-// app/models/invoice.ts
 import { DateTime } from 'luxon'
 import { BaseModel, column, belongsTo } from '@adonisjs/lucid/orm'
 import type { BelongsTo } from '@adonisjs/lucid/types/relations'
-import Fee from './fee.js'
-import BankCard from './bank_card.js'
+import Fee from '#models/fee'
+import BankCard from '#models/bank_card'
 
 export default class Invoice extends BaseModel {
   @column({ isPrimary: true })
   declare id: number
 
+  // Foreign keys
   @column({ columnName: 'fee_id' })
   declare feeId: number
 
   @column({ columnName: 'bank_card_id' })
   declare bankCardId: number | null
 
+  // Specific attributes of Invoice
   @column({ columnName: 'invoice_number' })
   declare invoiceNumber: string
 
@@ -30,19 +31,22 @@ export default class Invoice extends BaseModel {
   @column({ columnName: 'payment_method' })
   declare paymentMethod: string
 
-  @column.dateTime({ autoCreate: true, columnName: 'created_at' })
-  declare createdAt: DateTime
-
-  @column.dateTime({ autoCreate: true, autoUpdate: true, columnName: 'updated_at' })
-  declare updatedAt: DateTime
-
+  // Relation 1 to 1 with Fee
   @belongsTo(() => Fee, {
     foreignKey: 'feeId',
   })
   declare fee: BelongsTo<typeof Fee>
 
+  // Relation N to 1 with BankCard
   @belongsTo(() => BankCard, {
     foreignKey: 'bankCardId',
   })
   declare bankCard: BelongsTo<typeof BankCard>
+
+  // Timestamps
+  @column.dateTime({ autoCreate: true, columnName: 'created_at' })
+  declare createdAt: DateTime
+
+  @column.dateTime({ autoCreate: true, autoUpdate: true, columnName: 'updated_at' })
+  declare updatedAt: DateTime
 }

@@ -1,17 +1,19 @@
 import { DateTime } from 'luxon'
-import { BaseModel, column, belongsTo, manyToMany } from '@adonisjs/lucid/orm'
-import type { BelongsTo, ManyToMany } from '@adonisjs/lucid/types/relations'
-import Municipality from './municipality.js'
-import Guide from './guide.js'
-import Plan from './plan.js'
+import { BaseModel, column, belongsTo, hasMany } from '@adonisjs/lucid/orm'
+import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
+import Municipality from '#models/municipality'
+import GuideActivity from '#models/guide_activity'
+import PlanActivity from '#models/plan_activity'
 
 export default class TouristActivity extends BaseModel {
   @column({ isPrimary: true })
   declare id: number
 
+  // Foreign key
   @column({ columnName: 'municipality_id' })
   declare municipalityId: number
 
+  // Specific attributes of TouristActivity
   @column({ columnName: 'name' })
   declare name: string
 
@@ -27,35 +29,28 @@ export default class TouristActivity extends BaseModel {
   @column({ columnName: 'category' })
   declare category: 'cultural' | 'adventure' | 'gastronomic' | 'recreational' | 'other'
 
-  @column.dateTime({ autoCreate: true, columnName: 'created_at' })
-  declare createdAt: DateTime
-
-  @column.dateTime({ autoCreate: true, autoUpdate: true, columnName: 'updated_at' })
-  declare updatedAt: DateTime
-
   // Relación N a 1 con Municipality
   @belongsTo(() => Municipality, {
     foreignKey: 'municipalityId',
   })
   declare municipality: BelongsTo<typeof Municipality>
 
-  // Relación N a N con Guide
-  @manyToMany(() => Guide, {
-    pivotTable: 'guide_tourist_activity',
-    localKey: 'id',
-    pivotForeignKey: 'tourist_activity_id',
-    relatedKey: 'id',
-    pivotRelatedForeignKey: 'guide_id',
+  // Relation 1 to N with Guide Activity
+  @hasMany(() => GuideActivity, {
+    foreignKey: 'activityId',
   })
-  declare guides: ManyToMany<typeof Guide>
+  declare guideActivities: HasMany<typeof GuideActivity>
 
-  // Relación N a N con Plan
-  @manyToMany(() => Plan, {
-    pivotTable: 'activity_plan',
-    localKey: 'id',
-    pivotForeignKey: 'tourist_activity_id',
-    relatedKey: 'id',
-    pivotRelatedForeignKey: 'plan_id',
+  // Relation 1 to N with Plan Activity
+  @hasMany(() => PlanActivity, {
+    foreignKey: 'activityId',
   })
-  declare plans: ManyToMany<typeof Plan>
+  declare planActivities: HasMany<typeof PlanActivity>
+
+  // Timestamps
+  @column.dateTime({ autoCreate: true, columnName: 'created_at' })
+  declare createdAt: DateTime
+
+  @column.dateTime({ autoCreate: true, autoUpdate: true, columnName: 'updated_at' })
+  declare updatedAt: DateTime
 }

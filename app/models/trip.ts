@@ -1,37 +1,34 @@
 // app/models/trip.ts
 import { DateTime } from 'luxon'
-import { BaseModel, column, hasMany, hasOne, manyToMany } from '@adonisjs/lucid/orm'
-import type { HasMany, HasOne, ManyToMany } from '@adonisjs/lucid/types/relations'
-import Fee from './fee.js'
-import TripClient from './trip_client.js'
-import TripPlan from './trip_plan.js'
-import TripRoom from './trip_room.js'
-import Itinerary from './itinerary.js'
-import Client from './client.js'
-import Room from './room.js'
-import Plan from './plan.js'
+import { BaseModel, column, hasMany } from '@adonisjs/lucid/orm'
+import type { HasMany } from '@adonisjs/lucid/types/relations'
+import Fee from '#models/fee'
+import Booking from '#models/booking'
+import TripClient from '#models/trip_client'
+import TripPlan from '#models/trip_plan'
+import TransportItinerary from '#models/transport_itinerary'
 
 export default class Trip extends BaseModel {
   @column({ isPrimary: true })
   declare id: number
 
+  // Specific attributes of Trip
   @column({ columnName: 'name' })
-  declare name: string // Nombre del viaje (ej. "Tour a Medellín")
+  declare name: string
 
   @column({ columnName: 'description' })
-  declare description: string // Descripción corta o resumen
+  declare description: string
 
   @column({ columnName: 'price' })
-  declare price: number // Precio base o total del viaje
+  declare price: number
 
   @column({ columnName: 'capacity' })
-  declare capacity: number // Cupo máximo de personas
+  declare capacity: number
 
   @column({ columnName: 'available_seats' })
-  declare availableSeats: number // Cupos disponibles (si manejas reservas)
+  declare availableSeats: number
 
   @column({ columnName: 'status' })
-  // Estado: 'active', 'cancelled', 'completed', etc.
   declare status: string
 
   @column.dateTime({ columnName: 'start_date' })
@@ -43,65 +40,40 @@ export default class Trip extends BaseModel {
   @column({ columnName: 'destination' })
   declare destination: string
 
-  @column.dateTime({ autoCreate: true, columnName: 'created_at' })
-  declare createdAt: DateTime
-
-  @column.dateTime({ autoCreate: true, autoUpdate: true, columnName: 'updated_at' })
-  declare updatedAt: DateTime
-
+  // Relation 1 to N with Fee
   @hasMany(() => Fee, {
     foreignKey: 'tripId',
   })
   declare fees: HasMany<typeof Fee>
 
+  // Relation 1 to N with Trip Client
   @hasMany(() => TripClient, {
     foreignKey: 'tripId',
   })
   declare tripClients: HasMany<typeof TripClient>
 
+  // Relation 1 to N with Trip Plan
   @hasMany(() => TripPlan, {
     foreignKey: 'tripId',
   })
   declare tripPlans: HasMany<typeof TripPlan>
 
-  @hasMany(() => TripRoom, {
+  // Relation 1 to N with Trip Room
+  @hasMany(() => Booking, {
     foreignKey: 'tripId',
   })
-  declare tripRooms: HasMany<typeof TripRoom>
+  declare Bookings: HasMany<typeof Booking>
 
-  // Relación 1 a 1 con Itinerary
-  @hasOne(() => Itinerary, {
+  // Relation 1 to N with Transport Itinerary
+  @hasMany(() => TransportItinerary, {
     foreignKey: 'tripId',
   })
-  declare itinerary: HasOne<typeof Itinerary>
+  declare transportItineraries: HasMany<typeof TransportItinerary>
 
-  // Relación N a N con Client a través de trip_clients
-  @manyToMany(() => Client, {
-    pivotTable: 'trip_clients',
-    localKey: 'id',
-    pivotForeignKey: 'trip_id',
-    relatedKey: 'id',
-    pivotRelatedForeignKey: 'client_id',
-  })
-  declare clients: ManyToMany<typeof Client>
+  // Timestamps
+  @column.dateTime({ autoCreate: true, columnName: 'created_at' })
+  declare createdAt: DateTime
 
-  // Relación N a N con Room a través de trip_rooms
-  @manyToMany(() => Room, {
-    pivotTable: 'trip_rooms',
-    localKey: 'id',
-    pivotForeignKey: 'trip_id',
-    relatedKey: 'id',
-    pivotRelatedForeignKey: 'room_id',
-  })
-  declare rooms: ManyToMany<typeof Room>
-
-  // Relación N a N con Plan a través de trip_plans
-  @manyToMany(() => Plan, {
-    pivotTable: 'trip_plans',
-    localKey: 'id',
-    pivotForeignKey: 'trip_id',
-    relatedKey: 'id',
-    pivotRelatedForeignKey: 'plan_id',
-  })
-  declare plans: ManyToMany<typeof Plan>
+  @column.dateTime({ autoCreate: true, autoUpdate: true, columnName: 'updated_at' })
+  declare updatedAt: DateTime
 }

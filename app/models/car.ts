@@ -1,32 +1,37 @@
 import { DateTime } from 'luxon'
 import { BaseModel, column, belongsTo } from '@adonisjs/lucid/orm'
 import type { BelongsTo } from '@adonisjs/lucid/types/relations'
-import Vehicle from './vehicle.js'
-import Hotel from './hotel.js'
+import Vehicle from '#models/vehicle'
+import Hotel from '#models/hotel'
 
 export default class Car extends BaseModel {
   @column({ isPrimary: true })
   declare id: number
 
+  // Foreign keys
   @column({ columnName: 'vehicle_id' })
   declare vehicleId: number
 
   @column({ columnName: 'hotel_id' })
   declare hotelId: number
 
-  // Atributos específicos de carro
+  // Specific attributes of Car
   @column({ columnName: 'fuel_type' })
   declare fuelType: string
 
   @column({ columnName: 'transmission_type' })
   declare transmissionType: string
 
-  // Relación 1 a 1 con Vehicle
-  @belongsTo(() => Vehicle)
+  // Relation 1 to 1 with Vehicle
+  @belongsTo(() => Vehicle, {
+    foreignKey: 'vehicleId',
+  })
   declare vehicle: BelongsTo<typeof Vehicle>
 
   // Relación N a 1 con Hotel
-  @belongsTo(() => Hotel)
+  @belongsTo(() => Hotel, {
+    foreignKey: 'hotelId',
+  })
   declare hotel: BelongsTo<typeof Hotel>
 
   // Timestamps

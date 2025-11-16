@@ -1,12 +1,13 @@
 import { DateTime } from 'luxon'
 import { BaseModel, column, hasMany } from '@adonisjs/lucid/orm'
 import type { HasMany } from '@adonisjs/lucid/types/relations'
-import Aircraft from './aircraft.js'
+import Aircraft from '#models/aircraft'
 
 export default class Airline extends BaseModel {
   @column({ isPrimary: true })
   declare id: number
 
+  // Specific attributes of Airline
   @column({ columnName: 'name' })
   declare name: string
 
@@ -22,10 +23,13 @@ export default class Airline extends BaseModel {
   @column({ columnName: 'is_active' })
   declare isActive: boolean
 
-  // Relación 1 a N con Aircraft
-  @hasMany(() => Aircraft)
-  declare aircrafts: HasMany<typeof Aircraft>
+  // Relation 1 to N with Aircraft
+  @hasMany(() => Aircraft, {
+    foreignKey: 'airlineId',
+  })
+  declare aircraft: HasMany<typeof Aircraft>
 
+  // Timestamps
   @column.dateTime({ autoCreate: true, columnName: 'created_at' })
   declare createdAt: DateTime
 
