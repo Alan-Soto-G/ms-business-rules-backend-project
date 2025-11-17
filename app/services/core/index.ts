@@ -1,0 +1,5 @@
+export { default as ClientsService } from './clients_service.js'
+export { default as MunicipalitiesService } from './municipalities_service.js'
+export { default as PlansService } from './plans_service.js'
+export { default as TripsService } from './trips_service.js'
+export { default as SecurityService } from './security_service.js'

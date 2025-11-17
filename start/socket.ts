@@ -1,4 +1,4 @@
-import WebSocketServer from '../app/Services/web_socket_server.js'
+import WebSocketServer from '../app/services/web_socket_server.js'
 import server from '@adonisjs/core/services/server'
 
 WebSocketServer.boot(server.getNodeServer()!)

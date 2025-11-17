@@ -7,24 +7,35 @@
 |
 */
 
-import './routes/aircrafts.js'
-import './routes/airlines.js'
-import './routes/trips.js'
-import './routes/invoices.js'
-import './routes/fees.js'
-import './routes/bank_cards.js'
-import './routes/gps.js'
-import './routes/municipalities.js'
-import './routes/clients.js'
-import './routes/guides.js'
-import './routes/hotel_admins.js'
-import './routes/hotels.js'
-import './routes/cars.js'
-import './routes/rooms.js'
-import './routes/plans.js'
-import './routes/tourist_activities.js'
-import './routes/trip_plans.js'
-import './routes/booking.js'
-import './routes/trip_clients.js'
-import './routes/guide_tourist_activities.js'
-import './routes/plan_tourist_activities.js'
+// Core routes
+import './routes/core/municipalities.js'
+import './routes/core/clients.js'
+import './routes/core/trips.js'
+import './routes/core/plans.js'
+
+// Transportation routes
+import './routes/transportation/airlines.js'
+import './routes/transportation/aircrafts.js'
+import './routes/transportation/cars.js'
+import './routes/transportation/gps.js'
+
+// Accommodation routes
+import './routes/accommodation/hotel_admins.js'
+import './routes/accommodation/hotels.js'
+import './routes/accommodation/rooms.js'
+import './routes/accommodation/booking.js'
+
+// Tourism routes
+import './routes/tourism/guides.js'
+import './routes/tourism/tourist_activities.js'
+import './routes/tourism/guide_activities.js'
+import './routes/tourism/plan_activities.js'
+
+// Financial routes
+import './routes/financial/bank_cards.js'
+import './routes/financial/fees.js'
+import './routes/financial/invoices.js'
+
+// Pivots routes
+import './routes/pivots/trip_clients.js'
+import './routes/pivots/trip_plans.js'

@@ -31,4 +31,11 @@ export default await Env.create(new URL('../', import.meta.url), {
   DB_USER: Env.schema.string.optional(),
   DB_PASSWORD: Env.schema.string.optional(),
   DB_DATABASE: Env.schema.string.optional(),
+
+  /*
+  |----------------------------------------------------------
+  | Variables for microservices communication
+  |----------------------------------------------------------
+  */
+  MS_SECURITY: Env.schema.string.optional(),
 })

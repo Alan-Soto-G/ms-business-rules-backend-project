@@ -1,0 +1,8 @@
+export { default as AircraftsService } from './aircrafts_service.js'
+export { default as AirlinesService } from './airlines_service.js'
+export { default as CarsService } from './cars_service.js'
+export { default as GpsService } from './gps_service.js'
+export { default as JourneysService } from './journeys_service.js'
+export { default as TransportItinerariesService } from './transport_itineraries_service.js'
+export { default as TransportationServicesService } from './transportation_services_service.js'
+export { default as VehiclesService } from './vehicles_service.js'
