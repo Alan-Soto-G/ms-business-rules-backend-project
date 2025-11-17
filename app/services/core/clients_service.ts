@@ -34,6 +34,13 @@ export default class ClientsService {
     if (!data.userId) {
       throw new Error('userId is required to create a client')
     }
+
+    // Validar si el userId ya existe (un usuario solo puede ser cliente una vez)
+    const existingClient = await Client.query().where('UserId', data.userId).first()
+    if (existingClient) {
+      throw new Error(`El usuario con ID '${data.userId}' ya está registrado como cliente`)
+    }
+
     try {
       const user = await this.securityService.findById(data.userId)
       if (!user) {

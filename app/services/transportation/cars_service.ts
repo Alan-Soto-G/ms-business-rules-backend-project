@@ -28,6 +28,14 @@ export default class CarsService {
    * Create a new car
    */
   async create(data: any) {
+    // Validar si el vehicleId ya existe (un vehículo solo puede ser carro una vez)
+    if (data.vehicleId) {
+      const existingCar = await Car.query().where('vehicleId', data.vehicleId).first()
+      if (existingCar) {
+        throw new Error(`El vehículo con ID '${data.vehicleId}' ya está registrado como carro`)
+      }
+    }
+
     return await Car.create(data)
   }
 
@@ -36,6 +44,18 @@ export default class CarsService {
    */
   async update(id: number, data: any) {
     const car = await Car.findOrFail(id)
+
+    // Validar si el vehicleId ya existe (excluyendo el carro actual)
+    if (data.vehicleId) {
+      const existingCar = await Car.query()
+        .where('vehicleId', data.vehicleId)
+        .whereNot('id', id)
+        .first()
+      if (existingCar) {
+        throw new Error(`El vehículo con ID '${data.vehicleId}' ya está registrado como carro`)
+      }
+    }
+
     car.merge(data)
     await car.save()
     return car

@@ -37,6 +37,16 @@ export default class VehiclesService {
    * Create a new vehicle
    */
   async create(data: any) {
+    // Validar si la placa ya existe antes de intentar crear
+    if (data.licensePlate) {
+      const existingVehicle = await Vehicle.query()
+        .where('licensePlate', data.licensePlate)
+        .first()
+      if (existingVehicle) {
+        throw new Error(`La placa '${data.licensePlate}' ya está en uso por otro vehículo`)
+      }
+    }
+
     return await Vehicle.create(data)
   }
 
@@ -45,6 +55,18 @@ export default class VehiclesService {
    */
   async update(id: number, data: any) {
     const vehicle = await Vehicle.findOrFail(id)
+
+    // Validar si la placa ya existe (excluyendo el vehículo actual)
+    if (data.licensePlate) {
+      const existingVehicle = await Vehicle.query()
+        .where('licensePlate', data.licensePlate)
+        .whereNot('id', id)
+        .first()
+      if (existingVehicle) {
+        throw new Error(`La placa '${data.licensePlate}' ya está en uso por otro vehículo`)
+      }
+    }
+
     vehicle.merge(data)
     await vehicle.save()
     return vehicle

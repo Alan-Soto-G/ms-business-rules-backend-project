@@ -1,10 +1,13 @@
 import Guide from '#models/tourism/guide'
 import SecurityService from '#services/core/security_service'
+
 export default class GuidesService {
   private securityService: SecurityService
+
   constructor() {
     this.securityService = new SecurityService()
   }
+
   /**
    * Get all guides with optional pagination
    * @param page - Page number (optional, if not provided returns all records)
@@ -17,12 +20,14 @@ export default class GuidesService {
     }
     return await query
   }
+
   /**
    * Get a guide by ID
    */
   async findById(id: number) {
     return await Guide.query().where('id', id).preload('touristActivities').firstOrFail()
   }
+
   /**
    * Create a new guide with an existing user from ms-security
    */
@@ -33,12 +38,30 @@ export default class GuidesService {
     if (!data.licenseNumber) {
       throw new Error('licenseNumber is required to create a guide')
     }
+
+    // Validar si el licenseNumber ya existe antes de intentar crear
+    const existingByLicense = await Guide.query()
+      .where('licenseNumber', data.licenseNumber)
+      .first()
+    if (existingByLicense) {
+      throw new Error(`El número de licencia '${data.licenseNumber}' ya está en uso por otro guía`)
+    }
+
+    // Validar si el userId ya existe (un usuario solo puede ser guía una vez)
+    const existingByUser = await Guide.query()
+      .where('UserId', data.userId)
+      .first()
+    if (existingByUser) {
+      throw new Error(`El usuario con ID '${data.userId}' ya está registrado como guía`)
+    }
+
     try {
       const user = await this.securityService.findById(data.userId)
       if (!user) {
         throw new Error(`User with ID ${data.userId} not found in ms-security`)
       }
       console.log(`Found user in ms-security: ${user.email}`)
+
       const guideData = {
         UserId: data.userId,
         licenseNumber: data.licenseNumber,
@@ -46,6 +69,7 @@ export default class GuidesService {
         rating: data.rating || 0,
         isAvailable: data.isAvailable !== undefined ? data.isAvailable : true,
       }
+
       const guide = await Guide.create(guideData)
       console.log(`Guide created successfully with user ID: ${data.userId}`)
       return guide
@@ -54,15 +78,29 @@ export default class GuidesService {
       throw error
     }
   }
+
   /**
    * Update a guide
    */
   async update(id: number, data: any) {
     const guide = await Guide.findOrFail(id)
+
+    // Validar si el licenseNumber ya existe (excluyendo el guía actual)
+    if (data.licenseNumber) {
+      const existingByLicense = await Guide.query()
+        .where('licenseNumber', data.licenseNumber)
+        .whereNot('id', id)
+        .first()
+      if (existingByLicense) {
+        throw new Error(`El número de licencia '${data.licenseNumber}' ya está en uso por otro guía`)
+      }
+    }
+
     guide.merge(data)
     await guide.save()
     return guide
   }
+
   /**
    * Delete a guide
    */

@@ -30,16 +30,25 @@ export default class HotelAdminsService {
     if (!data.userId) {
       throw new Error('userId is required to create a hotel admin')
     }
+
+    // Validar si el userId ya existe (un usuario solo puede ser hotel admin una vez)
+    const existingAdmin = await HotelAdmin.query().where('UserId', data.userId).first()
+    if (existingAdmin) {
+      throw new Error(`El usuario con ID '${data.userId}' ya está registrado como administrador de hotel`)
+    }
+
     try {
       const user = await this.securityService.findById(data.userId)
       if (!user) {
         throw new Error(`User with ID ${data.userId} not found in ms-security`)
       }
       console.log(`Found user in ms-security: ${user.email}`)
+
       const hotelAdminData = {
         UserId: data.userId,
         isVerified: data.isVerified || false,
       }
+
       const hotelAdmin = await HotelAdmin.create(hotelAdminData)
       console.log(`Hotel admin created successfully with user ID: ${data.userId}`)
       return hotelAdmin

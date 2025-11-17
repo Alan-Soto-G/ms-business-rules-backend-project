@@ -27,6 +27,26 @@ export default class GpsService {
    * Create a new GPS device
    */
   async create(data: any) {
+    // Validar si el serialNumber ya existe antes de intentar crear
+    if (data.serialNumber) {
+      const existingBySerial = await Gps.query()
+        .where('serialNumber', data.serialNumber)
+        .first()
+      if (existingBySerial) {
+        throw new Error(`El número de serie '${data.serialNumber}' ya está en uso por otro GPS`)
+      }
+    }
+
+    // Validar si el vehicleId ya existe (un vehículo solo puede tener un GPS)
+    if (data.vehicleId) {
+      const existingByVehicle = await Gps.query()
+        .where('vehicleId', data.vehicleId)
+        .first()
+      if (existingByVehicle) {
+        throw new Error(`El vehículo con ID '${data.vehicleId}' ya tiene un GPS asignado`)
+      }
+    }
+
     return await Gps.create(data)
   }
 
@@ -35,6 +55,29 @@ export default class GpsService {
    */
   async update(id: number, data: any) {
     const gps = await Gps.findOrFail(id)
+
+    // Validar si el serialNumber ya existe (excluyendo el GPS actual)
+    if (data.serialNumber) {
+      const existingBySerial = await Gps.query()
+        .where('serialNumber', data.serialNumber)
+        .whereNot('id', id)
+        .first()
+      if (existingBySerial) {
+        throw new Error(`El número de serie '${data.serialNumber}' ya está en uso por otro GPS`)
+      }
+    }
+
+    // Validar si el vehicleId ya existe (excluyendo el GPS actual)
+    if (data.vehicleId) {
+      const existingByVehicle = await Gps.query()
+        .where('vehicleId', data.vehicleId)
+        .whereNot('id', id)
+        .first()
+      if (existingByVehicle) {
+        throw new Error(`El vehículo con ID '${data.vehicleId}' ya tiene un GPS asignado`)
+      }
+    }
+
     gps.merge(data)
     await gps.save()
     return gps

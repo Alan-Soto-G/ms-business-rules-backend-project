@@ -33,6 +33,14 @@ export default class AircraftsService {
    * Create a new aircraft
    */
   async create(data: any) {
+    // Validar si el vehicleId ya existe (un vehículo solo puede ser aeronave una vez)
+    if (data.vehicleId) {
+      const existingAircraft = await Aircraft.query().where('vehicleId', data.vehicleId).first()
+      if (existingAircraft) {
+        throw new Error(`El vehículo con ID '${data.vehicleId}' ya está registrado como aeronave`)
+      }
+    }
+
     // First create the vehicle with corresponding data
     const vehicleData = {
       licensePlate: data.licensePlate,
@@ -67,6 +75,17 @@ export default class AircraftsService {
   async update(id: number, data: any) {
     const aircraft = await Aircraft.findOrFail(id)
     await aircraft.load('vehicle')
+
+    // Validar si el vehicleId ya existe (excluyendo la aeronave actual)
+    if (data.vehicleId) {
+      const existingAircraft = await Aircraft.query()
+        .where('vehicleId', data.vehicleId)
+        .whereNot('id', id)
+        .first()
+      if (existingAircraft) {
+        throw new Error(`El vehículo con ID '${data.vehicleId}' ya está registrado como aeronave`)
+      }
+    }
 
     // Update vehicle if there's vehicle data
     const vehicleData: any = {}

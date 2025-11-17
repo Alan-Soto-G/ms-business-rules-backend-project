@@ -27,6 +27,26 @@ export default class InvoicesService {
    * Create a new invoice
    */
   async create(data: any) {
+    // Validar si el invoiceNumber ya existe antes de intentar crear
+    if (data.invoiceNumber) {
+      const existingByNumber = await Invoice.query()
+        .where('invoiceNumber', data.invoiceNumber)
+        .first()
+      if (existingByNumber) {
+        throw new Error(`El número de factura '${data.invoiceNumber}' ya está en uso`)
+      }
+    }
+
+    // Validar si el feeId ya existe (una cuota solo puede tener una factura)
+    if (data.feeId) {
+      const existingByFee = await Invoice.query()
+        .where('feeId', data.feeId)
+        .first()
+      if (existingByFee) {
+        throw new Error(`La cuota con ID '${data.feeId}' ya tiene una factura asociada`)
+      }
+    }
+
     return await Invoice.create(data)
   }
 
@@ -35,6 +55,29 @@ export default class InvoicesService {
    */
   async update(id: number, data: any) {
     const invoice = await Invoice.findOrFail(id)
+
+    // Validar si el invoiceNumber ya existe (excluyendo la factura actual)
+    if (data.invoiceNumber) {
+      const existingByNumber = await Invoice.query()
+        .where('invoiceNumber', data.invoiceNumber)
+        .whereNot('id', id)
+        .first()
+      if (existingByNumber) {
+        throw new Error(`El número de factura '${data.invoiceNumber}' ya está en uso`)
+      }
+    }
+
+    // Validar si el feeId ya existe (excluyendo la factura actual)
+    if (data.feeId) {
+      const existingByFee = await Invoice.query()
+        .where('feeId', data.feeId)
+        .whereNot('id', id)
+        .first()
+      if (existingByFee) {
+        throw new Error(`La cuota con ID '${data.feeId}' ya tiene una factura asociada`)
+      }
+    }
+
     invoice.merge(data)
     await invoice.save()
     return invoice
