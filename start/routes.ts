@@ -14,10 +14,14 @@ import './routes/core/trips.js'
 import './routes/core/plans.js'
 
 // Transportation routes
+import './routes/transportation/vehicles.js'
 import './routes/transportation/airlines.js'
 import './routes/transportation/aircrafts.js'
 import './routes/transportation/cars.js'
 import './routes/transportation/gps.js'
+import './routes/transportation/journeys.js'
+import './routes/transportation/transportation_services.js'
+import './routes/transportation/transport_itineraries.js'
 
 // Accommodation routes
 import './routes/accommodation/hotel_admins.js'
