@@ -1,4 +1,5 @@
 import vine from '@vinejs/vine'
+import { DateTime } from 'luxon'
 
 /**
  * Validator for creating a transportation service.
@@ -8,8 +9,8 @@ export const createTransportationServiceValidator = vine.compile(
   vine.object({
     journeyId: vine.number().positive().withoutDecimals(),
     vehicleId: vine.number().positive().withoutDecimals(),
-    startDate: vine.date(),
-    endDate: vine.date(),
+    startDate: vine.date().transform((value) => (value ? DateTime.fromJSDate(value) : value)),
+    endDate: vine.date().transform((value) => (value ? DateTime.fromJSDate(value) : value)),
     cost: vine.number().positive().min(0),
   })
 )
@@ -22,8 +23,14 @@ export const updateTransportationServiceValidator = vine.compile(
   vine.object({
     journeyId: vine.number().positive().withoutDecimals().optional(),
     vehicleId: vine.number().positive().withoutDecimals().optional(),
-    startDate: vine.date().optional(),
-    endDate: vine.date().optional(),
+    startDate: vine
+      .date()
+      .transform((value) => (value ? DateTime.fromJSDate(value) : value))
+      .optional(),
+    endDate: vine
+      .date()
+      .transform((value) => (value ? DateTime.fromJSDate(value) : value))
+      .optional(),
     cost: vine.number().positive().min(0).optional(),
   })
 )
@@ -35,8 +42,8 @@ export const assignTransportationServiceValidator = vine.compile(
   vine.object({
     journeyId: vine.number().positive().withoutDecimals(),
     vehicleId: vine.number().positive().withoutDecimals(),
-    startDate: vine.date(),
-    endDate: vine.date(),
+    startDate: vine.date().transform((value) => (value ? DateTime.fromJSDate(value) : value)),
+    endDate: vine.date().transform((value) => (value ? DateTime.fromJSDate(value) : value)),
     cost: vine.number().positive().min(0),
   })
 )
