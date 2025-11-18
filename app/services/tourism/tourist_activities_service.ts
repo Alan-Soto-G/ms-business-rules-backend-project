@@ -1,57 +1,114 @@
 import TouristActivity from '#models/tourism/tourist_activity'
+import { ModelPaginatorContract } from '@adonisjs/lucid/types/model'
 
 export default class TouristActivitiesService {
   /**
-   * Get all tourist activities
+   * Get all tourist activities with optional pagination
    */
-  async findAll(page?: number, perPage: number = 10) {
+  async getAllTouristActivities(
+    page?: number,
+    limit?: number
+  ): Promise<TouristActivity[] | ModelPaginatorContract<TouristActivity>> {
     const query = TouristActivity.query()
       .preload('municipality')
       .preload('guideActivities')
       .preload('planActivities')
+      .orderBy('id', 'asc')
 
-    if (page !== undefined) {
-      return await query.paginate(page, perPage)
+    if (page && limit) {
+      return await query.paginate(page, limit)
     }
 
     return await query
   }
 
   /**
-   * Get a tourist activity by ID
+   * Get tourist activity by ID
    */
-  async findById(id: number) {
+  async getTouristActivityById(id: number): Promise<TouristActivity | null> {
     return await TouristActivity.query()
       .where('id', id)
       .preload('municipality')
       .preload('guideActivities')
       .preload('planActivities')
-      .firstOrFail()
+      .first()
   }
 
   /**
-   * Create a new tourist activity
+   * Create new tourist activity
    */
-  async create(data: any) {
-    return await TouristActivity.create(data)
+  async createTouristActivity(data: {
+    municipalityId: number
+    name: string
+    description?: string
+    price?: number | null
+    duration?: number | null
+    category?:
+      | 'cultural'
+      | 'adventure'
+      | 'gastronomic'
+      | 'recreational'
+      | 'ecological'
+      | 'aquatic'
+      | 'other'
+  }): Promise<TouristActivity> {
+    const touristActivity = await TouristActivity.create(data)
+
+    await touristActivity.load('municipality')
+    await touristActivity.load('guideActivities')
+    await touristActivity.load('planActivities')
+
+    return touristActivity
   }
 
   /**
-   * Update a tourist activity
+   * Update tourist activity
    */
-  async update(id: number, data: any) {
-    const touristActivity = await TouristActivity.findOrFail(id)
+  async updateTouristActivity(
+    id: number,
+    data: {
+      municipalityId?: number
+      name?: string
+      description?: string
+      price?: number | null
+      duration?: number | null
+      category?:
+        | 'cultural'
+        | 'adventure'
+        | 'gastronomic'
+        | 'recreational'
+        | 'ecological'
+        | 'aquatic'
+        | 'other'
+    }
+  ): Promise<TouristActivity | null> {
+    const touristActivity = await TouristActivity.find(id)
+
+    if (!touristActivity) {
+      return null
+    }
+
     touristActivity.merge(data)
     await touristActivity.save()
+
+    await touristActivity.load('municipality')
+    await touristActivity.load('guideActivities')
+    await touristActivity.load('planActivities')
+
     return touristActivity
   }
 
   /**
-   * Delete a tourist activity
+   * Delete tourist activity
    */
-  async delete(id: number) {
-    const touristActivity = await TouristActivity.findOrFail(id)
+  async deleteTouristActivity(id: number): Promise<boolean> {
+    const touristActivity = await TouristActivity.find(id)
+
+    if (!touristActivity) {
+      return false
+    }
+
     await touristActivity.delete()
-    return touristActivity
+    return true
   }
 }

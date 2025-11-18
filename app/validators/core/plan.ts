@@ -5,10 +5,10 @@ import vine from '@vinejs/vine'
  */
 export const createPlanValidator = vine.compile(
   vine.object({
-    name: vine.string().trim().minLength(3).maxLength(255),
-    description: vine.string().trim().minLength(3).maxLength(1000).optional(),
-    price: vine.number().positive(),
-    duration: vine.number().positive().optional(),
+    name: vine.string().trim().minLength(3).maxLength(150),
+    description: vine.string().trim().optional(),
+    price: vine.number().positive().decimal([0, 2]),
+    duration: vine.number().positive().withoutDecimals().min(1).max(365).optional(),
   })
 )
 
@@ -17,9 +17,9 @@ export const createPlanValidator = vine.compile(
  */
 export const updatePlanValidator = vine.compile(
   vine.object({
-    name: vine.string().trim().minLength(3).maxLength(255).optional(),
-    description: vine.string().trim().minLength(3).maxLength(1000).optional(),
-    price: vine.number().positive().optional(),
-    duration: vine.number().positive().optional(),
+    name: vine.string().trim().minLength(3).maxLength(150).optional(),
+    description: vine.string().trim().optional(),
+    price: vine.number().positive().decimal([0, 2]).optional(),
+    duration: vine.number().positive().withoutDecimals().min(1).max(365).optional(),
   })
 )

@@ -34,7 +34,7 @@ export default class Hotel extends BaseModel {
   declare starRating: number
 
   @column({ columnName: 'status' })
-  declare status: 'active' | 'inactive'
+  declare status: 'active' | 'inactive' | 'under_renovation'
 
   // Relation N to 1 with HotelAdmin
   @belongsTo(() => HotelAdmin, {

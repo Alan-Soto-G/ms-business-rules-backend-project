@@ -27,7 +27,14 @@ export default class TouristActivity extends BaseModel {
   declare duration: number | null
 
   @column({ columnName: 'category' })
-  declare category: 'cultural' | 'adventure' | 'gastronomic' | 'recreational' | 'other'
+  declare category:
+    | 'cultural'
+    | 'adventure'
+    | 'gastronomic'
+    | 'recreational'
+    | 'ecological'
+    | 'aquatic'
+    | 'other'
 
   // Relación N a 1 con Municipality
   @belongsTo(() => Municipality, {

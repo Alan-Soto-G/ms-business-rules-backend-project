@@ -1,28 +1,34 @@
 import Trip from '#models/core/trip'
+import { ModelPaginatorContract } from '@adonisjs/lucid/types/model'
+import { DateTime } from 'luxon'
 
 export default class TripsService {
   /**
-   * Get all trips
+   * Get all trips with optional pagination
    */
-  async findAll(page?: number, perPage: number = 10) {
+  async getAllTrips(
+    page?: number,
+    limit?: number
+  ): Promise<Trip[] | ModelPaginatorContract<Trip>> {
     const query = Trip.query()
       .preload('fees')
       .preload('tripClients')
       .preload('tripPlans')
       .preload('Bookings')
       .preload('transportItineraries')
+      .orderBy('id', 'asc')
 
-    if (page !== undefined) {
-      return await query.paginate(page, perPage)
+    if (page && limit) {
+      return await query.paginate(page, limit)
     }
 
     return await query
   }
 
   /**
-   * Get a trip by ID
+   * Get trip by ID
    */
-  async findById(id: number) {
+  async getTripById(id: number): Promise<Trip | null> {
     return await Trip.query()
       .where('id', id)
       .preload('fees')
@@ -30,32 +36,81 @@ export default class TripsService {
       .preload('tripPlans')
       .preload('Bookings')
       .preload('transportItineraries')
-      .firstOrFail()
+      .first()
   }
 
   /**
-   * Create a new trip
+   * Create new trip
    */
-  async create(data: any) {
-    return await Trip.create(data)
+  async createTrip(data: {
+    name: string
+    description?: string
+    destination: string
+    startDate: DateTime
+    endDate: DateTime
+    price: number
+    capacity: number
+    availableSeats: number
+    status?: 'draft' | 'published' | 'active' | 'full' | 'completed' | 'cancelled'
+  }): Promise<Trip> {
+    const trip = await Trip.create(data)
+
+    await trip.load('fees')
+    await trip.load('tripClients')
+    await trip.load('tripPlans')
+    await trip.load('Bookings')
+    await trip.load('transportItineraries')
+
+    return trip
   }
 
   /**
-   * Update a trip
+   * Update trip
    */
-  async update(id: number, data: any) {
-    const trip = await Trip.findOrFail(id)
+  async updateTrip(
+    id: number,
+    data: {
+      name?: string
+      description?: string
+      destination?: string
+      startDate?: DateTime
+      endDate?: DateTime
+      price?: number
+      capacity?: number
+      availableSeats?: number
+      status?: 'draft' | 'published' | 'active' | 'full' | 'completed' | 'cancelled'
+    }
+  ): Promise<Trip | null> {
+    const trip = await Trip.find(id)
+
+    if (!trip) {
+      return null
+    }
+
     trip.merge(data)
     await trip.save()
+
+    await trip.load('fees')
+    await trip.load('tripClients')
+    await trip.load('tripPlans')
+    await trip.load('Bookings')
+    await trip.load('transportItineraries')
+
     return trip
   }
 
   /**
-   * Delete a trip
+   * Delete trip
    */
-  async delete(id: number) {
-    const trip = await Trip.findOrFail(id)
+  async deleteTrip(id: number): Promise<boolean> {
+    const trip = await Trip.find(id)
+
+    if (!trip) {
+      return false
+    }
+
     await trip.delete()
-    return trip
+    return true
   }
 }
+

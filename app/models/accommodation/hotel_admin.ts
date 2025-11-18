@@ -7,9 +7,9 @@ export default class HotelAdmin extends BaseModel {
   @column({ isPrimary: true })
   declare id: number
 
-  // Specific attributes of Client
+  // Specific attributes of HotelAdmin
   @column({ columnName: 'user_id' })
-  declare UserId: string // It comes from ms-security
+  declare userId: string // It comes from ms-security
 
   @column({ columnName: 'is_verified' })
   declare isVerified: boolean

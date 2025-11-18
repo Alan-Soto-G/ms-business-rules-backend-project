@@ -23,7 +23,7 @@ export default class Fee extends BaseModel {
   declare dueDate: DateTime
 
   @column({ columnName: 'status' })
-  declare status: string // 'pending', 'paid', 'overdue'
+  declare status: 'pending' | 'paid' | 'overdue' | 'cancelled' | 'refunded'
 
   // Relation N to 1 with Trip
   @belongsTo(() => Trip, {

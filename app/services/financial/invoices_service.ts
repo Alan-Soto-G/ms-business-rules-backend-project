@@ -1,94 +1,87 @@
 import Invoice from '#models/financial/invoice'
+import { ModelPaginatorContract } from '@adonisjs/lucid/types/model'
+import { DateTime } from 'luxon'
 
 export default class InvoicesService {
   /**
    * Get all invoices with optional pagination
-   * @param page - Page number (optional, if not provided returns all records)
-   * @param perPage - Items per page (default: 10)
    */
-  async findAll(page?: number, perPage: number = 10) {
-    const query = Invoice.query().preload('fee').preload('bankCard')
+  async getAllInvoices(
+    page?: number,
+    limit?: number
+  ): Promise<Invoice[] | ModelPaginatorContract<Invoice>> {
+    const query = Invoice.query().preload('fee').orderBy('id', 'asc')
 
-    if (page !== undefined) {
-      return await query.paginate(page, perPage)
+    if (page && limit) {
+      return await query.paginate(page, limit)
     }
 
     return await query
   }
 
   /**
-   * Get an invoice by ID
+   * Get invoice by ID
    */
-  async findById(id: number) {
-    return await Invoice.query().where('id', id).preload('fee').preload('bankCard').firstOrFail()
+  async getInvoiceById(id: number): Promise<Invoice | null> {
+    return await Invoice.query().where('id', id).preload('fee').first()
   }
 
   /**
-   * Create a new invoice
+   * Create new invoice
    */
-  async create(data: any) {
-    // Validar si el invoiceNumber ya existe antes de intentar crear
-    if (data.invoiceNumber) {
-      const existingByNumber = await Invoice.query()
-        .where('invoiceNumber', data.invoiceNumber)
-        .first()
-      if (existingByNumber) {
-        throw new Error(`El número de factura '${data.invoiceNumber}' ya está en uso`)
-      }
-    }
-
-    // Validar si el feeId ya existe (una cuota solo puede tener una factura)
-    if (data.feeId) {
-      const existingByFee = await Invoice.query()
-        .where('feeId', data.feeId)
-        .first()
-      if (existingByFee) {
-        throw new Error(`La cuota con ID '${data.feeId}' ya tiene una factura asociada`)
-      }
-    }
-
-    return await Invoice.create(data)
+  async createInvoice(data: {
+    feeId: number
+    bankCardId?: number | null
+    invoiceNumber: string
+    totalAmount: number
+    issueDate: DateTime
+    paymentDate?: DateTime | null
+    paymentMethod?: 'credit_card' | 'debit_card' | 'cash' | 'bank_transfer' | 'paypal' | 'other'
+  }): Promise<Invoice> {
+    const invoice = await Invoice.create(data)
+    await invoice.load('fee')
+    return invoice
   }
 
   /**
-   * Update an invoice
+   * Update invoice
    */
-  async update(id: number, data: any) {
-    const invoice = await Invoice.findOrFail(id)
-
-    // Validar si el invoiceNumber ya existe (excluyendo la factura actual)
-    if (data.invoiceNumber) {
-      const existingByNumber = await Invoice.query()
-        .where('invoiceNumber', data.invoiceNumber)
-        .whereNot('id', id)
-        .first()
-      if (existingByNumber) {
-        throw new Error(`El número de factura '${data.invoiceNumber}' ya está en uso`)
-      }
+  async updateInvoice(
+    id: number,
+    data: {
+      feeId?: number
+      bankCardId?: number | null
+      invoiceNumber?: string
+      totalAmount?: number
+      issueDate?: DateTime
+      paymentDate?: DateTime | null
+      paymentMethod?: 'credit_card' | 'debit_card' | 'cash' | 'bank_transfer' | 'paypal' | 'other'
     }
+  ): Promise<Invoice | null> {
+    const invoice = await Invoice.find(id)
 
-    // Validar si el feeId ya existe (excluyendo la factura actual)
-    if (data.feeId) {
-      const existingByFee = await Invoice.query()
-        .where('feeId', data.feeId)
-        .whereNot('id', id)
-        .first()
-      if (existingByFee) {
-        throw new Error(`La cuota con ID '${data.feeId}' ya tiene una factura asociada`)
-      }
+    if (!invoice) {
+      return null
     }
 
     invoice.merge(data)
     await invoice.save()
+    await invoice.load('fee')
+
     return invoice
   }
 
   /**
-   * Delete an invoice
+   * Delete invoice
    */
-  async delete(id: number) {
-    const invoice = await Invoice.findOrFail(id)
+  async deleteInvoice(id: number): Promise<boolean> {
+    const invoice = await Invoice.find(id)
+
+    if (!invoice) {
+      return false
+    }
+
     await invoice.delete()
-    return invoice
+    return true
   }
 }

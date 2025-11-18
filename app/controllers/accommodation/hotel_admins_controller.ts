@@ -1,5 +1,9 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import HotelAdminsService from '#services/accommodation/hotel_admins_service'
+import {
+  createHotelAdminValidator,
+  updateHotelAdminValidator,
+} from '#validators/accommodation/hotel_admin'
 
 export default class HotelAdminsController {
   private hotelAdminsService: HotelAdminsService
@@ -9,71 +13,152 @@ export default class HotelAdminsController {
   }
 
   /**
-   * Get all hotel admins
    * GET /hotel-admins
+   * Get all hotel admins with optional pagination
    */
-  public async index({ request, response }: HttpContext) {
+  async index({ request, response }: HttpContext) {
     try {
       const page = request.input('page')
-      const perPage = request.input('per_page', 10)
-      const hotelAdmins = await this.hotelAdminsService.findAll(page, perPage)
-      return response.status(200).json(hotelAdmins)
+      const limit = request.input('limit')
+
+      const hotelAdmins = await this.hotelAdminsService.getAllHotelAdmins(page, limit)
+
+      return response.ok({
+        message: 'Hotel admins retrieved successfully',
+        data: hotelAdmins,
+      })
     } catch (error) {
-      return response.status(500).json({ message: error.message })
+      return response.internalServerError({
+        message: 'Error retrieving hotel admins',
+        error: error.message,
+      })
     }
   }
 
   /**
-   * Get a hotel admin by ID
    * GET /hotel-admins/:id
+   * Get hotel admin by ID
    */
-  public async show({ params, response }: HttpContext) {
+  async show({ params, response }: HttpContext) {
     try {
-      const hotelAdmin = await this.hotelAdminsService.findById(params.id)
-      return response.status(200).json(hotelAdmin)
+      const hotelAdmin = await this.hotelAdminsService.getHotelAdminById(params.id)
+
+      if (!hotelAdmin) {
+        return response.notFound({
+          message: 'Hotel admin not found',
+        })
+      }
+
+      return response.ok({
+        message: 'Hotel admin retrieved successfully',
+        data: hotelAdmin,
+      })
     } catch (error) {
-      return response.status(404).json({ message: error.message })
+      return response.internalServerError({
+        message: 'Error retrieving hotel admin',
+        error: error.message,
+      })
     }
   }
 
   /**
-   * Create a new hotel admin
    * POST /hotel-admins
+   * Create new hotel admin
    */
-  public async store({ request, response }: HttpContext) {
+  async store({ request, response }: HttpContext) {
     try {
-      const data = request.all()
-      const hotelAdmin = await this.hotelAdminsService.create(data)
-      return response.status(201).json(hotelAdmin)
+      const data = await request.validateUsing(createHotelAdminValidator)
+
+      const hotelAdmin = await this.hotelAdminsService.createHotelAdmin(data)
+
+      return response.created({
+        message: 'Hotel admin created successfully',
+        data: hotelAdmin,
+      })
     } catch (error) {
-      return response.status(400).json({ message: error.message })
+      if (error.messages) {
+        return response.badRequest({
+          message: 'Validation error',
+          errors: error.messages,
+        })
+      }
+
+      if (error.code === '23505') {
+        return response.conflict({
+          message: 'User ID already exists',
+        })
+      }
+
+      return response.internalServerError({
+        message: 'Error creating hotel admin',
+        error: error.message,
+      })
     }
   }
 
   /**
-   * Update a hotel admin
-   * PUT /hotel-admins/:id
+   * PUT/PATCH /hotel-admins/:id
+   * Update hotel admin
    */
-  public async update({ params, request, response }: HttpContext) {
+  async update({ params, request, response }: HttpContext) {
     try {
-      const data = request.all()
-      const hotelAdmin = await this.hotelAdminsService.update(params.id, data)
-      return response.status(200).json(hotelAdmin)
+      const data = await request.validateUsing(updateHotelAdminValidator)
+
+      const hotelAdmin = await this.hotelAdminsService.updateHotelAdmin(params.id, data)
+
+      if (!hotelAdmin) {
+        return response.notFound({
+          message: 'Hotel admin not found',
+        })
+      }
+
+      return response.ok({
+        message: 'Hotel admin updated successfully',
+        data: hotelAdmin,
+      })
     } catch (error) {
-      return response.status(404).json({ message: error.message })
+      if (error.messages) {
+        return response.badRequest({
+          message: 'Validation error',
+          errors: error.messages,
+        })
+      }
+
+      if (error.code === '23505') {
+        return response.conflict({
+          message: 'User ID already exists',
+        })
+      }
+
+      return response.internalServerError({
+        message: 'Error updating hotel admin',
+        error: error.message,
+      })
     }
   }
 
   /**
-   * Delete a hotel admin
    * DELETE /hotel-admins/:id
+   * Delete hotel admin
    */
-  public async destroy({ params, response }: HttpContext) {
+  async destroy({ params, response }: HttpContext) {
     try {
-      const hotelAdmin = await this.hotelAdminsService.delete(params.id)
-      return response.status(200).json(hotelAdmin)
+      const deleted = await this.hotelAdminsService.deleteHotelAdmin(params.id)
+
+      if (!deleted) {
+        return response.notFound({
+          message: 'Hotel admin not found',
+        })
+      }
+
+      return response.ok({
+        message: 'Hotel admin deleted successfully',
+      })
     } catch (error) {
-      return response.status(404).json({ message: error.message })
+      return response.internalServerError({
+        message: 'Error deleting hotel admin',
+        error: error.message,
+      })
     }
   }
 }

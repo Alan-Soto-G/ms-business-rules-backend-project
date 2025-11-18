@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import CarsService from '#services/transportation/cars_service'
+import { createCarValidator, updateCarValidator } from '#validators/transportation/car'
 
 export default class CarsController {
   private carsService: CarsService
@@ -9,71 +10,164 @@ export default class CarsController {
   }
 
   /**
-   * Get all cars
    * GET /cars
+   * Get all cars with optional pagination
    */
-  public async index({ request, response }: HttpContext) {
+  async index({ request, response }: HttpContext) {
     try {
       const page = request.input('page')
-      const perPage = request.input('per_page', 10)
-      const cars = await this.carsService.findAll(page, perPage)
-      return response.status(200).json(cars)
+      const limit = request.input('limit')
+
+      const cars = await this.carsService.getAllCars(page, limit)
+
+      return response.ok({
+        message: 'Cars retrieved successfully',
+        data: cars,
+      })
     } catch (error) {
-      return response.status(500).json({ message: error.message })
+      return response.internalServerError({
+        message: 'Error retrieving cars',
+        error: error.message,
+      })
     }
   }
 
   /**
-   * Get a car by ID
    * GET /cars/:id
+   * Get car by ID
    */
-  public async show({ params, response }: HttpContext) {
+  async show({ params, response }: HttpContext) {
     try {
-      const car = await this.carsService.findById(params.id)
-      return response.status(200).json(car)
+      const car = await this.carsService.getCarById(params.id)
+
+      if (!car) {
+        return response.notFound({
+          message: 'Car not found',
+        })
+      }
+
+      return response.ok({
+        message: 'Car retrieved successfully',
+        data: car,
+      })
     } catch (error) {
-      return response.status(404).json({ message: error.message })
+      return response.internalServerError({
+        message: 'Error retrieving car',
+        error: error.message,
+      })
     }
   }
 
   /**
-   * Create a new car
    * POST /cars
+   * Create new car
    */
-  public async store({ request, response }: HttpContext) {
+  async store({ request, response }: HttpContext) {
     try {
-      const data = request.all()
-      const car = await this.carsService.create(data)
-      return response.status(201).json(car)
+      const data = await request.validateUsing(createCarValidator)
+
+      const car = await this.carsService.createCar(data)
+
+      return response.created({
+        message: 'Car created successfully',
+        data: car,
+      })
     } catch (error) {
-      return response.status(400).json({ message: error.message })
+      if (error.messages) {
+        return response.badRequest({
+          message: 'Validation error',
+          errors: error.messages,
+        })
+      }
+
+      if (error.code === '23505') {
+        return response.conflict({
+          message: 'License plate already exists',
+        })
+      }
+
+      if (error.code === '23503') {
+        return response.badRequest({
+          message: 'Invalid hotel ID or vehicle ID',
+        })
+      }
+
+      return response.internalServerError({
+        message: 'Error creating car',
+        error: error.message,
+      })
     }
   }
 
   /**
-   * Update a car
-   * PUT /cars/:id
+   * PUT/PATCH /cars/:id
+   * Update car
    */
-  public async update({ params, request, response }: HttpContext) {
+  async update({ params, request, response }: HttpContext) {
     try {
-      const data = request.all()
-      const car = await this.carsService.update(params.id, data)
-      return response.status(200).json(car)
+      const data = await request.validateUsing(updateCarValidator)
+
+      const car = await this.carsService.updateCar(params.id, data)
+
+      if (!car) {
+        return response.notFound({
+          message: 'Car not found',
+        })
+      }
+
+      return response.ok({
+        message: 'Car updated successfully',
+        data: car,
+      })
     } catch (error) {
-      return response.status(404).json({ message: error.message })
+      if (error.messages) {
+        return response.badRequest({
+          message: 'Validation error',
+          errors: error.messages,
+        })
+      }
+
+      if (error.code === '23505') {
+        return response.conflict({
+          message: 'License plate already exists',
+        })
+      }
+
+      if (error.code === '23503') {
+        return response.badRequest({
+          message: 'Invalid hotel ID',
+        })
+      }
+
+      return response.internalServerError({
+        message: 'Error updating car',
+        error: error.message,
+      })
     }
   }
 
   /**
-   * Delete a car
    * DELETE /cars/:id
+   * Delete car
    */
-  public async destroy({ params, response }: HttpContext) {
+  async destroy({ params, response }: HttpContext) {
     try {
-      const car = await this.carsService.delete(params.id)
-      return response.status(200).json(car)
+      const deleted = await this.carsService.deleteCar(params.id)
+
+      if (!deleted) {
+        return response.notFound({
+          message: 'Car not found',
+        })
+      }
+
+      return response.ok({
+        message: 'Car deleted successfully',
+      })
     } catch (error) {
-      return response.status(404).json({ message: error.message })
+      return response.internalServerError({
+        message: 'Error deleting car',
+        error: error.message,
+      })
     }
   }
 }

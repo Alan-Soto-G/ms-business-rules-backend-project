@@ -1,94 +1,82 @@
 import Gps from '#models/transportation/gps'
+import { ModelPaginatorContract } from '@adonisjs/lucid/types/model'
 
 export default class GpsService {
   /**
    * Get all GPS devices with optional pagination
-   * @param page - Page number (optional, if not provided returns all records)
-   * @param perPage - Items per page (default: 10)
    */
-  async findAll(page?: number, perPage: number = 10) {
-    const query = Gps.query().preload('vehicle')
+  async getAllGps(
+    page?: number,
+    limit?: number
+  ): Promise<Gps[] | ModelPaginatorContract<Gps>> {
+    const query = Gps.query().preload('vehicle').orderBy('id', 'asc')
 
-    if (page !== undefined) {
-      return await query.paginate(page, perPage)
+    if (page && limit) {
+      return await query.paginate(page, limit)
     }
 
     return await query
   }
 
   /**
-   * Get a GPS device by ID
+   * Get GPS device by ID
    */
-  async findById(id: number) {
-    return await Gps.query().where('id', id).preload('vehicle').firstOrFail()
+  async getGpsById(id: number): Promise<Gps | null> {
+    return await Gps.query().where('id', id).preload('vehicle').first()
   }
 
   /**
-   * Create a new GPS device
+   * Create new GPS device
    */
-  async create(data: any) {
-    // Validar si el serialNumber ya existe antes de intentar crear
-    if (data.serialNumber) {
-      const existingBySerial = await Gps.query()
-        .where('serialNumber', data.serialNumber)
-        .first()
-      if (existingBySerial) {
-        throw new Error(`El número de serie '${data.serialNumber}' ya está en uso por otro GPS`)
-      }
-    }
-
-    // Validar si el vehicleId ya existe (un vehículo solo puede tener un GPS)
-    if (data.vehicleId) {
-      const existingByVehicle = await Gps.query()
-        .where('vehicleId', data.vehicleId)
-        .first()
-      if (existingByVehicle) {
-        throw new Error(`El vehículo con ID '${data.vehicleId}' ya tiene un GPS asignado`)
-      }
-    }
-
-    return await Gps.create(data)
+  async createGps(data: {
+    vehicleId: number
+    serialNumber: string
+    brand: string
+    model: string
+    isActive?: boolean
+  }): Promise<Gps> {
+    const gps = await Gps.create(data)
+    await gps.load('vehicle')
+    return gps
   }
 
   /**
-   * Update a GPS device
+   * Update GPS device
    */
-  async update(id: number, data: any) {
-    const gps = await Gps.findOrFail(id)
-
-    // Validar si el serialNumber ya existe (excluyendo el GPS actual)
-    if (data.serialNumber) {
-      const existingBySerial = await Gps.query()
-        .where('serialNumber', data.serialNumber)
-        .whereNot('id', id)
-        .first()
-      if (existingBySerial) {
-        throw new Error(`El número de serie '${data.serialNumber}' ya está en uso por otro GPS`)
-      }
+  async updateGps(
+    id: number,
+    data: {
+      vehicleId?: number
+      serialNumber?: string
+      brand?: string
+      model?: string
+      isActive?: boolean
     }
+  ): Promise<Gps | null> {
+    const gps = await Gps.find(id)
 
-    // Validar si el vehicleId ya existe (excluyendo el GPS actual)
-    if (data.vehicleId) {
-      const existingByVehicle = await Gps.query()
-        .where('vehicleId', data.vehicleId)
-        .whereNot('id', id)
-        .first()
-      if (existingByVehicle) {
-        throw new Error(`El vehículo con ID '${data.vehicleId}' ya tiene un GPS asignado`)
-      }
+    if (!gps) {
+      return null
     }
 
     gps.merge(data)
     await gps.save()
+
+    await gps.load('vehicle')
     return gps
   }
 
   /**
-   * Delete a GPS device
+   * Delete GPS device
    */
-  async delete(id: number) {
-    const gps = await Gps.findOrFail(id)
+  async deleteGps(id: number): Promise<boolean> {
+    const gps = await Gps.find(id)
+
+    if (!gps) {
+      return false
+    }
+
     await gps.delete()
-    return gps
+    return true
   }
 }

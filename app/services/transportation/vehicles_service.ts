@@ -1,83 +1,85 @@
 import Vehicle from '#models/transportation/vehicle'
+import { ModelPaginatorContract } from '@adonisjs/lucid/types/model'
 
 export default class VehiclesService {
   /**
-   * Get all vehicles
-   * @param page - Page number (optional, if not provided returns all records)
-   * @param perPage - Items per page (default: 10)
+   * Get all vehicles with optional pagination
    */
-  async findAll(page?: number, perPage: number = 10) {
-    const query = Vehicle.query()
-      .preload('aircraft')
-      .preload('gps')
-      .preload('car')
-      .preload('transportationServices')
+  async getAllVehicles(
+    page?: number,
+    limit?: number
+  ): Promise<Vehicle[] | ModelPaginatorContract<Vehicle>> {
+    const query = Vehicle.query().orderBy('id', 'asc')
 
-    if (page !== undefined) {
-      return await query.paginate(page, perPage)
+    if (page && limit) {
+      return await query.paginate(page, limit)
     }
 
     return await query
   }
 
   /**
-   * Get a vehicle by ID
+   * Get vehicle by ID
    */
-  async findById(id: number) {
-    return await Vehicle.query()
-      .where('id', id)
-      .preload('aircraft')
-      .preload('gps')
-      .preload('car')
-      .preload('transportationServices')
-      .firstOrFail()
+  async getVehicleById(id: number): Promise<Vehicle | null> {
+    return await Vehicle.query().where('id', id).first()
   }
 
   /**
-   * Create a new vehicle
+   * Create new vehicle
    */
-  async create(data: any) {
-    // Validar si la placa ya existe antes de intentar crear
-    if (data.licensePlate) {
-      const existingVehicle = await Vehicle.query()
-        .where('licensePlate', data.licensePlate)
-        .first()
-      if (existingVehicle) {
-        throw new Error(`La placa '${data.licensePlate}' ya está en uso por otro vehículo`)
-      }
-    }
-
+  async createVehicle(data: {
+    licensePlate: string
+    brand: string
+    model: string
+    year: number
+    color: string
+    numberOfSeats: number
+    vehicleType: string
+    status?: 'available' | 'in_use' | 'maintenance' | 'retired'
+  }): Promise<Vehicle> {
     return await Vehicle.create(data)
   }
 
   /**
-   * Update a vehicle
+   * Update vehicle
    */
-  async update(id: number, data: any) {
-    const vehicle = await Vehicle.findOrFail(id)
+  async updateVehicle(
+    id: number,
+    data: {
+      licensePlate?: string
+      brand?: string
+      model?: string
+      year?: number
+      color?: string
+      numberOfSeats?: number
+      vehicleType?: string
+      status?: 'available' | 'in_use' | 'maintenance' | 'retired'
+    }
+  ): Promise<Vehicle | null> {
+    const vehicle = await Vehicle.find(id)
 
-    // Validar si la placa ya existe (excluyendo el vehículo actual)
-    if (data.licensePlate) {
-      const existingVehicle = await Vehicle.query()
-        .where('licensePlate', data.licensePlate)
-        .whereNot('id', id)
-        .first()
-      if (existingVehicle) {
-        throw new Error(`La placa '${data.licensePlate}' ya está en uso por otro vehículo`)
-      }
+    if (!vehicle) {
+      return null
     }
 
     vehicle.merge(data)
     await vehicle.save()
+
     return vehicle
   }
 
   /**
-   * Delete a vehicle
+   * Delete vehicle
    */
-  async delete(id: number) {
-    const vehicle = await Vehicle.findOrFail(id)
+  async deleteVehicle(id: number): Promise<boolean> {
+    const vehicle = await Vehicle.find(id)
+
+    if (!vehicle) {
+      return false
+    }
+
     await vehicle.delete()
-    return vehicle
+    return true
   }
 }

@@ -26,10 +26,16 @@ export default class Invoice extends BaseModel {
   declare issueDate: DateTime
 
   @column.dateTime({ columnName: 'payment_date' })
-  declare paymentDate: DateTime
+  declare paymentDate: DateTime | null
 
   @column({ columnName: 'payment_method' })
-  declare paymentMethod: string
+  declare paymentMethod:
+    | 'credit_card'
+    | 'debit_card'
+    | 'cash'
+    | 'bank_transfer'
+    | 'paypal'
+    | 'other'
 
   // Relation 1 to 1 with Fee
   @belongsTo(() => Fee, {

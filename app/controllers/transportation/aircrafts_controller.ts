@@ -1,5 +1,9 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import AircraftsService from '#services/transportation/aircrafts_service'
+import {
+  createAircraftValidator,
+  updateAircraftValidator,
+} from '#validators/transportation/aircraft'
 
 export default class AircraftsController {
   private aircraftsService: AircraftsService
@@ -9,71 +13,164 @@ export default class AircraftsController {
   }
 
   /**
-   * Get all aircrafts
    * GET /aircrafts
+   * Get all aircrafts with optional pagination
    */
-  public async index({ request, response }: HttpContext) {
+  async index({ request, response }: HttpContext) {
     try {
       const page = request.input('page')
-      const perPage = request.input('per_page', 10)
-      const aircrafts = await this.aircraftsService.findAll(page, perPage)
-      return response.status(200).json(aircrafts)
+      const limit = request.input('limit')
+
+      const aircrafts = await this.aircraftsService.getAllAircrafts(page, limit)
+
+      return response.ok({
+        message: 'Aircrafts retrieved successfully',
+        data: aircrafts,
+      })
     } catch (error) {
-      return response.status(500).json({ message: error.message })
+      return response.internalServerError({
+        message: 'Error retrieving aircrafts',
+        error: error.message,
+      })
     }
   }
 
   /**
-   * Get an aircraft by ID
    * GET /aircrafts/:id
+   * Get aircraft by ID
    */
-  public async show({ params, response }: HttpContext) {
+  async show({ params, response }: HttpContext) {
     try {
-      const aircraft = await this.aircraftsService.findById(params.id)
-      return response.status(200).json(aircraft)
+      const aircraft = await this.aircraftsService.getAircraftById(params.id)
+
+      if (!aircraft) {
+        return response.notFound({
+          message: 'Aircraft not found',
+        })
+      }
+
+      return response.ok({
+        message: 'Aircraft retrieved successfully',
+        data: aircraft,
+      })
     } catch (error) {
-      return response.status(404).json({ message: error.message })
+      return response.internalServerError({
+        message: 'Error retrieving aircraft',
+        error: error.message,
+      })
     }
   }
 
   /**
-   * Create a new aircraft
    * POST /aircrafts
+   * Create new aircraft
    */
-  public async store({ request, response }: HttpContext) {
+  async store({ request, response }: HttpContext) {
     try {
-      const data = request.all()
-      const aircraft = await this.aircraftsService.create(data)
-      return response.status(201).json(aircraft)
+      const data = await request.validateUsing(createAircraftValidator)
+
+      const aircraft = await this.aircraftsService.createAircraft(data)
+
+      return response.created({
+        message: 'Aircraft created successfully',
+        data: aircraft,
+      })
     } catch (error) {
-      return response.status(400).json({ message: error.message })
+      if (error.messages) {
+        return response.badRequest({
+          message: 'Validation error',
+          errors: error.messages,
+        })
+      }
+
+      if (error.code === '23505') {
+        return response.conflict({
+          message: 'License plate already exists',
+        })
+      }
+
+      if (error.code === '23503') {
+        return response.badRequest({
+          message: 'Invalid airline ID or vehicle ID',
+        })
+      }
+
+      return response.internalServerError({
+        message: 'Error creating aircraft',
+        error: error.message,
+      })
     }
   }
 
   /**
-   * Update an aircraft
-   * PUT /aircrafts/:id
+   * PUT/PATCH /aircrafts/:id
+   * Update aircraft
    */
-  public async update({ params, request, response }: HttpContext) {
+  async update({ params, request, response }: HttpContext) {
     try {
-      const data = request.all()
-      const aircraft = await this.aircraftsService.update(params.id, data)
-      return response.status(200).json(aircraft)
+      const data = await request.validateUsing(updateAircraftValidator)
+
+      const aircraft = await this.aircraftsService.updateAircraft(params.id, data)
+
+      if (!aircraft) {
+        return response.notFound({
+          message: 'Aircraft not found',
+        })
+      }
+
+      return response.ok({
+        message: 'Aircraft updated successfully',
+        data: aircraft,
+      })
     } catch (error) {
-      return response.status(404).json({ message: error.message })
+      if (error.messages) {
+        return response.badRequest({
+          message: 'Validation error',
+          errors: error.messages,
+        })
+      }
+
+      if (error.code === '23505') {
+        return response.conflict({
+          message: 'License plate already exists',
+        })
+      }
+
+      if (error.code === '23503') {
+        return response.badRequest({
+          message: 'Invalid airline ID',
+        })
+      }
+
+      return response.internalServerError({
+        message: 'Error updating aircraft',
+        error: error.message,
+      })
     }
   }
 
   /**
-   * Delete an aircraft
    * DELETE /aircrafts/:id
+   * Delete aircraft
    */
-  public async destroy({ params, response }: HttpContext) {
+  async destroy({ params, response }: HttpContext) {
     try {
-      const aircraft = await this.aircraftsService.delete(params.id)
-      return response.status(200).json(aircraft)
+      const deleted = await this.aircraftsService.deleteAircraft(params.id)
+
+      if (!deleted) {
+        return response.notFound({
+          message: 'Aircraft not found',
+        })
+      }
+
+      return response.ok({
+        message: 'Aircraft deleted successfully',
+      })
     } catch (error) {
-      return response.status(404).json({ message: error.message })
+      return response.internalServerError({
+        message: 'Error deleting aircraft',
+        error: error.message,
+      })
     }
   }
 }

@@ -1,55 +1,92 @@
 import BankCard from '#models/financial/bank_card'
+import { ModelPaginatorContract } from '@adonisjs/lucid/types/model'
+import { DateTime } from 'luxon'
 
 export default class BankCardsService {
   /**
    * Get all bank cards with optional pagination
-   * @param page - Page number (optional, if not provided returns all records)
-   * @param perPage - Items per page (default: 10)
    */
-  async findAll(page?: number, perPage: number = 10) {
-    const query = BankCard.query().preload('client').preload('invoices')
+  async getAllBankCards(
+    page?: number,
+    limit?: number
+  ): Promise<BankCard[] | ModelPaginatorContract<BankCard>> {
+    const query = BankCard.query().preload('client').preload('invoices').orderBy('id', 'asc')
 
-    if (page !== undefined) {
-      return await query.paginate(page, perPage)
+    if (page && limit) {
+      return await query.paginate(page, limit)
     }
 
     return await query
   }
 
   /**
-   * Get a bank card by ID
+   * Get bank card by ID
    */
-  async findById(id: number) {
+  async getBankCardById(id: number): Promise<BankCard | null> {
     return await BankCard.query()
       .where('id', id)
       .preload('client')
       .preload('invoices')
-      .firstOrFail()
+      .first()
   }
 
   /**
-   * Create a new bank card
+   * Create new bank card
    */
-  async create(data: any) {
-    return await BankCard.create(data)
+  async createBankCard(data: {
+    clientId: number
+    cardNumber: string
+    cvv: string
+    expirationDate: DateTime
+    cardHolderName: string
+  }): Promise<BankCard> {
+    const bankCard = await BankCard.create(data)
+
+    await bankCard.load('client')
+    await bankCard.load('invoices')
+
+    return bankCard
   }
 
   /**
-   * Update a bank card
+   * Update bank card
    */
-  async update(id: number, data: any) {
-    const bankCard = await BankCard.findOrFail(id)
+  async updateBankCard(
+    id: number,
+    data: {
+      clientId?: number
+      cardNumber?: string
+      cvv?: string
+      expirationDate?: DateTime
+      cardHolderName?: string
+    }
+  ): Promise<BankCard | null> {
+    const bankCard = await BankCard.find(id)
+
+    if (!bankCard) {
+      return null
+    }
+
     bankCard.merge(data)
     await bankCard.save()
+
+    await bankCard.load('client')
+    await bankCard.load('invoices')
+
     return bankCard
   }
 
   /**
-   * Delete a bank card
+   * Delete bank card
    */
-  async delete(id: number) {
-    const bankCard = await BankCard.findOrFail(id)
+  async deleteBankCard(id: number): Promise<boolean> {
+    const bankCard = await BankCard.find(id)
+
+    if (!bankCard) {
+      return false
+    }
+
     await bankCard.delete()
-    return bankCard
+    return true
   }
 }

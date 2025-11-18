@@ -1,0 +1,1266 @@
+{
+	"info": {
+		"name": "MS Business Rules - CRUD Collection",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:3333/api",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "Municipalities",
+			"item": [
+				{
+					"name": "Create Municipality",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Bogotá\",\n  \"departmentCode\": \"11\"\n}"
+						},
+						"url": {"raw": "{{base_url}}/municipalities", "host": ["{{base_url}}"], "path": ["municipalities"]}
+					}
+				},
+				{
+					"name": "Get All Municipalities",
+					"request": {
+						"method": "GET",
+						"url": {"raw": "{{base_url}}/municipalities?page=1&limit=10", "host": ["{{base_url}}"], "path": ["municipalities"], "query": [{"key": "page", "value": "1"}, {"key": "limit", "value": "10"}]}
+					}
+				},
+				{
+					"name": "Get Municipality",
+					"request": {
+						"method": "GET",
+						"url": {"raw": "{{base_url}}/municipalities/1", "host": ["{{base_url}}"], "path": ["municipalities", "1"]}
+					}
+				},
+				{
+					"name": "Update Municipality",
+					"request": {
+						"method": "PUT",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Bogotá D.C.\"\n}"
+						},
+						"url": {"raw": "{{base_url}}/municipalities/1", "host": ["{{base_url}}"], "path": ["municipalities", "1"]}
+					}
+				},
+				{
+					"name": "Delete Municipality",
+					"request": {
+						"method": "DELETE",
+						"url": {"raw": "{{base_url}}/municipalities/1", "host": ["{{base_url}}"], "path": ["municipalities", "1"]}
+					}
+				}
+			]
+		},
+		{
+			"name": "Clients",
+			"item": [
+				{
+					"name": "Create Client",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"phone\": \"1234567890\"\n}"
+						},
+						"url": {"raw": "{{base_url}}/clients", "host": ["{{base_url}}"], "path": ["clients"]}
+					}
+				},
+				{
+					"name": "Get All Clients",
+					"request": {
+						"method": "GET",
+						"url": {"raw": "{{base_url}}/clients?page=1&limit=10", "host": ["{{base_url}}"], "path": ["clients"], "query": [{"key": "page", "value": "1"}, {"key": "limit", "value": "10"}]}
+					}
+				},
+				{
+					"name": "Get Client",
+					"request": {
+						"method": "GET",
+						"url": {"raw": "{{base_url}}/clients/1", "host": ["{{base_url}}"], "path": ["clients", "1"]}
+					}
+				},
+				{
+					"name": "Update Client",
+					"request": {
+						"method": "PUT",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"phone\": \"0987654321\"\n}"
+						},
+						"url": {"raw": "{{base_url}}/clients/1", "host": ["{{base_url}}"], "path": ["clients", "1"]}
+					}
+				},
+				{
+					"name": "Delete Client",
+					"request": {
+						"method": "DELETE",
+						"url": {"raw": "{{base_url}}/clients/1", "host": ["{{base_url}}"], "path": ["clients", "1"]}
+					}
+				}
+			]
+		},
+		{
+			"name": "Trips",
+			"item": [
+				{
+					"name": "Create Trip",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"startDate\": \"2025-12-01\",\n  \"endDate\": \"2025-12-10\",\n  \"status\": \"planned\"\n}"
+						},
+						"url": {"raw": "{{base_url}}/trips", "host": ["{{base_url}}"], "path": ["trips"]}
+					}
+				},
+				{
+					"name": "Get All Trips",
+					"request": {
+						"method": "GET",
+						"url": {"raw": "{{base_url}}/trips?page=1&limit=10", "host": ["{{base_url}}"], "path": ["trips"], "query": [{"key": "page", "value": "1"}, {"key": "limit", "value": "10"}]}
+					}
+				},
+				{
+					"name": "Get Trip",
+					"request": {
+						"method": "GET",
+						"url": {"raw": "{{base_url}}/trips/1", "host": ["{{base_url}}"], "path": ["trips", "1"]}
+					}
+				},
+				{
+					"name": "Update Trip",
+					"request": {
+						"method": "PUT",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"confirmed\"\n}"
+						},
+						"url": {"raw": "{{base_url}}/trips/1", "host": ["{{base_url}}"], "path": ["trips", "1"]}
+					}
+				},
+				{
+					"name": "Delete Trip",
+					"request": {
+						"method": "DELETE",
+						"url": {"raw": "{{base_url}}/trips/1", "host": ["{{base_url}}"], "path": ["trips", "1"]}
+					}
+				}
+			]
+		},
+		{
+			"name": "Plans",
+			"item": [
+				{
+					"name": "Create Plan",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Beach Tour\",\n  \"description\": \"Relaxing beach vacation\"\n}"
+						},
+						"url": {"raw": "{{base_url}}/plans", "host": ["{{base_url}}"], "path": ["plans"]}
+					}
+				},
+				{
+					"name": "Get All Plans",
+					"request": {
+						"method": "GET",
+						"url": {"raw": "{{base_url}}/plans?page=1&limit=10", "host": ["{{base_url}}"], "path": ["plans"], "query": [{"key": "page", "value": "1"}, {"key": "limit", "value": "10"}]}
+					}
+				},
+				{
+					"name": "Get Plan",
+					"request": {
+						"method": "GET",
+						"url": {"raw": "{{base_url}}/plans/1", "host": ["{{base_url}}"], "path": ["plans", "1"]}
+					}
+				},
+				{
+					"name": "Update Plan",
+					"request": {
+						"method": "PUT",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"description\": \"Updated description\"\n}"
+						},
+						"url": {"raw": "{{base_url}}/plans/1", "host": ["{{base_url}}"], "path": ["plans", "1"]}
+					}
+				},
+				{
+					"name": "Delete Plan",
+					"request": {
+						"method": "DELETE",
+						"url": {"raw": "{{base_url}}/plans/1", "host": ["{{base_url}}"], "path": ["plans", "1"]}
+					}
+				}
+			]
+		},
+		{
+			"name": "Vehicles",
+			"item": [
+				{
+					"name": "Create Vehicle",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"licensePlate\": \"ABC123\",\n  \"model\": \"Toyota Corolla\",\n  \"capacity\": 5\n}"
+						},
+						"url": {"raw": "{{base_url}}/vehicles", "host": ["{{base_url}}"], "path": ["vehicles"]}
+					}
+				},
+				{
+					"name": "Get All Vehicles",
+					"request": {
+						"method": "GET",
+						"url": {"raw": "{{base_url}}/vehicles?page=1&limit=10", "host": ["{{base_url}}"], "path": ["vehicles"], "query": [{"key": "page", "value": "1"}, {"key": "limit", "value": "10"}]}
+					}
+				},
+				{
+					"name": "Get Vehicle",
+					"request": {
+						"method": "GET",
+						"url": {"raw": "{{base_url}}/vehicles/1", "host": ["{{base_url}}"], "path": ["vehicles", "1"]}
+					}
+				},
+				{
+					"name": "Update Vehicle",
+					"request": {
+						"method": "PUT",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"capacity\": 6\n}"
+						},
+						"url": {"raw": "{{base_url}}/vehicles/1", "host": ["{{base_url}}"], "path": ["vehicles", "1"]}
+					}
+				},
+				{
+					"name": "Delete Vehicle",
+					"request": {
+						"method": "DELETE",
+						"url": {"raw": "{{base_url}}/vehicles/1", "host": ["{{base_url}}"], "path": ["vehicles", "1"]}
+					}
+				}
+			]
+		},
+		{
+			"name": "Airlines",
+			"item": [
+				{
+					"name": "Create Airline",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Avianca\",\n  \"code\": \"AV\"\n}"
+						},
+						"url": {"raw": "{{base_url}}/airlines", "host": ["{{base_url}}"], "path": ["airlines"]}
+					}
+				},
+				{
+					"name": "Get All Airlines",
+					"request": {
+						"method": "GET",
+						"url": {"raw": "{{base_url}}/airlines?page=1&limit=10", "host": ["{{base_url}}"], "path": ["airlines"], "query": [{"key": "page", "value": "1"}, {"key": "limit", "value": "10"}]}
+					}
+				},
+				{
+					"name": "Get Airline",
+					"request": {
+						"method": "GET",
+						"url": {"raw": "{{base_url}}/airlines/1", "host": ["{{base_url}}"], "path": ["airlines", "1"]}
+					}
+				},
+				{
+					"name": "Update Airline",
+					"request": {
+						"method": "PUT",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Avianca Airlines\"\n}"
+						},
+						"url": {"raw": "{{base_url}}/airlines/1", "host": ["{{base_url}}"], "path": ["airlines", "1"]}
+					}
+				},
+				{
+					"name": "Delete Airline",
+					"request": {
+						"method": "DELETE",
+						"url": {"raw": "{{base_url}}/airlines/1", "host": ["{{base_url}}"], "path": ["airlines", "1"]}
+					}
+				}
+			]
+		},
+		{
+			"name": "Aircrafts",
+			"item": [
+				{
+					"name": "Create Aircraft",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"airlineId\": 1,\n  \"model\": \"Boeing 737\",\n  \"capacity\": 180\n}"
+						},
+						"url": {"raw": "{{base_url}}/aircrafts", "host": ["{{base_url}}"], "path": ["aircrafts"]}
+					}
+				},
+				{
+					"name": "Get All Aircrafts",
+					"request": {
+						"method": "GET",
+						"url": {"raw": "{{base_url}}/aircrafts?page=1&limit=10", "host": ["{{base_url}}"], "path": ["aircrafts"], "query": [{"key": "page", "value": "1"}, {"key": "limit", "value": "10"}]}
+					}
+				},
+				{
+					"name": "Get Aircraft",
+					"request": {
+						"method": "GET",
+						"url": {"raw": "{{base_url}}/aircrafts/1", "host": ["{{base_url}}"], "path": ["aircrafts", "1"]}
+					}
+				},
+				{
+					"name": "Update Aircraft",
+					"request": {
+						"method": "PUT",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"capacity\": 200\n}"
+						},
+						"url": {"raw": "{{base_url}}/aircrafts/1", "host": ["{{base_url}}"], "path": ["aircrafts", "1"]}
+					}
+				},
+				{
+					"name": "Delete Aircraft",
+					"request": {
+						"method": "DELETE",
+						"url": {"raw": "{{base_url}}/aircrafts/1", "host": ["{{base_url}}"], "path": ["aircrafts", "1"]}
+					}
+				}
+			]
+		},
+		{
+			"name": "Cars",
+			"item": [
+				{
+					"name": "Create Car",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"vehicleId\": 1,\n  \"hotelId\": 1,\n  \"type\": \"sedan\"\n}"
+						},
+						"url": {"raw": "{{base_url}}/cars", "host": ["{{base_url}}"], "path": ["cars"]}
+					}
+				},
+				{
+					"name": "Get All Cars",
+					"request": {
+						"method": "GET",
+						"url": {"raw": "{{base_url}}/cars?page=1&limit=10", "host": ["{{base_url}}"], "path": ["cars"], "query": [{"key": "page", "value": "1"}, {"key": "limit", "value": "10"}]}
+					}
+				},
+				{
+					"name": "Get Car",
+					"request": {
+						"method": "GET",
+						"url": {"raw": "{{base_url}}/cars/1", "host": ["{{base_url}}"], "path": ["cars", "1"]}
+					}
+				},
+				{
+					"name": "Update Car",
+					"request": {
+						"method": "PUT",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"type\": \"suv\"\n}"
+						},
+						"url": {"raw": "{{base_url}}/cars/1", "host": ["{{base_url}}"], "path": ["cars", "1"]}
+					}
+				},
+				{
+					"name": "Delete Car",
+					"request": {
+						"method": "DELETE",
+						"url": {"raw": "{{base_url}}/cars/1", "host": ["{{base_url}}"], "path": ["cars", "1"]}
+					}
+				}
+			]
+		},
+		{
+			"name": "GPS",
+			"item": [
+				{
+					"name": "Create GPS",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"vehicleId\": 1,\n  \"latitude\": 4.6097,\n  \"longitude\": -74.0817\n}"
+						},
+						"url": {"raw": "{{base_url}}/gps", "host": ["{{base_url}}"], "path": ["gps"]}
+					}
+				},
+				{
+					"name": "Get All GPS",
+					"request": {
+						"method": "GET",
+						"url": {"raw": "{{base_url}}/gps?page=1&limit=10", "host": ["{{base_url}}"], "path": ["gps"], "query": [{"key": "page", "value": "1"}, {"key": "limit", "value": "10"}]}
+					}
+				},
+				{
+					"name": "Get GPS",
+					"request": {
+						"method": "GET",
+						"url": {"raw": "{{base_url}}/gps/1", "host": ["{{base_url}}"], "path": ["gps", "1"]}
+					}
+				},
+				{
+					"name": "Update GPS",
+					"request": {
+						"method": "PUT",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"latitude\": 4.6098\n}"
+						},
+						"url": {"raw": "{{base_url}}/gps/1", "host": ["{{base_url}}"], "path": ["gps", "1"]}
+					}
+				},
+				{
+					"name": "Delete GPS",
+					"request": {
+						"method": "DELETE",
+						"url": {"raw": "{{base_url}}/gps/1", "host": ["{{base_url}}"], "path": ["gps", "1"]}
+					}
+				}
+			]
+		},
+		{
+			"name": "Journeys",
+			"item": [
+				{
+					"name": "Create Journey",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"originMunicipalityId\": 1,\n  \"destinationMunicipalityId\": 2,\n  \"distance\": 500\n}"
+						},
+						"url": {"raw": "{{base_url}}/journeys", "host": ["{{base_url}}"], "path": ["journeys"]}
+					}
+				},
+				{
+					"name": "Get All Journeys",
+					"request": {
+						"method": "GET",
+						"url": {"raw": "{{base_url}}/journeys?page=1&limit=10", "host": ["{{base_url}}"], "path": ["journeys"], "query": [{"key": "page", "value": "1"}, {"key": "limit", "value": "10"}]}
+					}
+				},
+				{
+					"name": "Get Journey",
+					"request": {
+						"method": "GET",
+						"url": {"raw": "{{base_url}}/journeys/1", "host": ["{{base_url}}"], "path": ["journeys", "1"]}
+					}
+				},
+				{
+					"name": "Update Journey",
+					"request": {
+						"method": "PUT",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"distance\": 520\n}"
+						},
+						"url": {"raw": "{{base_url}}/journeys/1", "host": ["{{base_url}}"], "path": ["journeys", "1"]}
+					}
+				},
+				{
+					"name": "Delete Journey",
+					"request": {
+						"method": "DELETE",
+						"url": {"raw": "{{base_url}}/journeys/1", "host": ["{{base_url}}"], "path": ["journeys", "1"]}
+					}
+				}
+			]
+		},
+		{
+			"name": "Transportation Services",
+			"item": [
+				{
+					"name": "Create Transportation Service",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"journeyId\": 1,\n  \"vehicleId\": 1,\n  \"startDate\": \"2025-12-01\",\n  \"endDate\": \"2025-12-02\",\n  \"cost\": 100\n}"
+						},
+						"url": {"raw": "{{base_url}}/transportation-services", "host": ["{{base_url}}"], "path": ["transportation-services"]}
+					}
+				},
+				{
+					"name": "Get All Transportation Services",
+					"request": {
+						"method": "GET",
+						"url": {"raw": "{{base_url}}/transportation-services?page=1&limit=10", "host": ["{{base_url}}"], "path": ["transportation-services"], "query": [{"key": "page", "value": "1"}, {"key": "limit", "value": "10"}]}
+					}
+				},
+				{
+					"name": "Get Transportation Service",
+					"request": {
+						"method": "GET",
+						"url": {"raw": "{{base_url}}/transportation-services/1", "host": ["{{base_url}}"], "path": ["transportation-services", "1"]}
+					}
+				},
+				{
+					"name": "Update Transportation Service",
+					"request": {
+						"method": "PUT",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"cost\": 120\n}"
+						},
+						"url": {"raw": "{{base_url}}/transportation-services/1", "host": ["{{base_url}}"], "path": ["transportation-services", "1"]}
+					}
+				},
+				{
+					"name": "Delete Transportation Service",
+					"request": {
+						"method": "DELETE",
+						"url": {"raw": "{{base_url}}/transportation-services/1", "host": ["{{base_url}}"], "path": ["transportation-services", "1"]}
+					}
+				}
+			]
+		},
+		{
+			"name": "Transport Itineraries",
+			"item": [
+				{
+					"name": "Create Transport Itinerary",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"tripId\": 1,\n  \"journeyId\": 1,\n  \"sequence\": 1\n}"
+						},
+						"url": {"raw": "{{base_url}}/transport-itineraries", "host": ["{{base_url}}"], "path": ["transport-itineraries"]}
+					}
+				},
+				{
+					"name": "Get All Transport Itineraries",
+					"request": {
+						"method": "GET",
+						"url": {"raw": "{{base_url}}/transport-itineraries?page=1&limit=10", "host": ["{{base_url}}"], "path": ["transport-itineraries"], "query": [{"key": "page", "value": "1"}, {"key": "limit", "value": "10"}]}
+					}
+				},
+				{
+					"name": "Get Transport Itinerary",
+					"request": {
+						"method": "GET",
+						"url": {"raw": "{{base_url}}/transport-itineraries/1", "host": ["{{base_url}}"], "path": ["transport-itineraries", "1"]}
+					}
+				},
+				{
+					"name": "Update Transport Itinerary",
+					"request": {
+						"method": "PUT",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"sequence\": 2\n}"
+						},
+						"url": {"raw": "{{base_url}}/transport-itineraries/1", "host": ["{{base_url}}"], "path": ["transport-itineraries", "1"]}
+					}
+				},
+				{
+					"name": "Delete Transport Itinerary",
+					"request": {
+						"method": "DELETE",
+						"url": {"raw": "{{base_url}}/transport-itineraries/1", "host": ["{{base_url}}"], "path": ["transport-itineraries", "1"]}
+					}
+				}
+			]
+		},
+		{
+			"name": "Hotel Admins",
+			"item": [
+				{
+					"name": "Create Hotel Admin",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Jane Smith\",\n  \"email\": \"jane@hotel.com\"\n}"
+						},
+						"url": {"raw": "{{base_url}}/hotel-admins", "host": ["{{base_url}}"], "path": ["hotel-admins"]}
+					}
+				},
+				{
+					"name": "Get All Hotel Admins",
+					"request": {
+						"method": "GET",
+						"url": {"raw": "{{base_url}}/hotel-admins?page=1&limit=10", "host": ["{{base_url}}"], "path": ["hotel-admins"], "query": [{"key": "page", "value": "1"}, {"key": "limit", "value": "10"}]}
+					}
+				},
+				{
+					"name": "Get Hotel Admin",
+					"request": {
+						"method": "GET",
+						"url": {"raw": "{{base_url}}/hotel-admins/1", "host": ["{{base_url}}"], "path": ["hotel-admins", "1"]}
+					}
+				},
+				{
+					"name": "Update Hotel Admin",
+					"request": {
+						"method": "PUT",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"jane.smith@hotel.com\"\n}"
+						},
+						"url": {"raw": "{{base_url}}/hotel-admins/1", "host": ["{{base_url}}"], "path": ["hotel-admins", "1"]}
+					}
+				},
+				{
+					"name": "Delete Hotel Admin",
+					"request": {
+						"method": "DELETE",
+						"url": {"raw": "{{base_url}}/hotel-admins/1", "host": ["{{base_url}}"], "path": ["hotel-admins", "1"]}
+					}
+				}
+			]
+		},
+		{
+			"name": "Hotels",
+			"item": [
+				{
+					"name": "Create Hotel",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"hotelAdminId\": 1,\n  \"municipalityId\": 1,\n  \"name\": \"Grand Hotel\",\n  \"address\": \"123 Main St\"\n}"
+						},
+						"url": {"raw": "{{base_url}}/hotels", "host": ["{{base_url}}"], "path": ["hotels"]}
+					}
+				},
+				{
+					"name": "Get All Hotels",
+					"request": {
+						"method": "GET",
+						"url": {"raw": "{{base_url}}/hotels?page=1&limit=10", "host": ["{{base_url}}"], "path": ["hotels"], "query": [{"key": "page", "value": "1"}, {"key": "limit", "value": "10"}]}
+					}
+				},
+				{
+					"name": "Get Hotel",
+					"request": {
+						"method": "GET",
+						"url": {"raw": "{{base_url}}/hotels/1", "host": ["{{base_url}}"], "path": ["hotels", "1"]}
+					}
+				},
+				{
+					"name": "Update Hotel",
+					"request": {
+						"method": "PUT",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Grand Luxury Hotel\"\n}"
+						},
+						"url": {"raw": "{{base_url}}/hotels/1", "host": ["{{base_url}}"], "path": ["hotels", "1"]}
+					}
+				},
+				{
+					"name": "Delete Hotel",
+					"request": {
+						"method": "DELETE",
+						"url": {"raw": "{{base_url}}/hotels/1", "host": ["{{base_url}}"], "path": ["hotels", "1"]}
+					}
+				}
+			]
+		},
+		{
+			"name": "Rooms",
+			"item": [
+				{
+					"name": "Create Room",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"hotelId\": 1,\n  \"roomNumber\": \"101\",\n  \"type\": \"single\",\n  \"pricePerNight\": 100\n}"
+						},
+						"url": {"raw": "{{base_url}}/rooms", "host": ["{{base_url}}"], "path": ["rooms"]}
+					}
+				},
+				{
+					"name": "Get All Rooms",
+					"request": {
+						"method": "GET",
+						"url": {"raw": "{{base_url}}/rooms?page=1&limit=10", "host": ["{{base_url}}"], "path": ["rooms"], "query": [{"key": "page", "value": "1"}, {"key": "limit", "value": "10"}]}
+					}
+				},
+				{
+					"name": "Get Room",
+					"request": {
+						"method": "GET",
+						"url": {"raw": "{{base_url}}/rooms/1", "host": ["{{base_url}}"], "path": ["rooms", "1"]}
+					}
+				},
+				{
+					"name": "Update Room",
+					"request": {
+						"method": "PUT",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"pricePerNight\": 120\n}"
+						},
+						"url": {"raw": "{{base_url}}/rooms/1", "host": ["{{base_url}}"], "path": ["rooms", "1"]}
+					}
+				},
+				{
+					"name": "Delete Room",
+					"request": {
+						"method": "DELETE",
+						"url": {"raw": "{{base_url}}/rooms/1", "host": ["{{base_url}}"], "path": ["rooms", "1"]}
+					}
+				}
+			]
+		},
+		{
+			"name": "Bookings",
+			"item": [
+				{
+					"name": "Create Booking",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"roomId\": 1,\n  \"tripId\": 1,\n  \"checkInDate\": \"2025-12-01\",\n  \"checkOutDate\": \"2025-12-05\"\n}"
+						},
+						"url": {"raw": "{{base_url}}/bookings", "host": ["{{base_url}}"], "path": ["bookings"]}
+					}
+				},
+				{
+					"name": "Get All Bookings",
+					"request": {
+						"method": "GET",
+						"url": {"raw": "{{base_url}}/bookings?page=1&limit=10", "host": ["{{base_url}}"], "path": ["bookings"], "query": [{"key": "page", "value": "1"}, {"key": "limit", "value": "10"}]}
+					}
+				},
+				{
+					"name": "Get Booking",
+					"request": {
+						"method": "GET",
+						"url": {"raw": "{{base_url}}/bookings/1", "host": ["{{base_url}}"], "path": ["bookings", "1"]}
+					}
+				},
+				{
+					"name": "Update Booking",
+					"request": {
+						"method": "PUT",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"checkOutDate\": \"2025-12-06\"\n}"
+						},
+						"url": {"raw": "{{base_url}}/bookings/1", "host": ["{{base_url}}"], "path": ["bookings", "1"]}
+					}
+				},
+				{
+					"name": "Delete Booking",
+					"request": {
+						"method": "DELETE",
+						"url": {"raw": "{{base_url}}/bookings/1", "host": ["{{base_url}}"], "path": ["bookings", "1"]}
+					}
+				}
+			]
+		},
+		{
+			"name": "Guides",
+			"item": [
+				{
+					"name": "Create Guide",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Carlos Rodriguez\",\n  \"email\": \"carlos@guide.com\",\n  \"languages\": \"English, Spanish\"\n}"
+						},
+						"url": {"raw": "{{base_url}}/guides", "host": ["{{base_url}}"], "path": ["guides"]}
+					}
+				},
+				{
+					"name": "Get All Guides",
+					"request": {
+						"method": "GET",
+						"url": {"raw": "{{base_url}}/guides?page=1&limit=10", "host": ["{{base_url}}"], "path": ["guides"], "query": [{"key": "page", "value": "1"}, {"key": "limit", "value": "10"}]}
+					}
+				},
+				{
+					"name": "Get Guide",
+					"request": {
+						"method": "GET",
+						"url": {"raw": "{{base_url}}/guides/1", "host": ["{{base_url}}"], "path": ["guides", "1"]}
+					}
+				},
+				{
+					"name": "Update Guide",
+					"request": {
+						"method": "PUT",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"languages\": \"English, Spanish, French\"\n}"
+						},
+						"url": {"raw": "{{base_url}}/guides/1", "host": ["{{base_url}}"], "path": ["guides", "1"]}
+					}
+				},
+				{
+					"name": "Delete Guide",
+					"request": {
+						"method": "DELETE",
+						"url": {"raw": "{{base_url}}/guides/1", "host": ["{{base_url}}"], "path": ["guides", "1"]}
+					}
+				}
+			]
+		},
+		{
+			"name": "Tourist Activities",
+			"item": [
+				{
+					"name": "Create Tourist Activity",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"municipalityId\": 1,\n  \"name\": \"City Tour\",\n  \"description\": \"Historical city tour\"\n}"
+						},
+						"url": {"raw": "{{base_url}}/tourist-activities", "host": ["{{base_url}}"], "path": ["tourist-activities"]}
+					}
+				},
+				{
+					"name": "Get All Tourist Activities",
+					"request": {
+						"method": "GET",
+						"url": {"raw": "{{base_url}}/tourist-activities?page=1&limit=10", "host": ["{{base_url}}"], "path": ["tourist-activities"], "query": [{"key": "page", "value": "1"}, {"key": "limit", "value": "10"}]}
+					}
+				},
+				{
+					"name": "Get Tourist Activity",
+					"request": {
+						"method": "GET",
+						"url": {"raw": "{{base_url}}/tourist-activities/1", "host": ["{{base_url}}"], "path": ["tourist-activities", "1"]}
+					}
+				},
+				{
+					"name": "Update Tourist Activity",
+					"request": {
+						"method": "PUT",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"description\": \"Complete historical city tour\"\n}"
+						},
+						"url": {"raw": "{{base_url}}/tourist-activities/1", "host": ["{{base_url}}"], "path": ["tourist-activities", "1"]}
+					}
+				},
+				{
+					"name": "Delete Tourist Activity",
+					"request": {
+						"method": "DELETE",
+						"url": {"raw": "{{base_url}}/tourist-activities/1", "host": ["{{base_url}}"], "path": ["tourist-activities", "1"]}
+					}
+				}
+			]
+		},
+		{
+			"name": "Guide Activities",
+			"item": [
+				{
+					"name": "Create Guide Activity",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"guideId\": 1,\n  \"touristActivityId\": 1,\n  \"date\": \"2025-12-01\"\n}"
+						},
+						"url": {"raw": "{{base_url}}/guide-activities", "host": ["{{base_url}}"], "path": ["guide-activities"]}
+					}
+				},
+				{
+					"name": "Get All Guide Activities",
+					"request": {
+						"method": "GET",
+						"url": {"raw": "{{base_url}}/guide-activities?page=1&limit=10", "host": ["{{base_url}}"], "path": ["guide-activities"], "query": [{"key": "page", "value": "1"}, {"key": "limit", "value": "10"}]}
+					}
+				},
+				{
+					"name": "Get Guide Activity",
+					"request": {
+						"method": "GET",
+						"url": {"raw": "{{base_url}}/guide-activities/1", "host": ["{{base_url}}"], "path": ["guide-activities", "1"]}
+					}
+				},
+				{
+					"name": "Update Guide Activity",
+					"request": {
+						"method": "PUT",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"date\": \"2025-12-02\"\n}"
+						},
+						"url": {"raw": "{{base_url}}/guide-activities/1", "host": ["{{base_url}}"], "path": ["guide-activities", "1"]}
+					}
+				},
+				{
+					"name": "Delete Guide Activity",
+					"request": {
+						"method": "DELETE",
+						"url": {"raw": "{{base_url}}/guide-activities/1", "host": ["{{base_url}}"], "path": ["guide-activities", "1"]}
+					}
+				}
+			]
+		},
+		{
+			"name": "Plan Activities",
+			"item": [
+				{
+					"name": "Create Plan Activity",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"planId\": 1,\n  \"touristActivityId\": 1,\n  \"sequence\": 1\n}"
+						},
+						"url": {"raw": "{{base_url}}/plan-activities", "host": ["{{base_url}}"], "path": ["plan-activities"]}
+					}
+				},
+				{
+					"name": "Get All Plan Activities",
+					"request": {
+						"method": "GET",
+						"url": {"raw": "{{base_url}}/plan-activities?page=1&limit=10", "host": ["{{base_url}}"], "path": ["plan-activities"], "query": [{"key": "page", "value": "1"}, {"key": "limit", "value": "10"}]}
+					}
+				},
+				{
+					"name": "Get Plan Activity",
+					"request": {
+						"method": "GET",
+						"url": {"raw": "{{base_url}}/plan-activities/1", "host": ["{{base_url}}"], "path": ["plan-activities", "1"]}
+					}
+				},
+				{
+					"name": "Update Plan Activity",
+					"request": {
+						"method": "PUT",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"sequence\": 2\n}"
+						},
+						"url": {"raw": "{{base_url}}/plan-activities/1", "host": ["{{base_url}}"], "path": ["plan-activities", "1"]}
+					}
+				},
+				{
+					"name": "Delete Plan Activity",
+					"request": {
+						"method": "DELETE",
+						"url": {"raw": "{{base_url}}/plan-activities/1", "host": ["{{base_url}}"], "path": ["plan-activities", "1"]}
+					}
+				}
+			]
+		},
+		{
+			"name": "Bank Cards",
+			"item": [
+				{
+					"name": "Create Bank Card",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"clientId\": 1,\n  \"cardNumber\": \"4111111111111111\",\n  \"cvv\": \"123\",\n  \"expirationDate\": \"2027-12-31\",\n  \"cardHolderName\": \"John Doe\"\n}"
+						},
+						"url": {"raw": "{{base_url}}/bank-cards", "host": ["{{base_url}}"], "path": ["bank-cards"]}
+					}
+				},
+				{
+					"name": "Get All Bank Cards",
+					"request": {
+						"method": "GET",
+						"url": {"raw": "{{base_url}}/bank-cards?page=1&limit=10", "host": ["{{base_url}}"], "path": ["bank-cards"], "query": [{"key": "page", "value": "1"}, {"key": "limit", "value": "10"}]}
+					}
+				},
+				{
+					"name": "Get Bank Card",
+					"request": {
+						"method": "GET",
+						"url": {"raw": "{{base_url}}/bank-cards/1", "host": ["{{base_url}}"], "path": ["bank-cards", "1"]}
+					}
+				},
+				{
+					"name": "Update Bank Card",
+					"request": {
+						"method": "PUT",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"expirationDate\": \"2028-12-31\"\n}"
+						},
+						"url": {"raw": "{{base_url}}/bank-cards/1", "host": ["{{base_url}}"], "path": ["bank-cards", "1"]}
+					}
+				},
+				{
+					"name": "Delete Bank Card",
+					"request": {
+						"method": "DELETE",
+						"url": {"raw": "{{base_url}}/bank-cards/1", "host": ["{{base_url}}"], "path": ["bank-cards", "1"]}
+					}
+				}
+			]
+		},
+		{
+			"name": "Fees",
+			"item": [
+				{
+					"name": "Create Fee",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"tripId\": 1,\n  \"amount\": 500,\n  \"description\": \"Trip fee\"\n}"
+						},
+						"url": {"raw": "{{base_url}}/fees", "host": ["{{base_url}}"], "path": ["fees"]}
+					}
+				},
+				{
+					"name": "Get All Fees",
+					"request": {
+						"method": "GET",
+						"url": {"raw": "{{base_url}}/fees?page=1&limit=10", "host": ["{{base_url}}"], "path": ["fees"], "query": [{"key": "page", "value": "1"}, {"key": "limit", "value": "10"}]}
+					}
+				},
+				{
+					"name": "Get Fee",
+					"request": {
+						"method": "GET",
+						"url": {"raw": "{{base_url}}/fees/1", "host": ["{{base_url}}"], "path": ["fees", "1"]}
+					}
+				},
+				{
+					"name": "Update Fee",
+					"request": {
+						"method": "PUT",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"amount\": 550\n}"
+						},
+						"url": {"raw": "{{base_url}}/fees/1", "host": ["{{base_url}}"], "path": ["fees", "1"]}
+					}
+				},
+				{
+					"name": "Delete Fee",
+					"request": {
+						"method": "DELETE",
+						"url": {"raw": "{{base_url}}/fees/1", "host": ["{{base_url}}"], "path": ["fees", "1"]}
+					}
+				}
+			]
+		},
+		{
+			"name": "Invoices",
+			"item": [
+				{
+					"name": "Create Invoice",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"feeId\": 1,\n  \"invoiceNumber\": \"INV-001\",\n  \"totalAmount\": 500,\n  \"issueDate\": \"2025-11-17\",\n  \"paymentMethod\": \"credit_card\"\n}"
+						},
+						"url": {"raw": "{{base_url}}/invoices", "host": ["{{base_url}}"], "path": ["invoices"]}
+					}
+				},
+				{
+					"name": "Get All Invoices",
+					"request": {
+						"method": "GET",
+						"url": {"raw": "{{base_url}}/invoices?page=1&limit=10", "host": ["{{base_url}}"], "path": ["invoices"], "query": [{"key": "page", "value": "1"}, {"key": "limit", "value": "10"}]}
+					}
+				},
+				{
+					"name": "Get Invoice",
+					"request": {
+						"method": "GET",
+						"url": {"raw": "{{base_url}}/invoices/1", "host": ["{{base_url}}"], "path": ["invoices", "1"]}
+					}
+				},
+				{
+					"name": "Update Invoice",
+					"request": {
+						"method": "PUT",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"paymentDate\": \"2025-11-18\"\n}"
+						},
+						"url": {"raw": "{{base_url}}/invoices/1", "host": ["{{base_url}}"], "path": ["invoices", "1"]}
+					}
+				},
+				{
+					"name": "Delete Invoice",
+					"request": {
+						"method": "DELETE",
+						"url": {"raw": "{{base_url}}/invoices/1", "host": ["{{base_url}}"], "path": ["invoices", "1"]}
+					}
+				}
+			]
+		},
+		{
+			"name": "Trip Clients",
+			"item": [
+				{
+					"name": "Create Trip Client",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"tripId\": 1,\n  \"clientId\": 1\n}"
+						},
+						"url": {"raw": "{{base_url}}/trip-clients", "host": ["{{base_url}}"], "path": ["trip-clients"]}
+					}
+				},
+				{
+					"name": "Get All Trip Clients",
+					"request": {
+						"method": "GET",
+						"url": {"raw": "{{base_url}}/trip-clients?page=1&limit=10", "host": ["{{base_url}}"], "path": ["trip-clients"], "query": [{"key": "page", "value": "1"}, {"key": "limit", "value": "10"}]}
+					}
+				},
+				{
+					"name": "Get Trip Client",
+					"request": {
+						"method": "GET",
+						"url": {"raw": "{{base_url}}/trip-clients/1", "host": ["{{base_url}}"], "path": ["trip-clients", "1"]}
+					}
+				},
+				{
+					"name": "Update Trip Client",
+					"request": {
+						"method": "PUT",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"clientId\": 2\n}"
+						},
+						"url": {"raw": "{{base_url}}/trip-clients/1", "host": ["{{base_url}}"], "path": ["trip-clients", "1"]}
+					}
+				},
+				{
+					"name": "Delete Trip Client",
+					"request": {
+						"method": "DELETE",
+						"url": {"raw": "{{base_url}}/trip-clients/1", "host": ["{{base_url}}"], "path": ["trip-clients", "1"]}
+					}
+				}
+			]
+		},
+		{
+			"name": "Trip Plans",
+			"item": [
+				{
+					"name": "Create Trip Plan",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"tripId\": 1,\n  \"planId\": 1\n}"
+						},
+						"url": {"raw": "{{base_url}}/trip-plans", "host": ["{{base_url}}"], "path": ["trip-plans"]}
+					}
+				},
+				{
+					"name": "Get All Trip Plans",
+					"request": {
+						"method": "GET",
+						"url": {"raw": "{{base_url}}/trip-plans?page=1&limit=10", "host": ["{{base_url}}"], "path": ["trip-plans"], "query": [{"key": "page", "value": "1"}, {"key": "limit", "value": "10"}]}
+					}
+				},
+				{
+					"name": "Get Trip Plan",
+					"request": {
+						"method": "GET",
+						"url": {"raw": "{{base_url}}/trip-plans/1", "host": ["{{base_url}}"], "path": ["trip-plans", "1"]}
+					}
+				},
+				{
+					"name": "Update Trip Plan",
+					"request": {
+						"method": "PUT",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"planId\": 2\n}"
+						},
+						"url": {"raw": "{{base_url}}/trip-plans/1", "host": ["{{base_url}}"], "path": ["trip-plans", "1"]}
+					}
+				},
+				{
+					"name": "Delete Trip Plan",
+					"request": {
+						"method": "DELETE",
+						"url": {"raw": "{{base_url}}/trip-plans/1", "host": ["{{base_url}}"], "path": ["trip-plans", "1"]}
+					}
+				}
+			]
+		}
+	]
+}
+

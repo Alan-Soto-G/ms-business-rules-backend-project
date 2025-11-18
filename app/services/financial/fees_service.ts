@@ -1,52 +1,88 @@
 import Fee from '#models/financial/fee'
+import { ModelPaginatorContract } from '@adonisjs/lucid/types/model'
+import { DateTime } from 'luxon'
 
-// Fees Service
 export default class FeesService {
   /**
    * Get all fees with optional pagination
-   * @param page - Page number (optional, if not provided returns all records)
-   * @param perPage - Items per page (default: 10)
    */
-  async findAll(page?: number, perPage: number = 10) {
-    const query = Fee.query().preload('trip').preload('invoice')
+  async getAllFees(
+    page?: number,
+    limit?: number
+  ): Promise<Fee[] | ModelPaginatorContract<Fee>> {
+    const query = Fee.query().preload('trip').preload('invoice').orderBy('id', 'asc')
 
-    if (page !== undefined) {
-      return await query.paginate(page, perPage)
+    if (page && limit) {
+      return await query.paginate(page, limit)
     }
 
     return await query
   }
 
   /**
-   * Get a fee by ID
+   * Get fee by ID
    */
-  async findById(id: number) {
-    return await Fee.query().where('id', id).preload('trip').preload('invoice').firstOrFail()
+  async getFeeById(id: number): Promise<Fee | null> {
+    return await Fee.query().where('id', id).preload('trip').preload('invoice').first()
   }
 
   /**
-   * Create a new fee
+   * Create new fee
    */
-  async create(data: any) {
-    return await Fee.create(data)
+  async createFee(data: {
+    tripId: number
+    amount: number
+    description: string
+    dueDate: DateTime
+    status?: 'pending' | 'paid' | 'overdue' | 'cancelled' | 'refunded'
+  }): Promise<Fee> {
+    const fee = await Fee.create(data)
+
+    await fee.load('trip')
+    await fee.load('invoice')
+
+    return fee
   }
 
   /**
-   * Update a fee
+   * Update fee
    */
-  async update(id: number, data: any) {
-    const fee = await Fee.findOrFail(id)
+  async updateFee(
+    id: number,
+    data: {
+      tripId?: number
+      amount?: number
+      description?: string
+      dueDate?: DateTime
+      status?: 'pending' | 'paid' | 'overdue' | 'cancelled' | 'refunded'
+    }
+  ): Promise<Fee | null> {
+    const fee = await Fee.find(id)
+
+    if (!fee) {
+      return null
+    }
+
     fee.merge(data)
     await fee.save()
+
+    await fee.load('trip')
+    await fee.load('invoice')
+
     return fee
   }
 
   /**
-   * Delete a fee
+   * Delete fee
    */
-  async delete(id: number) {
-    const fee = await Fee.findOrFail(id)
+  async deleteFee(id: number): Promise<boolean> {
+    const fee = await Fee.find(id)
+
+    if (!fee) {
+      return false
+    }
+
     await fee.delete()
-    return fee
+    return true
   }
 }

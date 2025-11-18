@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import ClientsService from '#services/core/clients_service'
+import { createClientValidator, updateClientValidator } from '#validators/core/client'
 
 export default class ClientsController {
   private clientsService: ClientsService
@@ -9,71 +10,152 @@ export default class ClientsController {
   }
 
   /**
-   * Get all clients
    * GET /clients
+   * Get all clients with optional pagination
    */
-  public async index({ request, response }: HttpContext) {
+  async index({ request, response }: HttpContext) {
     try {
       const page = request.input('page')
-      const perPage = request.input('per_page', 10)
-      const clients = await this.clientsService.findAll(page, perPage)
-      return response.status(200).json(clients)
+      const limit = request.input('limit')
+
+      const clients = await this.clientsService.getAllClients(page, limit)
+
+      return response.ok({
+        message: 'Clients retrieved successfully',
+        data: clients,
+      })
     } catch (error) {
-      return response.status(500).json({ message: error.message })
+      return response.internalServerError({
+        message: 'Error retrieving clients',
+        error: error.message,
+      })
     }
   }
 
   /**
-   * Get a client by ID
    * GET /clients/:id
+   * Get client by ID
    */
-  public async show({ params, response }: HttpContext) {
+  async show({ params, response }: HttpContext) {
     try {
-      const client = await this.clientsService.findById(params.id)
-      return response.status(200).json(client)
+      const client = await this.clientsService.getClientById(params.id)
+
+      if (!client) {
+        return response.notFound({
+          message: 'Client not found',
+        })
+      }
+
+      return response.ok({
+        message: 'Client retrieved successfully',
+        data: client,
+      })
     } catch (error) {
-      return response.status(404).json({ message: error.message })
+      return response.internalServerError({
+        message: 'Error retrieving client',
+        error: error.message,
+      })
     }
   }
 
   /**
-   * Create a new client
    * POST /clients
+   * Create new client
    */
-  public async store({ request, response }: HttpContext) {
+  async store({ request, response }: HttpContext) {
     try {
-      const data = request.all()
-      const client = await this.clientsService.create(data)
-      return response.status(201).json(client)
+      const data = await request.validateUsing(createClientValidator)
+
+      const client = await this.clientsService.createClient(data)
+
+      return response.created({
+        message: 'Client created successfully',
+        data: client,
+      })
     } catch (error) {
-      return response.status(400).json({ message: error.message })
+      if (error.messages) {
+        return response.badRequest({
+          message: 'Validation error',
+          errors: error.messages,
+        })
+      }
+
+      if (error.code === '23505') {
+        return response.conflict({
+          message: 'User ID already exists',
+        })
+      }
+
+      return response.internalServerError({
+        message: 'Error creating client',
+        error: error.message,
+      })
     }
   }
 
   /**
-   * Update a client
-   * PUT /clients/:id
+   * PUT/PATCH /clients/:id
+   * Update client
    */
-  public async update({ params, request, response }: HttpContext) {
+  async update({ params, request, response }: HttpContext) {
     try {
-      const data = request.all()
-      const client = await this.clientsService.update(params.id, data)
-      return response.status(200).json(client)
+      const data = await request.validateUsing(updateClientValidator)
+
+      const client = await this.clientsService.updateClient(params.id, data)
+
+      if (!client) {
+        return response.notFound({
+          message: 'Client not found',
+        })
+      }
+
+      return response.ok({
+        message: 'Client updated successfully',
+        data: client,
+      })
     } catch (error) {
-      return response.status(404).json({ message: error.message })
+      if (error.messages) {
+        return response.badRequest({
+          message: 'Validation error',
+          errors: error.messages,
+        })
+      }
+
+      if (error.code === '23505') {
+        return response.conflict({
+          message: 'User ID already exists',
+        })
+      }
+
+      return response.internalServerError({
+        message: 'Error updating client',
+        error: error.message,
+      })
     }
   }
 
   /**
-   * Delete a client
    * DELETE /clients/:id
+   * Delete client
    */
-  public async destroy({ params, response }: HttpContext) {
+  async destroy({ params, response }: HttpContext) {
     try {
-      const client = await this.clientsService.delete(params.id)
-      return response.status(200).json(client)
+      const deleted = await this.clientsService.deleteClient(params.id)
+
+      if (!deleted) {
+        return response.notFound({
+          message: 'Client not found',
+        })
+      }
+
+      return response.ok({
+        message: 'Client deleted successfully',
+      })
     } catch (error) {
-      return response.status(404).json({ message: error.message })
+      return response.internalServerError({
+        message: 'Error deleting client',
+        error: error.message,
+      })
     }
   }
 }

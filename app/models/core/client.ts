@@ -10,7 +10,7 @@ export default class Client extends BaseModel {
 
   // Specific attributes of Client
   @column({ columnName: 'user_id' })
-  declare UserId: string // It comes from ms-security
+  declare userId: string // It comes from ms-security
 
   @column({ columnName: 'emergency_contact_name' })
   declare emergencyContactName: string | null

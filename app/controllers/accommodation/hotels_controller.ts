@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import HotelsService from '#services/accommodation/hotels_service'
+import { createHotelValidator, updateHotelValidator } from '#validators/accommodation/hotel'
 
 export default class HotelsController {
   private hotelsService: HotelsService
@@ -9,71 +10,153 @@ export default class HotelsController {
   }
 
   /**
-   * Get all hotels
    * GET /hotels
+   * Get all hotels with optional pagination
    */
-  public async index({ request, response }: HttpContext) {
+  async index({ request, response }: HttpContext) {
     try {
       const page = request.input('page')
-      const perPage = request.input('per_page', 10)
-      const hotels = await this.hotelsService.findAll(page, perPage)
-      return response.status(200).json(hotels)
+      const limit = request.input('limit')
+
+      const hotels = await this.hotelsService.getAllHotels(page, limit)
+
+      return response.ok({
+        message: 'Hotels retrieved successfully',
+        data: hotels,
+      })
     } catch (error) {
-      return response.status(500).json({ message: error.message })
+      return response.internalServerError({
+        message: 'Error retrieving hotels',
+        error: error.message,
+      })
     }
   }
 
   /**
-   * Get a hotel by ID
    * GET /hotels/:id
+   * Get hotel by ID
    */
-  public async show({ params, response }: HttpContext) {
+  async show({ params, response }: HttpContext) {
     try {
-      const hotel = await this.hotelsService.findById(params.id)
-      return response.status(200).json(hotel)
+      const hotel = await this.hotelsService.getHotelById(params.id)
+
+      if (!hotel) {
+        return response.notFound({
+          message: 'Hotel not found',
+        })
+      }
+
+      return response.ok({
+        message: 'Hotel retrieved successfully',
+        data: hotel,
+      })
     } catch (error) {
-      return response.status(404).json({ message: error.message })
+      return response.internalServerError({
+        message: 'Error retrieving hotel',
+        error: error.message,
+      })
     }
   }
 
   /**
-   * Create a new hotel
    * POST /hotels
+   * Create new hotel
    */
-  public async store({ request, response }: HttpContext) {
+  async store({ request, response }: HttpContext) {
     try {
-      const data = request.all()
-      const hotel = await this.hotelsService.create(data)
-      return response.status(201).json(hotel)
+      const data = await request.validateUsing(createHotelValidator)
+
+      const hotel = await this.hotelsService.createHotel(data)
+
+      return response.created({
+        message: 'Hotel created successfully',
+        data: hotel,
+      })
     } catch (error) {
-      return response.status(400).json({ message: error.message })
+      if (error.messages) {
+        return response.badRequest({
+          message: 'Validation error',
+          errors: error.messages,
+        })
+      }
+
+      if (error.code === '23505') {
+        return response.conflict({
+          message: 'Email or phone already exists',
+        })
+      }
+
+      return response.internalServerError({
+        message: 'Error creating hotel',
+        error: error.message,
+      })
     }
   }
 
   /**
-   * Update a hotel
-   * PUT /hotels/:id
+   * PUT/PATCH /hotels/:id
+   * Update hotel
    */
-  public async update({ params, request, response }: HttpContext) {
+  async update({ params, request, response }: HttpContext) {
     try {
-      const data = request.all()
-      const hotel = await this.hotelsService.update(params.id, data)
-      return response.status(200).json(hotel)
+      const data = await request.validateUsing(updateHotelValidator)
+
+      const hotel = await this.hotelsService.updateHotel(params.id, data)
+
+      if (!hotel) {
+        return response.notFound({
+          message: 'Hotel not found',
+        })
+      }
+
+      return response.ok({
+        message: 'Hotel updated successfully',
+        data: hotel,
+      })
     } catch (error) {
-      return response.status(404).json({ message: error.message })
+      if (error.messages) {
+        return response.badRequest({
+          message: 'Validation error',
+          errors: error.messages,
+        })
+      }
+
+      if (error.code === '23505') {
+        return response.conflict({
+          message: 'Email or phone already exists',
+        })
+      }
+
+      return response.internalServerError({
+        message: 'Error updating hotel',
+        error: error.message,
+      })
     }
   }
 
   /**
-   * Delete a hotel
    * DELETE /hotels/:id
+   * Delete hotel
    */
-  public async destroy({ params, response }: HttpContext) {
+  async destroy({ params, response }: HttpContext) {
     try {
-      const hotel = await this.hotelsService.delete(params.id)
-      return response.status(200).json(hotel)
+      const deleted = await this.hotelsService.deleteHotel(params.id)
+
+      if (!deleted) {
+        return response.notFound({
+          message: 'Hotel not found',
+        })
+      }
+
+      return response.ok({
+        message: 'Hotel deleted successfully',
+      })
     } catch (error) {
-      return response.status(404).json({ message: error.message })
+      return response.internalServerError({
+        message: 'Error deleting hotel',
+        error: error.message,
+      })
     }
   }
 }
+

@@ -26,7 +26,7 @@ export default class Room extends BaseModel {
   declare pricePerNight: number
 
   @column({ columnName: 'status' })
-  declare status: 'available' | 'occupied' | 'maintenance'
+  declare status: 'available' | 'occupied' | 'maintenance' | 'cleaning'
 
   // Relation N to 1 with Hotel
   @belongsTo(() => Hotel, {

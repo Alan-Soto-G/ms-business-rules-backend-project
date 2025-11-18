@@ -1,8 +1,6 @@
-// ============================================
-// CONTROLADOR: app/controllers/bank_cards_controller.ts
-// ============================================
 import type { HttpContext } from '@adonisjs/core/http'
 import BankCardsService from '#services/financial/bank_cards_service'
+import { createBankCardValidator, updateBankCardValidator } from '#validators/financial/bank_card'
 
 export default class BankCardsController {
   private bankCardsService: BankCardsService
@@ -12,71 +10,152 @@ export default class BankCardsController {
   }
 
   /**
-   * Get all bank cards
    * GET /bank-cards
+   * Get all bank cards with optional pagination
    */
-  public async index({ request, response }: HttpContext) {
+  async index({ request, response }: HttpContext) {
     try {
       const page = request.input('page')
-      const perPage = request.input('per_page', 10)
-      const bankCards = await this.bankCardsService.findAll(page, perPage)
-      return response.status(200).json(bankCards)
+      const limit = request.input('limit')
+
+      const bankCards = await this.bankCardsService.getAllBankCards(page, limit)
+
+      return response.ok({
+        message: 'Bank cards retrieved successfully',
+        data: bankCards,
+      })
     } catch (error) {
-      return response.status(500).json({ message: error.message })
+      return response.internalServerError({
+        message: 'Error retrieving bank cards',
+        error: error.message,
+      })
     }
   }
 
   /**
-   * Get a bank card by ID
    * GET /bank-cards/:id
+   * Get bank card by ID
    */
-  public async show({ params, response }: HttpContext) {
+  async show({ params, response }: HttpContext) {
     try {
-      const bankCard = await this.bankCardsService.findById(params.id)
-      return response.status(200).json(bankCard)
+      const bankCard = await this.bankCardsService.getBankCardById(params.id)
+
+      if (!bankCard) {
+        return response.notFound({
+          message: 'Bank card not found',
+        })
+      }
+
+      return response.ok({
+        message: 'Bank card retrieved successfully',
+        data: bankCard,
+      })
     } catch (error) {
-      return response.status(404).json({ message: error.message })
+      return response.internalServerError({
+        message: 'Error retrieving bank card',
+        error: error.message,
+      })
     }
   }
 
   /**
-   * Create a new bank card
    * POST /bank-cards
+   * Create new bank card
    */
-  public async store({ request, response }: HttpContext) {
+  async store({ request, response }: HttpContext) {
     try {
-      const data = request.all()
-      const bankCard = await this.bankCardsService.create(data)
-      return response.status(201).json(bankCard)
+      const data = await request.validateUsing(createBankCardValidator)
+
+      const bankCard = await this.bankCardsService.createBankCard(data)
+
+      return response.created({
+        message: 'Bank card created successfully',
+        data: bankCard,
+      })
     } catch (error) {
-      return response.status(400).json({ message: error.message })
+      if (error.messages) {
+        return response.badRequest({
+          message: 'Validation error',
+          errors: error.messages,
+        })
+      }
+
+      if (error.code === '23503') {
+        return response.notFound({
+          message: 'Client not found',
+        })
+      }
+
+      return response.internalServerError({
+        message: 'Error creating bank card',
+        error: error.message,
+      })
     }
   }
 
   /**
-   * Update a bank card
-   * PUT /bank-cards/:id
+   * PUT/PATCH /bank-cards/:id
+   * Update bank card
    */
-  public async update({ params, request, response }: HttpContext) {
+  async update({ params, request, response }: HttpContext) {
     try {
-      const data = request.all()
-      const bankCard = await this.bankCardsService.update(params.id, data)
-      return response.status(200).json(bankCard)
+      const data = await request.validateUsing(updateBankCardValidator)
+
+      const bankCard = await this.bankCardsService.updateBankCard(params.id, data)
+
+      if (!bankCard) {
+        return response.notFound({
+          message: 'Bank card not found',
+        })
+      }
+
+      return response.ok({
+        message: 'Bank card updated successfully',
+        data: bankCard,
+      })
     } catch (error) {
-      return response.status(404).json({ message: error.message })
+      if (error.messages) {
+        return response.badRequest({
+          message: 'Validation error',
+          errors: error.messages,
+        })
+      }
+
+      if (error.code === '23503') {
+        return response.notFound({
+          message: 'Client not found',
+        })
+      }
+
+      return response.internalServerError({
+        message: 'Error updating bank card',
+        error: error.message,
+      })
     }
   }
 
   /**
-   * Delete a bank card
    * DELETE /bank-cards/:id
+   * Delete bank card
    */
-  public async destroy({ params, response }: HttpContext) {
+  async destroy({ params, response }: HttpContext) {
     try {
-      const bankCard = await this.bankCardsService.delete(params.id)
-      return response.status(200).json(bankCard)
+      const deleted = await this.bankCardsService.deleteBankCard(params.id)
+
+      if (!deleted) {
+        return response.notFound({
+          message: 'Bank card not found',
+        })
+      }
+
+      return response.ok({
+        message: 'Bank card deleted successfully',
+      })
     } catch (error) {
-      return response.status(404).json({ message: error.message })
+      return response.internalServerError({
+        message: 'Error deleting bank card',
+        error: error.message,
+      })
     }
   }
 }

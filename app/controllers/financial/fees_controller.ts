@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import FeesService from '#services/financial/fees_service'
+import { createFeeValidator, updateFeeValidator } from '#validators/financial/fee'
 
 export default class FeesController {
   private feesService: FeesService
@@ -9,71 +10,152 @@ export default class FeesController {
   }
 
   /**
-   * Get all fees
    * GET /fees
+   * Get all fees with optional pagination
    */
-  public async index({ request, response }: HttpContext) {
+  async index({ request, response }: HttpContext) {
     try {
       const page = request.input('page')
-      const perPage = request.input('per_page', 10)
-      const fees = await this.feesService.findAll(page, perPage)
-      return response.status(200).json(fees)
+      const limit = request.input('limit')
+
+      const fees = await this.feesService.getAllFees(page, limit)
+
+      return response.ok({
+        message: 'Fees retrieved successfully',
+        data: fees,
+      })
     } catch (error) {
-      return response.status(500).json({ message: error.message })
+      return response.internalServerError({
+        message: 'Error retrieving fees',
+        error: error.message,
+      })
     }
   }
 
   /**
-   * Get a fee by ID
    * GET /fees/:id
+   * Get fee by ID
    */
-  public async show({ params, response }: HttpContext) {
+  async show({ params, response }: HttpContext) {
     try {
-      const fee = await this.feesService.findById(params.id)
-      return response.status(200).json(fee)
+      const fee = await this.feesService.getFeeById(params.id)
+
+      if (!fee) {
+        return response.notFound({
+          message: 'Fee not found',
+        })
+      }
+
+      return response.ok({
+        message: 'Fee retrieved successfully',
+        data: fee,
+      })
     } catch (error) {
-      return response.status(404).json({ message: error.message })
+      return response.internalServerError({
+        message: 'Error retrieving fee',
+        error: error.message,
+      })
     }
   }
 
   /**
-   * Create a new fee
    * POST /fees
+   * Create new fee
    */
-  public async store({ request, response }: HttpContext) {
+  async store({ request, response }: HttpContext) {
     try {
-      const data = request.all()
-      const fee = await this.feesService.create(data)
-      return response.status(201).json(fee)
+      const data = await request.validateUsing(createFeeValidator)
+
+      const fee = await this.feesService.createFee(data)
+
+      return response.created({
+        message: 'Fee created successfully',
+        data: fee,
+      })
     } catch (error) {
-      return response.status(400).json({ message: error.message })
+      if (error.messages) {
+        return response.badRequest({
+          message: 'Validation error',
+          errors: error.messages,
+        })
+      }
+
+      if (error.code === '23503') {
+        return response.notFound({
+          message: 'Trip not found',
+        })
+      }
+
+      return response.internalServerError({
+        message: 'Error creating fee',
+        error: error.message,
+      })
     }
   }
 
   /**
-   * Update a fee
-   * PUT /fees/:id
+   * PUT/PATCH /fees/:id
+   * Update fee
    */
-  public async update({ params, request, response }: HttpContext) {
+  async update({ params, request, response }: HttpContext) {
     try {
-      const data = request.all()
-      const fee = await this.feesService.update(params.id, data)
-      return response.status(200).json(fee)
+      const data = await request.validateUsing(updateFeeValidator)
+
+      const fee = await this.feesService.updateFee(params.id, data)
+
+      if (!fee) {
+        return response.notFound({
+          message: 'Fee not found',
+        })
+      }
+
+      return response.ok({
+        message: 'Fee updated successfully',
+        data: fee,
+      })
     } catch (error) {
-      return response.status(404).json({ message: error.message })
+      if (error.messages) {
+        return response.badRequest({
+          message: 'Validation error',
+          errors: error.messages,
+        })
+      }
+
+      if (error.code === '23503') {
+        return response.notFound({
+          message: 'Trip not found',
+        })
+      }
+
+      return response.internalServerError({
+        message: 'Error updating fee',
+        error: error.message,
+      })
     }
   }
 
   /**
-   * Delete a fee
    * DELETE /fees/:id
+   * Delete fee
    */
-  public async destroy({ params, response }: HttpContext) {
+  async destroy({ params, response }: HttpContext) {
     try {
-      const fee = await this.feesService.delete(params.id)
-      return response.status(200).json(fee)
+      const deleted = await this.feesService.deleteFee(params.id)
+
+      if (!deleted) {
+        return response.notFound({
+          message: 'Fee not found',
+        })
+      }
+
+      return response.ok({
+        message: 'Fee deleted successfully',
+      })
     } catch (error) {
-      return response.status(404).json({ message: error.message })
+      return response.internalServerError({
+        message: 'Error deleting fee',
+        error: error.message,
+      })
     }
   }
 }

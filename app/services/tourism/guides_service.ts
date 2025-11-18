@@ -1,112 +1,86 @@
 import Guide from '#models/tourism/guide'
-import SecurityService from '#services/core/security_service'
+import { ModelPaginatorContract } from '@adonisjs/lucid/types/model'
 
 export default class GuidesService {
-  private securityService: SecurityService
-
-  constructor() {
-    this.securityService = new SecurityService()
-  }
-
   /**
    * Get all guides with optional pagination
-   * @param page - Page number (optional, if not provided returns all records)
-   * @param perPage - Items per page (default: 10)
    */
-  async findAll(page?: number, perPage: number = 10) {
-    const query = Guide.query().preload('touristActivities')
-    if (page !== undefined) {
-      return await query.paginate(page, perPage)
+  async getAllGuides(
+    page?: number,
+    limit?: number
+  ): Promise<Guide[] | ModelPaginatorContract<Guide>> {
+    const query = Guide.query().preload('touristActivities').orderBy('id', 'asc')
+
+    if (page && limit) {
+      return await query.paginate(page, limit)
     }
+
     return await query
   }
 
   /**
-   * Get a guide by ID
+   * Get guide by ID
    */
-  async findById(id: number) {
-    return await Guide.query().where('id', id).preload('touristActivities').firstOrFail()
+  async getGuideById(id: number): Promise<Guide | null> {
+    return await Guide.query().where('id', id).preload('touristActivities').first()
   }
 
   /**
-   * Create a new guide with an existing user from ms-security
+   * Create new guide
    */
-  async create(data: any) {
-    if (!data.userId) {
-      throw new Error('userId is required to create a guide')
-    }
-    if (!data.licenseNumber) {
-      throw new Error('licenseNumber is required to create a guide')
-    }
+  async createGuide(data: {
+    userId: string
+    licenseNumber: string
+    specialties?: string
+    rating?: number
+    isAvailable?: boolean
+  }): Promise<Guide> {
+    const guide = await Guide.create(data)
 
-    // Validar si el licenseNumber ya existe antes de intentar crear
-    const existingByLicense = await Guide.query()
-      .where('licenseNumber', data.licenseNumber)
-      .first()
-    if (existingByLicense) {
-      throw new Error(`El número de licencia '${data.licenseNumber}' ya está en uso por otro guía`)
-    }
+    await guide.load('touristActivities')
 
-    // Validar si el userId ya existe (un usuario solo puede ser guía una vez)
-    const existingByUser = await Guide.query()
-      .where('UserId', data.userId)
-      .first()
-    if (existingByUser) {
-      throw new Error(`El usuario con ID '${data.userId}' ya está registrado como guía`)
-    }
-
-    try {
-      const user = await this.securityService.findById(data.userId)
-      if (!user) {
-        throw new Error(`User with ID ${data.userId} not found in ms-security`)
-      }
-      console.log(`Found user in ms-security: ${user.email}`)
-
-      const guideData = {
-        UserId: data.userId,
-        licenseNumber: data.licenseNumber,
-        specialties: data.specialties || null,
-        rating: data.rating || 0,
-        isAvailable: data.isAvailable !== undefined ? data.isAvailable : true,
-      }
-
-      const guide = await Guide.create(guideData)
-      console.log(`Guide created successfully with user ID: ${data.userId}`)
-      return guide
-    } catch (error: any) {
-      console.error('Error creating guide:', error.message)
-      throw error
-    }
+    return guide
   }
 
   /**
-   * Update a guide
+   * Update guide
    */
-  async update(id: number, data: any) {
-    const guide = await Guide.findOrFail(id)
+  async updateGuide(
+    id: number,
+    data: {
+      userId?: string
+      licenseNumber?: string
+      specialties?: string
+      rating?: number
+      isAvailable?: boolean
+    }
+  ): Promise<Guide | null> {
+    const guide = await Guide.find(id)
 
-    // Validar si el licenseNumber ya existe (excluyendo el guía actual)
-    if (data.licenseNumber) {
-      const existingByLicense = await Guide.query()
-        .where('licenseNumber', data.licenseNumber)
-        .whereNot('id', id)
-        .first()
-      if (existingByLicense) {
-        throw new Error(`El número de licencia '${data.licenseNumber}' ya está en uso por otro guía`)
-      }
+    if (!guide) {
+      return null
     }
 
     guide.merge(data)
     await guide.save()
+
+    await guide.load('touristActivities')
+
     return guide
   }
 
   /**
-   * Delete a guide
+   * Delete guide
    */
-  async delete(id: number) {
-    const guide = await Guide.findOrFail(id)
+  async deleteGuide(id: number): Promise<boolean> {
+    const guide = await Guide.find(id)
+
+    if (!guide) {
+      return false
+    }
+
     await guide.delete()
-    return guide
+    return true
   }
 }
+

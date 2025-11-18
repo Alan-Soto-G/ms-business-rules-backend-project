@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import RoomsService from '#services/accommodation/rooms_service'
+import { createRoomValidator, updateRoomValidator } from '#validators/accommodation/room'
 
 export default class RoomsController {
   private roomsService: RoomsService
@@ -9,71 +10,164 @@ export default class RoomsController {
   }
 
   /**
-   * Get all rooms
    * GET /rooms
+   * Get all rooms with optional pagination
    */
-  public async index({ request, response }: HttpContext) {
+  async index({ request, response }: HttpContext) {
     try {
       const page = request.input('page')
-      const perPage = request.input('per_page', 10)
-      const rooms = await this.roomsService.findAll(page, perPage)
-      return response.status(200).json(rooms)
+      const limit = request.input('limit')
+
+      const rooms = await this.roomsService.getAllRooms(page, limit)
+
+      return response.ok({
+        message: 'Rooms retrieved successfully',
+        data: rooms,
+      })
     } catch (error) {
-      return response.status(500).json({ message: error.message })
+      return response.internalServerError({
+        message: 'Error retrieving rooms',
+        error: error.message,
+      })
     }
   }
 
   /**
-   * Get a room by ID
    * GET /rooms/:id
+   * Get room by ID
    */
-  public async show({ params, response }: HttpContext) {
+  async show({ params, response }: HttpContext) {
     try {
-      const room = await this.roomsService.findById(params.id)
-      return response.status(200).json(room)
+      const room = await this.roomsService.getRoomById(params.id)
+
+      if (!room) {
+        return response.notFound({
+          message: 'Room not found',
+        })
+      }
+
+      return response.ok({
+        message: 'Room retrieved successfully',
+        data: room,
+      })
     } catch (error) {
-      return response.status(404).json({ message: error.message })
+      return response.internalServerError({
+        message: 'Error retrieving room',
+        error: error.message,
+      })
     }
   }
 
   /**
-   * Create a new room
    * POST /rooms
+   * Create new room
    */
-  public async store({ request, response }: HttpContext) {
+  async store({ request, response }: HttpContext) {
     try {
-      const data = request.all()
-      const room = await this.roomsService.create(data)
-      return response.status(201).json(room)
+      const data = await request.validateUsing(createRoomValidator)
+
+      const room = await this.roomsService.createRoom(data)
+
+      return response.created({
+        message: 'Room created successfully',
+        data: room,
+      })
     } catch (error) {
-      return response.status(400).json({ message: error.message })
+      if (error.messages) {
+        return response.badRequest({
+          message: 'Validation error',
+          errors: error.messages,
+        })
+      }
+
+      if (error.code === '23505') {
+        return response.conflict({
+          message: 'Room number already exists for this hotel',
+        })
+      }
+
+      if (error.code === '23503') {
+        return response.notFound({
+          message: 'Hotel not found',
+        })
+      }
+
+      return response.internalServerError({
+        message: 'Error creating room',
+        error: error.message,
+      })
     }
   }
 
   /**
-   * Update a room
-   * PUT /rooms/:id
+   * PUT/PATCH /rooms/:id
+   * Update room
    */
-  public async update({ params, request, response }: HttpContext) {
+  async update({ params, request, response }: HttpContext) {
     try {
-      const data = request.all()
-      const room = await this.roomsService.update(params.id, data)
-      return response.status(200).json(room)
+      const data = await request.validateUsing(updateRoomValidator)
+
+      const room = await this.roomsService.updateRoom(params.id, data)
+
+      if (!room) {
+        return response.notFound({
+          message: 'Room not found',
+        })
+      }
+
+      return response.ok({
+        message: 'Room updated successfully',
+        data: room,
+      })
     } catch (error) {
-      return response.status(404).json({ message: error.message })
+      if (error.messages) {
+        return response.badRequest({
+          message: 'Validation error',
+          errors: error.messages,
+        })
+      }
+
+      if (error.code === '23505') {
+        return response.conflict({
+          message: 'Room number already exists for this hotel',
+        })
+      }
+
+      if (error.code === '23503') {
+        return response.notFound({
+          message: 'Hotel not found',
+        })
+      }
+
+      return response.internalServerError({
+        message: 'Error updating room',
+        error: error.message,
+      })
     }
   }
 
   /**
-   * Delete a room
    * DELETE /rooms/:id
+   * Delete room
    */
-  public async destroy({ params, response }: HttpContext) {
+  async destroy({ params, response }: HttpContext) {
     try {
-      const room = await this.roomsService.delete(params.id)
-      return response.status(200).json(room)
+      const deleted = await this.roomsService.deleteRoom(params.id)
+
+      if (!deleted) {
+        return response.notFound({
+          message: 'Room not found',
+        })
+      }
+
+      return response.ok({
+        message: 'Room deleted successfully',
+      })
     } catch (error) {
-      return response.status(404).json({ message: error.message })
+      return response.internalServerError({
+        message: 'Error deleting room',
+        error: error.message,
+      })
     }
   }
 }

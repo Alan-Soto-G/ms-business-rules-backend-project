@@ -1,5 +1,9 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import MunicipalitiesService from '#services/core/municipalities_service'
+import {
+  createMunicipalityValidator,
+  updateMunicipalityValidator,
+} from '#validators/core/municipality'
 
 export default class MunicipalitiesController {
   private municipalitiesService: MunicipalitiesService
@@ -9,71 +13,152 @@ export default class MunicipalitiesController {
   }
 
   /**
-   * Obtener todos los municipios.
    * GET /municipalities
+   * Get all municipalities with optional pagination
    */
-  public async index({ request, response }: HttpContext) {
+  async index({ request, response }: HttpContext) {
     try {
       const page = request.input('page')
-      const perPage = request.input('per_page', 10)
-      const municipalities = await this.municipalitiesService.findAll(page, perPage)
-      return response.status(200).json(municipalities)
+      const limit = request.input('limit')
+
+      const municipalities = await this.municipalitiesService.getAllMunicipalities(page, limit)
+
+      return response.ok({
+        message: 'Municipalities retrieved successfully',
+        data: municipalities,
+      })
     } catch (error) {
-      return response.status(500).json({ message: error.message })
+      return response.internalServerError({
+        message: 'Error retrieving municipalities',
+        error: error.message,
+      })
     }
   }
 
   /**
-   * Obtener un municipio por ID.
    * GET /municipalities/:id
+   * Get municipality by ID
    */
-  public async show({ params, response }: HttpContext) {
+  async show({ params, response }: HttpContext) {
     try {
-      const municipality = await this.municipalitiesService.findById(params.id)
-      return response.status(200).json(municipality)
+      const municipality = await this.municipalitiesService.getMunicipalityById(params.id)
+
+      if (!municipality) {
+        return response.notFound({
+          message: 'Municipality not found',
+        })
+      }
+
+      return response.ok({
+        message: 'Municipality retrieved successfully',
+        data: municipality,
+      })
     } catch (error) {
-      return response.status(404).json({ message: error.message })
+      return response.internalServerError({
+        message: 'Error retrieving municipality',
+        error: error.message,
+      })
     }
   }
 
   /**
-   * Crear un nuevo municipio.
    * POST /municipalities
+   * Create new municipality
    */
-  public async store({ request, response }: HttpContext) {
+  async store({ request, response }: HttpContext) {
     try {
-      const data = request.all()
-      const municipality = await this.municipalitiesService.create(data)
-      return response.status(201).json(municipality)
+      const data = await request.validateUsing(createMunicipalityValidator)
+
+      const municipality = await this.municipalitiesService.createMunicipality(data)
+
+      return response.created({
+        message: 'Municipality created successfully',
+        data: municipality,
+      })
     } catch (error) {
-      return response.status(400).json({ message: error.message })
+      if (error.messages) {
+        return response.badRequest({
+          message: 'Validation error',
+          errors: error.messages,
+        })
+      }
+
+      if (error.code === '23505') {
+        return response.conflict({
+          message: 'Municipality code already exists',
+        })
+      }
+
+      return response.internalServerError({
+        message: 'Error creating municipality',
+        error: error.message,
+      })
     }
   }
 
   /**
-   * Actualizar un municipio existente.
-   * PUT /municipalities/:id
+   * PUT/PATCH /municipalities/:id
+   * Update municipality
    */
-  public async update({ params, request, response }: HttpContext) {
+  async update({ params, request, response }: HttpContext) {
     try {
-      const data = request.all()
-      const municipality = await this.municipalitiesService.update(params.id, data)
-      return response.status(200).json(municipality)
+      const data = await request.validateUsing(updateMunicipalityValidator)
+
+      const municipality = await this.municipalitiesService.updateMunicipality(params.id, data)
+
+      if (!municipality) {
+        return response.notFound({
+          message: 'Municipality not found',
+        })
+      }
+
+      return response.ok({
+        message: 'Municipality updated successfully',
+        data: municipality,
+      })
     } catch (error) {
-      return response.status(404).json({ message: error.message })
+      if (error.messages) {
+        return response.badRequest({
+          message: 'Validation error',
+          errors: error.messages,
+        })
+      }
+
+      if (error.code === '23505') {
+        return response.conflict({
+          message: 'Municipality code already exists',
+        })
+      }
+
+      return response.internalServerError({
+        message: 'Error updating municipality',
+        error: error.message,
+      })
     }
   }
 
   /**
-   * Eliminar un municipio por id.
    * DELETE /municipalities/:id
+   * Delete municipality
    */
-  public async destroy({ params, response }: HttpContext) {
+  async destroy({ params, response }: HttpContext) {
     try {
-      const municipality = await this.municipalitiesService.delete(params.id)
-      return response.status(200).json(municipality)
+      const deleted = await this.municipalitiesService.deleteMunicipality(params.id)
+
+      if (!deleted) {
+        return response.notFound({
+          message: 'Municipality not found',
+        })
+      }
+
+      return response.ok({
+        message: 'Municipality deleted successfully',
+      })
     } catch (error) {
-      return response.status(404).json({ message: error.message })
+      return response.internalServerError({
+        message: 'Error deleting municipality',
+        error: error.message,
+      })
     }
   }
 }

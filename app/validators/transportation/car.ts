@@ -2,66 +2,61 @@ import vine from '@vinejs/vine'
 
 /**
  * Validator for creating a car.
- * Debe incluir los datos del vehículo y los datos específicos del carro.
+ * Supports two scenarios:
+ * A) Provide vehicleId to associate with existing vehicle
+ * B) Provide all vehicle data to create a new vehicle
  */
 export const createCarValidator = vine.compile(
   vine.object({
-    // Datos del vehículo
+    // Option A: Use existing vehicle
+    vehicleId: vine.number().positive().optional(),
+
+    // Option B: Create new vehicle (required if vehicleId not provided)
     licensePlate: vine
       .string()
       .trim()
       .toUpperCase()
-      .regex(/^[A-Z0-9-]{2,15}$/)
-      .unique(async (db, value) => {
-        const vehicle = await db.from('vehicles').where('license_plate', value).first()
-        return !vehicle
-      }),
-    brand: vine.string().trim().minLength(2).maxLength(100),
-    model: vine.string().trim().minLength(1).maxLength(100),
-    year: vine
-      .number()
-      .min(1900)
-      .max(new Date().getFullYear() + 5),
-    color: vine.string().trim().minLength(3).maxLength(50),
-    numberOfSeats: vine.number().min(1).max(50),
-    vehicleType: vine.string().trim().optional(),
-    status: vine.string().trim().in(['available', 'in_use', 'maintenance', 'retired']).optional(),
+      .regex(/^[A-Z0-9-]{2,20}$/)
+      .optional(),
+    brand: vine.string().trim().minLength(2).maxLength(50).optional(),
+    model: vine.string().trim().minLength(1).maxLength(50).optional(),
+    year: vine.number().min(1900).max(2100).optional(),
+    color: vine.string().trim().minLength(2).maxLength(30).optional(),
+    numberOfSeats: vine.number().min(1).max(100).optional(),
+    vehicleType: vine.string().trim().minLength(2).maxLength(50).optional(),
+    status: vine.enum(['available', 'in_use', 'maintenance', 'retired']).optional(),
 
-    // Datos específicos del carro
-    hotelId: vine.number().min(1),
-    fuelType: vine.string().trim().minLength(3).maxLength(50),
-    transmissionType: vine.string().trim().in(['manual', 'automatic']),
+    // Car-specific data (always required)
+    hotelId: vine.number().positive(),
+    fuelType: vine.enum(['gasoline', 'diesel', 'electric', 'hybrid', 'lpg']),
+    transmissionType: vine.enum(['manual', 'automatic', 'cvt']),
   })
 )
 
 /**
  * Validator for updating a car.
- * Todos los campos son opcionales para permitir actualizaciones parciales.
+ * All fields are optional for partial updates.
  */
 export const updateCarValidator = vine.compile(
   vine.object({
-    // Datos del vehículo (opcionales)
+    // Vehicle data (optional)
     licensePlate: vine
       .string()
       .trim()
       .toUpperCase()
-      .regex(/^[A-Z0-9-]{2,15}$/)
+      .regex(/^[A-Z0-9-]{2,20}$/)
       .optional(),
-    brand: vine.string().trim().minLength(2).maxLength(100).optional(),
-    model: vine.string().trim().minLength(1).maxLength(100).optional(),
-    year: vine
-      .number()
-      .min(1900)
-      .max(new Date().getFullYear() + 5)
-      .optional(),
-    color: vine.string().trim().minLength(3).maxLength(50).optional(),
-    numberOfSeats: vine.number().min(1).max(50).optional(),
-    vehicleType: vine.string().trim().optional(),
-    status: vine.string().trim().in(['available', 'in_use', 'maintenance', 'retired']).optional(),
+    brand: vine.string().trim().minLength(2).maxLength(50).optional(),
+    model: vine.string().trim().minLength(1).maxLength(50).optional(),
+    year: vine.number().min(1900).max(2100).optional(),
+    color: vine.string().trim().minLength(2).maxLength(30).optional(),
+    numberOfSeats: vine.number().min(1).max(100).optional(),
+    vehicleType: vine.string().trim().minLength(2).maxLength(50).optional(),
+    status: vine.enum(['available', 'in_use', 'maintenance', 'retired']).optional(),
 
-    // Datos específicos del carro (opcionales)
-    hotelId: vine.number().min(1).optional(),
-    fuelType: vine.string().trim().minLength(3).maxLength(50).optional(),
-    transmissionType: vine.string().trim().in(['manual', 'automatic']).optional(),
+    // Car-specific data (optional)
+    hotelId: vine.number().positive().optional(),
+    fuelType: vine.enum(['gasoline', 'diesel', 'electric', 'hybrid', 'lpg']).optional(),
+    transmissionType: vine.enum(['manual', 'automatic', 'cvt']).optional(),
   })
 )

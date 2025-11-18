@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import GpsService from '#services/transportation/gps_service'
+import { createGpsValidator, updateGpsValidator } from '#validators/transportation/gps'
 
 export default class GpsController {
   private gpsService: GpsService
@@ -9,71 +10,164 @@ export default class GpsController {
   }
 
   /**
-   * Obtener todos los dispositivos GPS.
    * GET /gps
+   * Get all GPS devices with optional pagination
    */
-  public async index({ request, response }: HttpContext) {
+  async index({ request, response }: HttpContext) {
     try {
       const page = request.input('page')
-      const perPage = request.input('per_page', 10)
-      const gpsDevices = await this.gpsService.findAll(page, perPage)
-      return response.status(200).json(gpsDevices)
+      const limit = request.input('limit')
+
+      const gpsDevices = await this.gpsService.getAllGps(page, limit)
+
+      return response.ok({
+        message: 'GPS devices retrieved successfully',
+        data: gpsDevices,
+      })
     } catch (error) {
-      return response.status(500).json({ message: error.message })
+      return response.internalServerError({
+        message: 'Error retrieving GPS devices',
+        error: error.message,
+      })
     }
   }
 
   /**
-   * Obtener un dispositivo GPS por ID.
    * GET /gps/:id
+   * Get GPS device by ID
    */
-  public async show({ params, response }: HttpContext) {
+  async show({ params, response }: HttpContext) {
     try {
-      const gps = await this.gpsService.findById(params.id)
-      return response.status(200).json(gps)
+      const gps = await this.gpsService.getGpsById(params.id)
+
+      if (!gps) {
+        return response.notFound({
+          message: 'GPS device not found',
+        })
+      }
+
+      return response.ok({
+        message: 'GPS device retrieved successfully',
+        data: gps,
+      })
     } catch (error) {
-      return response.status(404).json({ message: error.message })
+      return response.internalServerError({
+        message: 'Error retrieving GPS device',
+        error: error.message,
+      })
     }
   }
 
   /**
-   * Crear un nuevo dispositivo GPS.
    * POST /gps
+   * Create new GPS device
    */
-  public async store({ request, response }: HttpContext) {
+  async store({ request, response }: HttpContext) {
     try {
-      const data = request.all()
-      const gps = await this.gpsService.create(data)
-      return response.status(201).json(gps)
+      const data = await request.validateUsing(createGpsValidator)
+
+      const gps = await this.gpsService.createGps(data)
+
+      return response.created({
+        message: 'GPS device created successfully',
+        data: gps,
+      })
     } catch (error) {
-      return response.status(400).json({ message: error.message })
+      if (error.messages) {
+        return response.badRequest({
+          message: 'Validation error',
+          errors: error.messages,
+        })
+      }
+
+      if (error.code === '23505') {
+        return response.conflict({
+          message: 'Serial number already exists or vehicle already has a GPS device',
+        })
+      }
+
+      if (error.code === '23503') {
+        return response.badRequest({
+          message: 'Invalid vehicle ID',
+        })
+      }
+
+      return response.internalServerError({
+        message: 'Error creating GPS device',
+        error: error.message,
+      })
     }
   }
 
   /**
-   * Actualizar un dispositivo GPS.
-   * PUT /gps/:id
+   * PUT/PATCH /gps/:id
+   * Update GPS device
    */
-  public async update({ params, request, response }: HttpContext) {
+  async update({ params, request, response }: HttpContext) {
     try {
-      const data = request.all()
-      const gps = await this.gpsService.update(params.id, data)
-      return response.status(200).json(gps)
+      const data = await request.validateUsing(updateGpsValidator)
+
+      const gps = await this.gpsService.updateGps(params.id, data)
+
+      if (!gps) {
+        return response.notFound({
+          message: 'GPS device not found',
+        })
+      }
+
+      return response.ok({
+        message: 'GPS device updated successfully',
+        data: gps,
+      })
     } catch (error) {
-      return response.status(404).json({ message: error.message })
+      if (error.messages) {
+        return response.badRequest({
+          message: 'Validation error',
+          errors: error.messages,
+        })
+      }
+
+      if (error.code === '23505') {
+        return response.conflict({
+          message: 'Serial number already exists or vehicle already has a GPS device',
+        })
+      }
+
+      if (error.code === '23503') {
+        return response.badRequest({
+          message: 'Invalid vehicle ID',
+        })
+      }
+
+      return response.internalServerError({
+        message: 'Error updating GPS device',
+        error: error.message,
+      })
     }
   }
 
   /**
-   * Eliminar un dispositivo GPS.
    * DELETE /gps/:id
+   * Delete GPS device
    */
-  public async destroy({ params, response }: HttpContext) {
+  async destroy({ params, response }: HttpContext) {
     try {
-      const gps = await this.gpsService.delete(params.id)
-      return response.status(200).json(gps)
+      const deleted = await this.gpsService.deleteGps(params.id)
+
+      if (!deleted) {
+        return response.notFound({
+          message: 'GPS device not found',
+        })
+      }
+
+      return response.ok({
+        message: 'GPS device deleted successfully',
+      })
     } catch (error) {
-      return response.status(404).json({ message: error.message })
+      return response.internalServerError({
+        message: 'Error deleting GPS device',
+        error: error.message,
+      })
     }
   }
 }

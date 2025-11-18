@@ -7,9 +7,9 @@ export default class Guide extends BaseModel {
   @column({ isPrimary: true })
   declare id: number
 
-  // Specific attributes of Client
+  // Specific attributes of Guide
   @column({ columnName: 'user_id' })
-  declare UserId: string // It comes from ms-security
+  declare userId: string // It comes from ms-security
 
   @column({ columnName: 'license_number' })
   declare licenseNumber: string

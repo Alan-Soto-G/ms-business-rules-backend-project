@@ -2,97 +2,186 @@ import TripClient from '#models/pivots/trip_client'
 import Trip from '#models/core/trip'
 import Client from '#models/core/client'
 
-// Trip Clients Service
 export default class TripClientsService {
   /**
    * Get all trip clients with optional pagination
-   * @param page - Page number (optional, if not provided returns all records)
-   * @param perPage - Items per page (default: 10)
    */
-  async findAll(page?: number, perPage: number = 10) {
-    const query = TripClient.query().preload('trip').preload('client')
-
-    if (page !== undefined) {
-      return await query.paginate(page, perPage)
+  async getAllTripClients(page?: number, limit?: number) {
+    if (page && limit) {
+      return await TripClient.query().preload('trip').preload('client').paginate(page, limit)
     }
 
-    return await query
+    return await TripClient.query().preload('trip').preload('client')
   }
 
   /**
-   * Get a trip client by ID
+   * Get trip client by ID
    */
-  async findById(id: number) {
-    return await TripClient.query().where('id', id).preload('trip').preload('client').firstOrFail()
+  async getTripClientById(id: number) {
+    return await TripClient.query().where('id', id).preload('trip').preload('client').first()
+  }
+
+  /**
+   * Get all clients by trip
+   */
+  async getClientsByTrip(tripId: number) {
+    return await TripClient.query().where('trip_id', tripId).preload('trip').preload('client')
+  }
+
+  /**
+   * Get all trips by client
+   */
+  async getTripsByClient(clientId: number) {
+    return await TripClient.query().where('client_id', clientId).preload('trip').preload('client')
   }
 
   /**
    * Create a new trip client
+   * A) Validates existence of Trip and Client
+   * B) Prevents duplicates
+   * C) Inserts cleanly into pivot table
    */
-  async create(data: any) {
-    return await TripClient.create(data)
+  async createTripClient(data: { trip_id: number; client_id: number }) {
+    // A) Validate existence of Trip
+    const trip = await Trip.find(data.trip_id)
+    if (!trip) {
+      throw new Error(`Trip with ID ${data.trip_id} does not exist`)
+    }
+
+    // A) Validate existence of Client
+    const client = await Client.find(data.client_id)
+    if (!client) {
+      throw new Error(`Client with ID ${data.client_id} does not exist`)
+    }
+
+    // B) Check for duplicate assignment
+    const existingAssignment = await TripClient.query()
+      .where('trip_id', data.trip_id)
+      .where('client_id', data.client_id)
+      .first()
+
+    if (existingAssignment) {
+      throw new Error(`Client ${data.client_id} is already assigned to trip ${data.trip_id}`)
+    }
+
+    // C) Insert cleanly into pivot table
+    const tripClient = await TripClient.create({
+      tripId: data.trip_id,
+      clientId: data.client_id,
+    })
+
+    await tripClient.load('trip')
+    await tripClient.load('client')
+
+    return tripClient
+  }
+
+  /**
+   * Assign a client to a trip
+   * D) Allows multiple assignments (multiple clients per trip or multiple trips per client)
+   */
+  async assignTripClient(data: { trip_id: number; client_id: number }) {
+    // Reuse the same logic as create (validates, prevents duplicates, inserts cleanly)
+    return await this.createTripClient(data)
+  }
+
+  /**
+   * Unassign a client from a trip
+   */
+  async unassignTripClient(tripId: number, clientId: number) {
+    const tripClient = await TripClient.query()
+      .where('trip_id', tripId)
+      .where('client_id', clientId)
+      .first()
+
+    if (!tripClient) {
+      return false
+    }
+
+    await tripClient.delete()
+    return true
   }
 
   /**
    * Update a trip client
    */
-  async update(id: number, data: any) {
-    const tripClient = await TripClient.findOrFail(id)
-    tripClient.merge(data)
+  async updateTripClient(
+    id: number,
+    data: {
+      trip_id?: number
+      client_id?: number
+    }
+  ) {
+    const tripClient = await TripClient.find(id)
+
+    if (!tripClient) {
+      return null
+    }
+
+    // Validate new trip_id if provided
+    if (data.trip_id && data.trip_id !== tripClient.tripId) {
+      const trip = await Trip.find(data.trip_id)
+      if (!trip) {
+        throw new Error(`Trip with ID ${data.trip_id} does not exist`)
+      }
+
+      // Check for duplicate with new trip_id
+      const existingAssignment = await TripClient.query()
+        .where('trip_id', data.trip_id)
+        .where('client_id', data.client_id || tripClient.clientId)
+        .whereNot('id', id)
+        .first()
+
+      if (existingAssignment) {
+        throw new Error(
+          `Client ${data.client_id || tripClient.clientId} is already assigned to trip ${data.trip_id}`
+        )
+      }
+    }
+
+    // Validate new client_id if provided
+    if (data.client_id && data.client_id !== tripClient.clientId) {
+      const client = await Client.find(data.client_id)
+      if (!client) {
+        throw new Error(`Client with ID ${data.client_id} does not exist`)
+      }
+
+      // Check for duplicate with new client_id
+      const existingAssignment = await TripClient.query()
+        .where('trip_id', data.trip_id || tripClient.tripId)
+        .where('client_id', data.client_id)
+        .whereNot('id', id)
+        .first()
+
+      if (existingAssignment) {
+        throw new Error(
+          `Client ${data.client_id} is already assigned to trip ${data.trip_id || tripClient.tripId}`
+        )
+      }
+    }
+
+    // Update fields
+    if (data.trip_id) tripClient.tripId = data.trip_id
+    if (data.client_id) tripClient.clientId = data.client_id
+
     await tripClient.save()
+    await tripClient.load('trip')
+    await tripClient.load('client')
+
     return tripClient
   }
 
   /**
    * Delete a trip client
    */
-  async delete(id: number) {
-    const tripClient = await TripClient.findOrFail(id)
-    await tripClient.delete()
-    return tripClient
-  }
+  async deleteTripClient(id: number) {
+    const tripClient = await TripClient.find(id)
 
-  // Get all clients for a trip
-  async getTripClients(tripId: number) {
-    const trip = await Trip.findOrFail(tripId)
-    await trip.load('tripClients', (query) => {
-      query.preload('client')
-    })
-    return trip.tripClients
-  }
-
-  // Associate a client with a trip
-  async addClientToTrip(tripId: number, clientId: number) {
-    const trip = await Trip.findOrFail(tripId)
-    const client = await Client.findOrFail(clientId)
-
-    // Check if relationship already exists
-    const exists = await TripClient.query()
-      .where('trip_id', trip.id)
-      .where('client_id', client.id)
-      .first()
-
-    if (exists) {
-      throw new Error('This client is already associated with this trip')
+    if (!tripClient) {
+      return false
     }
 
-    const tripClient = await TripClient.create({
-      tripId: trip.id,
-      clientId: client.id,
-    })
-
-    await tripClient.load('client')
-    return tripClient
-  }
-
-  // Remove client association from a trip
-  async removeClientFromTrip(tripId: number, clientId: number) {
-    const tripClient = await TripClient.query()
-      .where('trip_id', tripId)
-      .where('client_id', clientId)
-      .firstOrFail()
-
     await tripClient.delete()
-    return { message: 'Client removed from trip successfully' }
+    return true
   }
 }

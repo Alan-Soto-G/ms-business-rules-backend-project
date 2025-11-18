@@ -1,77 +1,73 @@
 import HotelAdmin from '#models/accommodation/hotel_admin'
-import SecurityService from '#services/core/security_service'
+import { ModelPaginatorContract } from '@adonisjs/lucid/types/model'
+
 export default class HotelAdminsService {
-  private securityService: SecurityService
-  constructor() {
-    this.securityService = new SecurityService()
-  }
   /**
    * Get all hotel admins with optional pagination
-   * @param page - Page number (optional, if not provided returns all records)
-   * @param perPage - Items per page (default: 10)
    */
-  async findAll(page?: number, perPage: number = 10) {
-    const query = HotelAdmin.query().preload('hotels')
-    if (page !== undefined) {
-      return await query.paginate(page, perPage)
+  async getAllHotelAdmins(
+    page?: number,
+    limit?: number
+  ): Promise<HotelAdmin[] | ModelPaginatorContract<HotelAdmin>> {
+    const query = HotelAdmin.query().preload('hotels').orderBy('id', 'asc')
+
+    if (page && limit) {
+      return await query.paginate(page, limit)
     }
+
     return await query
   }
+
   /**
-   * Get a hotel admin by ID
+   * Get hotel admin by ID
    */
-  async findById(id: number) {
-    return await HotelAdmin.query().where('id', id).preload('hotels').firstOrFail()
+  async getHotelAdminById(id: number): Promise<HotelAdmin | null> {
+    return await HotelAdmin.query().where('id', id).preload('hotels').first()
   }
+
   /**
-   * Create a new hotel admin with an existing user from ms-security
+   * Create new hotel admin
    */
-  async create(data: any) {
-    if (!data.userId) {
-      throw new Error('userId is required to create a hotel admin')
-    }
+  async createHotelAdmin(data: { userId: string; isVerified?: boolean }): Promise<HotelAdmin> {
+    const hotelAdmin = await HotelAdmin.create(data)
 
-    // Validar si el userId ya existe (un usuario solo puede ser hotel admin una vez)
-    const existingAdmin = await HotelAdmin.query().where('UserId', data.userId).first()
-    if (existingAdmin) {
-      throw new Error(`El usuario con ID '${data.userId}' ya está registrado como administrador de hotel`)
-    }
+    await hotelAdmin.load('hotels')
 
-    try {
-      const user = await this.securityService.findById(data.userId)
-      if (!user) {
-        throw new Error(`User with ID ${data.userId} not found in ms-security`)
-      }
-      console.log(`Found user in ms-security: ${user.email}`)
-
-      const hotelAdminData = {
-        UserId: data.userId,
-        isVerified: data.isVerified || false,
-      }
-
-      const hotelAdmin = await HotelAdmin.create(hotelAdminData)
-      console.log(`Hotel admin created successfully with user ID: ${data.userId}`)
-      return hotelAdmin
-    } catch (error: any) {
-      console.error('Error creating hotel admin:', error.message)
-      throw error
-    }
+    return hotelAdmin
   }
+
   /**
-   * Update a hotel admin
+   * Update hotel admin
    */
-  async update(id: number, data: any) {
-    const hotelAdmin = await HotelAdmin.findOrFail(id)
+  async updateHotelAdmin(
+    id: number,
+    data: { userId?: string; isVerified?: boolean }
+  ): Promise<HotelAdmin | null> {
+    const hotelAdmin = await HotelAdmin.find(id)
+
+    if (!hotelAdmin) {
+      return null
+    }
+
     hotelAdmin.merge(data)
     await hotelAdmin.save()
+
+    await hotelAdmin.load('hotels')
+
     return hotelAdmin
   }
+
   /**
-   * Delete a hotel admin
+   * Delete hotel admin
    */
-  async delete(id: number) {
-    const hotelAdmin = await HotelAdmin.findOrFail(id)
+  async deleteHotelAdmin(id: number): Promise<boolean> {
+    const hotelAdmin = await HotelAdmin.find(id)
+
+    if (!hotelAdmin) {
+      return false
+    }
+
     await hotelAdmin.delete()
-    return hotelAdmin
+    return true
   }
 }

@@ -1,80 +1,94 @@
 import Municipality from '#models/core/municipality'
+import { ModelPaginatorContract } from '@adonisjs/lucid/types/model'
 
 export default class MunicipalitiesService {
   /**
    * Get all municipalities with optional pagination
-   * @param page - Page number (optional, if not provided returns all records)
-   * @param perPage - Items per page (default: 10)
    */
-  async findAll(page?: number, perPage: number = 10) {
+  async getAllMunicipalities(
+    page?: number,
+    limit?: number
+  ): Promise<Municipality[] | ModelPaginatorContract<Municipality>> {
     const query = Municipality.query()
       .preload('originJourneys')
       .preload('destinationJourneys')
       .preload('hotels')
       .preload('touristActivities')
-    if (page !== undefined) {
-      return await query.paginate(page, perPage)
+      .orderBy('id', 'asc')
+
+    if (page && limit) {
+      return await query.paginate(page, limit)
     }
+
     return await query
   }
 
   /**
-   * Get a municipality by ID
+   * Get municipality by ID
    */
-  async findById(id: number) {
+  async getMunicipalityById(id: number): Promise<Municipality | null> {
     return await Municipality.query()
       .where('id', id)
       .preload('originJourneys')
       .preload('destinationJourneys')
       .preload('hotels')
       .preload('touristActivities')
-      .firstOrFail()
+      .first()
   }
 
   /**
-   * Create a new municipality
+   * Create new municipality
    */
-  async create(data: any) {
-    // Validar si el código ya existe antes de intentar crear
-    if (data.code) {
-      const existingMunicipality = await Municipality.query().where('code', data.code).first()
-      if (existingMunicipality) {
-        throw new Error(`El código '${data.code}' ya está en uso por otro municipio`)
-      }
+  async createMunicipality(data: {
+    name: string
+    department: string
+    code: string
+  }): Promise<Municipality> {
+    const municipality = await Municipality.create(data)
+
+    return municipality
+  }
+
+  /**
+   * Update municipality
+   */
+  async updateMunicipality(
+    id: number,
+    data: {
+      name?: string
+      department?: string
+      code?: string
     }
+  ): Promise<Municipality | null> {
+    const municipality = await Municipality.find(id)
 
-    return await Municipality.create(data)
-  }
-
-  /**
-   * Update a municipality
-   */
-  async update(id: number, data: any) {
-    const municipality = await Municipality.findOrFail(id)
-
-    // Validar si el código ya existe (excluyendo el municipio actual)
-    if (data.code) {
-      const existingMunicipality = await Municipality.query()
-        .where('code', data.code)
-        .whereNot('id', id)
-        .first()
-
-      if (existingMunicipality) {
-        throw new Error(`El código '${data.code}' ya está en uso por otro municipio`)
-      }
+    if (!municipality) {
+      return null
     }
 
     municipality.merge(data)
     await municipality.save()
+
+    await municipality.load('originJourneys')
+    await municipality.load('destinationJourneys')
+    await municipality.load('hotels')
+    await municipality.load('touristActivities')
+
     return municipality
   }
 
   /**
-   * Delete a municipality
+   * Delete municipality
    */
-  async delete(id: number) {
-    const municipality = await Municipality.findOrFail(id)
+  async deleteMunicipality(id: number): Promise<boolean> {
+    const municipality = await Municipality.find(id)
+
+    if (!municipality) {
+      return false
+    }
+
     await municipality.delete()
-    return municipality
+    return true
   }
 }
+

@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import GuidesService from '#services/tourism/guides_service'
+import { createGuideValidator, updateGuideValidator } from '#validators/tourism/guide'
 
 export default class GuidesController {
   private guidesService: GuidesService
@@ -9,71 +10,152 @@ export default class GuidesController {
   }
 
   /**
-   * Get all guides
    * GET /guides
+   * Get all guides with optional pagination
    */
-  public async index({ request, response }: HttpContext) {
+  async index({ request, response }: HttpContext) {
     try {
       const page = request.input('page')
-      const perPage = request.input('per_page', 10)
-      const guides = await this.guidesService.findAll(page, perPage)
-      return response.status(200).json(guides)
+      const limit = request.input('limit')
+
+      const guides = await this.guidesService.getAllGuides(page, limit)
+
+      return response.ok({
+        message: 'Guides retrieved successfully',
+        data: guides,
+      })
     } catch (error) {
-      return response.status(500).json({ message: error.message })
+      return response.internalServerError({
+        message: 'Error retrieving guides',
+        error: error.message,
+      })
     }
   }
 
   /**
-   * Get a guide by ID
    * GET /guides/:id
+   * Get guide by ID
    */
-  public async show({ params, response }: HttpContext) {
+  async show({ params, response }: HttpContext) {
     try {
-      const guide = await this.guidesService.findById(params.id)
-      return response.status(200).json(guide)
+      const guide = await this.guidesService.getGuideById(params.id)
+
+      if (!guide) {
+        return response.notFound({
+          message: 'Guide not found',
+        })
+      }
+
+      return response.ok({
+        message: 'Guide retrieved successfully',
+        data: guide,
+      })
     } catch (error) {
-      return response.status(404).json({ message: error.message })
+      return response.internalServerError({
+        message: 'Error retrieving guide',
+        error: error.message,
+      })
     }
   }
 
   /**
-   * Create a new guide
    * POST /guides
+   * Create new guide
    */
-  public async store({ request, response }: HttpContext) {
+  async store({ request, response }: HttpContext) {
     try {
-      const data = request.all()
-      const guide = await this.guidesService.create(data)
-      return response.status(201).json(guide)
+      const data = await request.validateUsing(createGuideValidator)
+
+      const guide = await this.guidesService.createGuide(data)
+
+      return response.created({
+        message: 'Guide created successfully',
+        data: guide,
+      })
     } catch (error) {
-      return response.status(400).json({ message: error.message })
+      if (error.messages) {
+        return response.badRequest({
+          message: 'Validation error',
+          errors: error.messages,
+        })
+      }
+
+      if (error.code === '23505') {
+        return response.conflict({
+          message: 'User ID or license number already exists',
+        })
+      }
+
+      return response.internalServerError({
+        message: 'Error creating guide',
+        error: error.message,
+      })
     }
   }
 
   /**
-   * Update a guide
-   * PUT /guides/:id
+   * PUT/PATCH /guides/:id
+   * Update guide
    */
-  public async update({ params, request, response }: HttpContext) {
+  async update({ params, request, response }: HttpContext) {
     try {
-      const data = request.all()
-      const guide = await this.guidesService.update(params.id, data)
-      return response.status(200).json(guide)
+      const data = await request.validateUsing(updateGuideValidator)
+
+      const guide = await this.guidesService.updateGuide(params.id, data)
+
+      if (!guide) {
+        return response.notFound({
+          message: 'Guide not found',
+        })
+      }
+
+      return response.ok({
+        message: 'Guide updated successfully',
+        data: guide,
+      })
     } catch (error) {
-      return response.status(404).json({ message: error.message })
+      if (error.messages) {
+        return response.badRequest({
+          message: 'Validation error',
+          errors: error.messages,
+        })
+      }
+
+      if (error.code === '23505') {
+        return response.conflict({
+          message: 'User ID or license number already exists',
+        })
+      }
+
+      return response.internalServerError({
+        message: 'Error updating guide',
+        error: error.message,
+      })
     }
   }
 
   /**
-   * Delete a guide
    * DELETE /guides/:id
+   * Delete guide
    */
-  public async destroy({ params, response }: HttpContext) {
+  async destroy({ params, response }: HttpContext) {
     try {
-      const guide = await this.guidesService.delete(params.id)
-      return response.status(200).json(guide)
+      const deleted = await this.guidesService.deleteGuide(params.id)
+
+      if (!deleted) {
+        return response.notFound({
+          message: 'Guide not found',
+        })
+      }
+
+      return response.ok({
+        message: 'Guide deleted successfully',
+      })
     } catch (error) {
-      return response.status(404).json({ message: error.message })
+      return response.internalServerError({
+        message: 'Error deleting guide',
+        error: error.message,
+      })
     }
   }
 }

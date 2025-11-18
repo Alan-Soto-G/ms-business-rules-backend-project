@@ -7,15 +7,17 @@ import { DateTime } from 'luxon'
  */
 export const createTripValidator = vine.compile(
   vine.object({
-    name: vine.string().trim().minLength(3).maxLength(255),
-    description: vine.string().trim().minLength(3).maxLength(1000),
-    destination: vine.string().trim().minLength(3).maxLength(255),
+    name: vine.string().trim().minLength(3).maxLength(150),
+    description: vine.string().trim().optional(),
+    destination: vine.string().trim().minLength(3).maxLength(150),
     startDate: vine.date().transform((value) => (value ? DateTime.fromJSDate(value) : value)),
     endDate: vine.date().transform((value) => (value ? DateTime.fromJSDate(value) : value)),
-    price: vine.number().min(0),
-    capacity: vine.number().min(1),
-    availableSeats: vine.number().min(0),
-    status: vine.enum(['active', 'cancelled', 'completed', 'pending']),
+    price: vine.number().positive().decimal([0, 2]),
+    capacity: vine.number().positive().withoutDecimals().min(1).max(500),
+    availableSeats: vine.number().min(0).withoutDecimals(),
+    status: vine
+      .enum(['draft', 'published', 'active', 'full', 'completed', 'cancelled'])
+      .optional(),
   })
 )
 
@@ -24,9 +26,9 @@ export const createTripValidator = vine.compile(
  */
 export const updateTripValidator = vine.compile(
   vine.object({
-    name: vine.string().trim().minLength(3).maxLength(255).optional(),
-    description: vine.string().trim().minLength(3).maxLength(1000).optional(),
-    destination: vine.string().trim().minLength(3).maxLength(255).optional(),
+    name: vine.string().trim().minLength(3).maxLength(150).optional(),
+    description: vine.string().trim().optional(),
+    destination: vine.string().trim().minLength(3).maxLength(150).optional(),
     startDate: vine
       .date()
       .transform((value) => (value ? DateTime.fromJSDate(value) : value))
@@ -35,9 +37,11 @@ export const updateTripValidator = vine.compile(
       .date()
       .transform((value) => (value ? DateTime.fromJSDate(value) : value))
       .optional(),
-    price: vine.number().min(0).optional(),
-    capacity: vine.number().min(1).optional(),
-    availableSeats: vine.number().min(0).optional(),
-    status: vine.enum(['active', 'cancelled', 'completed', 'pending']).optional(),
+    price: vine.number().positive().decimal([0, 2]).optional(),
+    capacity: vine.number().positive().withoutDecimals().min(1).max(500).optional(),
+    availableSeats: vine.number().min(0).withoutDecimals().optional(),
+    status: vine
+      .enum(['draft', 'published', 'active', 'full', 'completed', 'cancelled'])
+      .optional(),
   })
 )

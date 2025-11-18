@@ -1,5 +1,9 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import TouristActivitiesService from '#services/tourism/tourist_activities_service'
+import {
+  createTouristActivityValidator,
+  updateTouristActivityValidator,
+} from '#validators/tourism/tourist_activity'
 
 export default class TouristActivitiesController {
   private touristActivitiesService: TouristActivitiesService
@@ -9,71 +13,160 @@ export default class TouristActivitiesController {
   }
 
   /**
-   * Get all tourist activities
    * GET /tourist-activities
+   * Get all tourist activities with optional pagination
    */
-  public async index({ request, response }: HttpContext) {
+  async index({ request, response }: HttpContext) {
     try {
       const page = request.input('page')
-      const perPage = request.input('per_page', 10)
-      const activities = await this.touristActivitiesService.findAll(page, perPage)
-      return response.status(200).json(activities)
+      const limit = request.input('limit')
+
+      const touristActivities = await this.touristActivitiesService.getAllTouristActivities(
+        page,
+        limit
+      )
+
+      return response.ok({
+        message: 'Tourist activities retrieved successfully',
+        data: touristActivities,
+      })
     } catch (error) {
-      return response.status(500).json({ message: error.message })
+      return response.internalServerError({
+        message: 'Error retrieving tourist activities',
+        error: error.message,
+      })
     }
   }
 
   /**
-   * Get a tourist activity by ID
    * GET /tourist-activities/:id
+   * Get tourist activity by ID
    */
-  public async show({ params, response }: HttpContext) {
+  async show({ params, response }: HttpContext) {
     try {
-      const activity = await this.touristActivitiesService.findById(params.id)
-      return response.status(200).json(activity)
+      const touristActivity = await this.touristActivitiesService.getTouristActivityById(
+        params.id
+      )
+
+      if (!touristActivity) {
+        return response.notFound({
+          message: 'Tourist activity not found',
+        })
+      }
+
+      return response.ok({
+        message: 'Tourist activity retrieved successfully',
+        data: touristActivity,
+      })
     } catch (error) {
-      return response.status(404).json({ message: error.message })
+      return response.internalServerError({
+        message: 'Error retrieving tourist activity',
+        error: error.message,
+      })
     }
   }
 
   /**
-   * Create a new tourist activity
    * POST /tourist-activities
+   * Create new tourist activity
    */
-  public async store({ request, response }: HttpContext) {
+  async store({ request, response }: HttpContext) {
     try {
-      const data = request.all()
-      const activity = await this.touristActivitiesService.create(data)
-      return response.status(201).json(activity)
+      const data = await request.validateUsing(createTouristActivityValidator)
+
+      const touristActivity = await this.touristActivitiesService.createTouristActivity(data)
+
+      return response.created({
+        message: 'Tourist activity created successfully',
+        data: touristActivity,
+      })
     } catch (error) {
-      return response.status(400).json({ message: error.message })
+      if (error.messages) {
+        return response.badRequest({
+          message: 'Validation error',
+          errors: error.messages,
+        })
+      }
+
+      if (error.code === '23503') {
+        return response.notFound({
+          message: 'Municipality not found',
+        })
+      }
+
+      return response.internalServerError({
+        message: 'Error creating tourist activity',
+        error: error.message,
+      })
     }
   }
 
   /**
-   * Update a tourist activity
-   * PUT /tourist-activities/:id
+   * PUT/PATCH /tourist-activities/:id
+   * Update tourist activity
    */
-  public async update({ params, request, response }: HttpContext) {
+  async update({ params, request, response }: HttpContext) {
     try {
-      const data = request.all()
-      const activity = await this.touristActivitiesService.update(params.id, data)
-      return response.status(200).json(activity)
+      const data = await request.validateUsing(updateTouristActivityValidator)
+
+      const touristActivity = await this.touristActivitiesService.updateTouristActivity(
+        params.id,
+        data
+      )
+
+      if (!touristActivity) {
+        return response.notFound({
+          message: 'Tourist activity not found',
+        })
+      }
+
+      return response.ok({
+        message: 'Tourist activity updated successfully',
+        data: touristActivity,
+      })
     } catch (error) {
-      return response.status(404).json({ message: error.message })
+      if (error.messages) {
+        return response.badRequest({
+          message: 'Validation error',
+          errors: error.messages,
+        })
+      }
+
+      if (error.code === '23503') {
+        return response.notFound({
+          message: 'Municipality not found',
+        })
+      }
+
+      return response.internalServerError({
+        message: 'Error updating tourist activity',
+        error: error.message,
+      })
     }
   }
 
   /**
-   * Delete a tourist activity
    * DELETE /tourist-activities/:id
+   * Delete tourist activity
    */
-  public async destroy({ params, response }: HttpContext) {
+  async destroy({ params, response }: HttpContext) {
     try {
-      const activity = await this.touristActivitiesService.delete(params.id)
-      return response.status(200).json(activity)
+      const deleted = await this.touristActivitiesService.deleteTouristActivity(params.id)
+
+      if (!deleted) {
+        return response.notFound({
+          message: 'Tourist activity not found',
+        })
+      }
+
+      return response.ok({
+        message: 'Tourist activity deleted successfully',
+      })
     } catch (error) {
-      return response.status(404).json({ message: error.message })
+      return response.internalServerError({
+        message: 'Error deleting tourist activity',
+        error: error.message,
+      })
     }
   }
 }

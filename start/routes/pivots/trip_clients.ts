@@ -3,21 +3,37 @@ import router from '@adonisjs/core/services/router'
 
 const TripClientsController = () => import('#controllers/pivots/trip_clients_controller')
 
-// Rutas para listar clientes de un viaje
+// CRUD routes for trip clients
 router
   .group(() => {
+    // GET all trip clients (with optional pagination)
     router.get('/', [TripClientsController, 'index'])
-  })
-  .prefix('/api/trips/:tripId/clients')
-//.use([middleware.Security()])
 
-// Rutas para asociar/desasociar un cliente específico
-router
-  .group(() => {
+    // GET trip clients by trip
+    router.get('/trip/:tripId', [TripClientsController, 'getByTrip'])
+
+    // GET trip clients by client
+    router.get('/client/:clientId', [TripClientsController, 'getByClient'])
+
+    // POST assign client to trip
+    router.post('/assign', [TripClientsController, 'assign'])
+
+    // DELETE unassign client from trip
+    router.delete('/unassign/:tripId/:clientId', [TripClientsController, 'unassign'])
+
+    // GET trip client by ID
+    router.get('/:id', [TripClientsController, 'show'])
+
+    // POST create trip client
     router.post('/', [TripClientsController, 'store'])
-    router.delete('/', [TripClientsController, 'destroy'])
+
+    // PUT/PATCH update trip client
+    router.put('/:id', [TripClientsController, 'update'])
+    router.patch('/:id', [TripClientsController, 'update'])
+
+    // DELETE trip client
   })
   .prefix('/api/trips/:tripId/clients/:clientId')
-//.use([middleware.Security()])
+  .prefix('/api/trip-clients')
 
 export default router

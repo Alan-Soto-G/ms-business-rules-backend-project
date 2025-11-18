@@ -29,7 +29,7 @@ export default class Trip extends BaseModel {
   declare availableSeats: number
 
   @column({ columnName: 'status' })
-  declare status: string
+  declare status: 'draft' | 'published' | 'active' | 'full' | 'completed' | 'cancelled'
 
   @column.dateTime({ columnName: 'start_date' })
   declare startDate: DateTime

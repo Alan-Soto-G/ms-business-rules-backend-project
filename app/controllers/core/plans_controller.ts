@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import PlansService from '#services/core/plans_service'
+import { createPlanValidator, updatePlanValidator } from '#validators/core/plan'
 
 export default class PlansController {
   private plansService: PlansService
@@ -9,71 +10,140 @@ export default class PlansController {
   }
 
   /**
-   * Get all plans
    * GET /plans
+   * Get all plans with optional pagination
    */
-  public async index({ request, response }: HttpContext) {
+  async index({ request, response }: HttpContext) {
     try {
       const page = request.input('page')
-      const perPage = request.input('per_page', 10)
-      const plans = await this.plansService.findAll(page, perPage)
-      return response.status(200).json(plans)
+      const limit = request.input('limit')
+
+      const plans = await this.plansService.getAllPlans(page, limit)
+
+      return response.ok({
+        message: 'Plans retrieved successfully',
+        data: plans,
+      })
     } catch (error) {
-      return response.status(500).json({ message: error.message })
+      return response.internalServerError({
+        message: 'Error retrieving plans',
+        error: error.message,
+      })
     }
   }
 
   /**
-   * Get a plan by ID
    * GET /plans/:id
+   * Get plan by ID
    */
-  public async show({ params, response }: HttpContext) {
+  async show({ params, response }: HttpContext) {
     try {
-      const plan = await this.plansService.findById(params.id)
-      return response.status(200).json(plan)
+      const plan = await this.plansService.getPlanById(params.id)
+
+      if (!plan) {
+        return response.notFound({
+          message: 'Plan not found',
+        })
+      }
+
+      return response.ok({
+        message: 'Plan retrieved successfully',
+        data: plan,
+      })
     } catch (error) {
-      return response.status(404).json({ message: error.message })
+      return response.internalServerError({
+        message: 'Error retrieving plan',
+        error: error.message,
+      })
     }
   }
 
   /**
-   * Create a new plan
    * POST /plans
+   * Create new plan
    */
-  public async store({ request, response }: HttpContext) {
+  async store({ request, response }: HttpContext) {
     try {
-      const data = request.all()
-      const plan = await this.plansService.create(data)
-      return response.status(201).json(plan)
+      const data = await request.validateUsing(createPlanValidator)
+
+      const plan = await this.plansService.createPlan(data)
+
+      return response.created({
+        message: 'Plan created successfully',
+        data: plan,
+      })
     } catch (error) {
-      return response.status(400).json({ message: error.message })
+      if (error.messages) {
+        return response.badRequest({
+          message: 'Validation error',
+          errors: error.messages,
+        })
+      }
+
+      return response.internalServerError({
+        message: 'Error creating plan',
+        error: error.message,
+      })
     }
   }
 
   /**
-   * Update a plan
-   * PUT /plans/:id
+   * PUT/PATCH /plans/:id
+   * Update plan
    */
-  public async update({ params, request, response }: HttpContext) {
+  async update({ params, request, response }: HttpContext) {
     try {
-      const data = request.all()
-      const plan = await this.plansService.update(params.id, data)
-      return response.status(200).json(plan)
+      const data = await request.validateUsing(updatePlanValidator)
+
+      const plan = await this.plansService.updatePlan(params.id, data)
+
+      if (!plan) {
+        return response.notFound({
+          message: 'Plan not found',
+        })
+      }
+
+      return response.ok({
+        message: 'Plan updated successfully',
+        data: plan,
+      })
     } catch (error) {
-      return response.status(404).json({ message: error.message })
+      if (error.messages) {
+        return response.badRequest({
+          message: 'Validation error',
+          errors: error.messages,
+        })
+      }
+
+      return response.internalServerError({
+        message: 'Error updating plan',
+        error: error.message,
+      })
     }
   }
 
   /**
-   * Delete a plan
    * DELETE /plans/:id
+   * Delete plan
    */
-  public async destroy({ params, response }: HttpContext) {
+  async destroy({ params, response }: HttpContext) {
     try {
-      const plan = await this.plansService.delete(params.id)
-      return response.status(200).json(plan)
+      const deleted = await this.plansService.deletePlan(params.id)
+
+      if (!deleted) {
+        return response.notFound({
+          message: 'Plan not found',
+        })
+      }
+
+      return response.ok({
+        message: 'Plan deleted successfully',
+      })
     } catch (error) {
-      return response.status(404).json({ message: error.message })
+      return response.internalServerError({
+        message: 'Error deleting plan',
+        error: error.message,
+      })
     }
   }
 }

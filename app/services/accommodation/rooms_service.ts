@@ -1,51 +1,89 @@
 import Room from '#models/accommodation/room'
+import { ModelPaginatorContract } from '@adonisjs/lucid/types/model'
 
 export default class RoomsService {
   /**
    * Get all rooms with optional pagination
-   * @param page - Page number (optional, if not provided returns all records)
-   * @param perPage - Items per page (default: 10)
    */
-  async findAll(page?: number, perPage: number = 10) {
-    const query = Room.query().preload('hotel').preload('bookings')
+  async getAllRooms(
+    page?: number,
+    limit?: number
+  ): Promise<Room[] | ModelPaginatorContract<Room>> {
+    const query = Room.query().preload('hotel').preload('bookings').orderBy('id', 'asc')
 
-    if (page !== undefined) {
-      return await query.paginate(page, perPage)
+    if (page && limit) {
+      return await query.paginate(page, limit)
     }
 
     return await query
   }
 
   /**
-   * Get a room by ID
+   * Get room by ID
    */
-  async findById(id: number) {
-    return await Room.query().where('id', id).preload('hotel').preload('bookings').firstOrFail()
+  async getRoomById(id: number): Promise<Room | null> {
+    return await Room.query().where('id', id).preload('hotel').preload('bookings').first()
   }
 
   /**
-   * Create a new room
+   * Create new room
    */
-  async create(data: any) {
-    return await Room.create(data)
+  async createRoom(data: {
+    hotelId: number
+    roomNumber: string
+    roomType: string
+    capacity: number
+    pricePerNight: number
+    status?: 'available' | 'occupied' | 'maintenance' | 'cleaning'
+  }): Promise<Room> {
+    const room = await Room.create(data)
+
+    await room.load('hotel')
+
+    return room
   }
 
   /**
-   * Update a room
+   * Update room
    */
-  async update(id: number, data: any) {
-    const room = await Room.findOrFail(id)
+  async updateRoom(
+    id: number,
+    data: {
+      hotelId?: number
+      roomNumber?: string
+      roomType?: string
+      capacity?: number
+      pricePerNight?: number
+      status?: 'available' | 'occupied' | 'maintenance' | 'cleaning'
+    }
+  ): Promise<Room | null> {
+    const room = await Room.find(id)
+
+    if (!room) {
+      return null
+    }
+
     room.merge(data)
     await room.save()
+
+    await room.load('hotel')
+    await room.load('bookings')
+
     return room
   }
 
   /**
-   * Delete a room
+   * Delete room
    */
-  async delete(id: number) {
-    const room = await Room.findOrFail(id)
+  async deleteRoom(id: number): Promise<boolean> {
+    const room = await Room.find(id)
+
+    if (!room) {
+      return false
+    }
+
     await room.delete()
-    return room
+    return true
   }
 }
+

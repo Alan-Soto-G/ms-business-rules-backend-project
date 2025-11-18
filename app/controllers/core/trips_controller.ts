@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import TripsService from '#services/core/trips_service'
+import { createTripValidator, updateTripValidator } from '#validators/core/trip'
 
 export default class TripsController {
   private tripsService: TripsService
@@ -9,71 +10,140 @@ export default class TripsController {
   }
 
   /**
-   * Get all trips
    * GET /trips
+   * Get all trips with optional pagination
    */
-  public async index({ request, response }: HttpContext) {
+  async index({ request, response }: HttpContext) {
     try {
       const page = request.input('page')
-      const perPage = request.input('per_page', 10)
-      const trips = await this.tripsService.findAll(page, perPage)
-      return response.status(200).json(trips)
+      const limit = request.input('limit')
+
+      const trips = await this.tripsService.getAllTrips(page, limit)
+
+      return response.ok({
+        message: 'Trips retrieved successfully',
+        data: trips,
+      })
     } catch (error) {
-      return response.status(500).json({ message: error.message })
+      return response.internalServerError({
+        message: 'Error retrieving trips',
+        error: error.message,
+      })
     }
   }
 
   /**
-   * Get a trip by ID
    * GET /trips/:id
+   * Get trip by ID
    */
-  public async show({ params, response }: HttpContext) {
+  async show({ params, response }: HttpContext) {
     try {
-      const trip = await this.tripsService.findById(params.id)
-      return response.status(200).json(trip)
+      const trip = await this.tripsService.getTripById(params.id)
+
+      if (!trip) {
+        return response.notFound({
+          message: 'Trip not found',
+        })
+      }
+
+      return response.ok({
+        message: 'Trip retrieved successfully',
+        data: trip,
+      })
     } catch (error) {
-      return response.status(404).json({ message: error.message })
+      return response.internalServerError({
+        message: 'Error retrieving trip',
+        error: error.message,
+      })
     }
   }
 
   /**
-   * Create a new trip
    * POST /trips
+   * Create new trip
    */
-  public async store({ request, response }: HttpContext) {
+  async store({ request, response }: HttpContext) {
     try {
-      const data = request.all()
-      const trip = await this.tripsService.create(data)
-      return response.status(201).json(trip)
+      const data = await request.validateUsing(createTripValidator)
+
+      const trip = await this.tripsService.createTrip(data)
+
+      return response.created({
+        message: 'Trip created successfully',
+        data: trip,
+      })
     } catch (error) {
-      return response.status(400).json({ message: error.message })
+      if (error.messages) {
+        return response.badRequest({
+          message: 'Validation error',
+          errors: error.messages,
+        })
+      }
+
+      return response.internalServerError({
+        message: 'Error creating trip',
+        error: error.message,
+      })
     }
   }
 
   /**
-   * Update a trip
-   * PUT /trips/:id
+   * PUT/PATCH /trips/:id
+   * Update trip
    */
-  public async update({ params, request, response }: HttpContext) {
+  async update({ params, request, response }: HttpContext) {
     try {
-      const data = request.all()
-      const trip = await this.tripsService.update(params.id, data)
-      return response.status(200).json(trip)
+      const data = await request.validateUsing(updateTripValidator)
+
+      const trip = await this.tripsService.updateTrip(params.id, data)
+
+      if (!trip) {
+        return response.notFound({
+          message: 'Trip not found',
+        })
+      }
+
+      return response.ok({
+        message: 'Trip updated successfully',
+        data: trip,
+      })
     } catch (error) {
-      return response.status(404).json({ message: error.message })
+      if (error.messages) {
+        return response.badRequest({
+          message: 'Validation error',
+          errors: error.messages,
+        })
+      }
+
+      return response.internalServerError({
+        message: 'Error updating trip',
+        error: error.message,
+      })
     }
   }
 
   /**
-   * Delete a trip
    * DELETE /trips/:id
+   * Delete trip
    */
-  public async destroy({ params, response }: HttpContext) {
+  async destroy({ params, response }: HttpContext) {
     try {
-      const trip = await this.tripsService.delete(params.id)
-      return response.status(200).json(trip)
+      const deleted = await this.tripsService.deleteTrip(params.id)
+
+      if (!deleted) {
+        return response.notFound({
+          message: 'Trip not found',
+        })
+      }
+
+      return response.ok({
+        message: 'Trip deleted successfully',
+      })
     } catch (error) {
-      return response.status(404).json({ message: error.message })
+      return response.internalServerError({
+        message: 'Error deleting trip',
+        error: error.message,
+      })
     }
   }
 }
