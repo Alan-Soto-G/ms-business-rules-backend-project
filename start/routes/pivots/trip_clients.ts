@@ -32,8 +32,9 @@ router
     router.patch('/:id', [TripClientsController, 'update'])
 
     // DELETE trip client
+    router.delete('/:id', [TripClientsController, 'destroy'])
   })
-  .prefix('/api/trips/:tripId/clients/:clientId')
   .prefix('/api/trip-clients')
+//.use(middleware.Security)
 
 export default router
