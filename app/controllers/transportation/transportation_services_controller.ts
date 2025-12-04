@@ -5,7 +5,6 @@ import {
   updateTransportationServiceValidator,
   assignTransportationServiceValidator,
 } from '#validators/transportation/transport_service'
-import { DateTime } from 'luxon'
 
 export default class TransportationServicesController {
   private transportationServicesService: TransportationServicesService
@@ -70,7 +69,7 @@ export default class TransportationServicesController {
 
   /**
    * GET /transportation-services/journey/:journeyId
-   * Get all transportation services by journey
+   * Get all transportation services for a specific journey
    */
   async getByJourney({ params, response }: HttpContext) {
     try {
@@ -92,7 +91,7 @@ export default class TransportationServicesController {
 
   /**
    * GET /transportation-services/vehicle/:vehicleId
-   * Get all transportation services by vehicle
+   * Get all transportation services for a specific vehicle
    */
   async getByVehicle({ params, response }: HttpContext) {
     try {
@@ -118,14 +117,7 @@ export default class TransportationServicesController {
    */
   async store({ request, response }: HttpContext) {
     try {
-      const validatedData = await request.validateUsing(createTransportationServiceValidator)
-
-      // Convert Date to DateTime
-      const data = {
-        ...validatedData,
-        startDate: DateTime.fromJSDate(validatedData.startDate),
-        endDate: DateTime.fromJSDate(validatedData.endDate),
-      }
+      const data = await request.validateUsing(createTransportationServiceValidator)
 
       const service = await this.transportationServicesService.createTransportationService(data)
 
@@ -153,15 +145,9 @@ export default class TransportationServicesController {
         })
       }
 
-      if (error.message.includes('End date must be after start date')) {
-        return response.badRequest({
-          message: error.message,
-        })
-      }
-
       if (error.code === '23503') {
         return response.badRequest({
-          message: 'Invalid journey ID or vehicle ID',
+          message: 'Invalid journey or vehicle ID',
         })
       }
 
@@ -174,18 +160,11 @@ export default class TransportationServicesController {
 
   /**
    * POST /transportation-services/assign
-   * Assign transportation service between journey and vehicle
+   * Assign a vehicle to a journey creating a transportation service
    */
   async assign({ request, response }: HttpContext) {
     try {
-      const validatedData = await request.validateUsing(assignTransportationServiceValidator)
-
-      // Convert Date to DateTime
-      const data = {
-        ...validatedData,
-        startDate: DateTime.fromJSDate(validatedData.startDate),
-        endDate: DateTime.fromJSDate(validatedData.endDate),
-      }
+      const data = await request.validateUsing(assignTransportationServiceValidator)
 
       const service = await this.transportationServicesService.assignTransportationService(data)
 
@@ -213,12 +192,6 @@ export default class TransportationServicesController {
         })
       }
 
-      if (error.message.includes('End date must be after start date')) {
-        return response.badRequest({
-          message: error.message,
-        })
-      }
-
       return response.internalServerError({
         message: 'Error assigning transportation service',
         error: error.message,
@@ -228,7 +201,7 @@ export default class TransportationServicesController {
 
   /**
    * DELETE /transportation-services/unassign/:journeyId/:vehicleId
-   * Unassign transportation service between journey and vehicle
+   * Unassign a vehicle from a journey
    */
   async unassign({ params, response }: HttpContext) {
     try {
@@ -260,16 +233,7 @@ export default class TransportationServicesController {
    */
   async update({ params, request, response }: HttpContext) {
     try {
-      const validatedData = await request.validateUsing(updateTransportationServiceValidator)
-
-      // Convert Date to DateTime if dates are provided
-      const data = {
-        ...validatedData,
-        startDate: validatedData.startDate
-          ? DateTime.fromJSDate(validatedData.startDate)
-          : undefined,
-        endDate: validatedData.endDate ? DateTime.fromJSDate(validatedData.endDate) : undefined,
-      }
+      const data = await request.validateUsing(updateTransportationServiceValidator)
 
       const service = await this.transportationServicesService.updateTransportationService(
         params.id,
@@ -302,12 +266,6 @@ export default class TransportationServicesController {
 
       if (error.message.includes('already exists')) {
         return response.conflict({
-          message: error.message,
-        })
-      }
-
-      if (error.message.includes('End date must be after start date')) {
-        return response.badRequest({
           message: error.message,
         })
       }
