@@ -1,12 +1,14 @@
 // app/models/trip.ts
 import { DateTime } from 'luxon'
-import { BaseModel, column, hasMany } from '@adonisjs/lucid/orm'
+import { BaseModel, column, hasMany, beforeUpdate } from '@adonisjs/lucid/orm'
 import type { HasMany } from '@adonisjs/lucid/types/relations'
 import Fee from '#models/financial/fee'
 import Booking from '#models/accommodation/booking'
 import TripClient from '#models/pivots/trip_client'
 import TripPlan from '#models/pivots/trip_plan'
 import TransportItinerary from '#models/transportation/transport_itinerary'
+import notificationService from '#services/notification_service'
+import { getAffectedClientsFromTrip } from '#services/helpers/notification_helpers'
 
 export default class Trip extends BaseModel {
   @column({ isPrimary: true })
@@ -76,4 +78,60 @@ export default class Trip extends BaseModel {
 
   @column.dateTime({ autoCreate: true, autoUpdate: true, columnName: 'updated_at' })
   declare updatedAt: DateTime
+
+  /**
+   * Hook: Detecta cambios de estado y emite notificaciones
+   */
+  @beforeUpdate()
+  static async notifyStatusChange(trip: Trip) {
+    // Solo notificar si el estado cambió
+    if (trip.$dirty.status) {
+      const oldStatus = trip.$original.status
+      const newStatus = trip.status
+
+      // Obtener clientes afectados
+      const affectedClients = await getAffectedClientsFromTrip(trip.id)
+
+      // Notificar cancelación del viaje
+      if (newStatus === 'cancelled') {
+        await notificationService.notifyTripCancelled({
+          tripId: trip.id,
+          tripName: trip.name,
+          reason: 'Viaje cancelado por la agencia',
+          affectedClients,
+        })
+      }
+
+      // Notificar finalización del servicio
+      if (newStatus === 'completed' && oldStatus === 'active') {
+        const mainClient = affectedClients[0] // Cliente principal
+        if (mainClient) {
+          await notificationService.notifyServiceCompleted({
+            tripId: trip.id,
+            tripName: trip.name,
+            startDate: trip.startDate.toISO() || '',
+            endDate: trip.endDate.toISO() || '',
+            destination: trip.destination,
+            summary: {
+              activitiesCompleted: 0, // Esto debería calcularse desde las actividades del plan
+              accommodations: [],
+              highlights: ['Viaje completado exitosamente'],
+            },
+            mainClient,
+          })
+        }
+      }
+
+      // Notificar cualquier cambio de estado si hay clientes activos
+      if (affectedClients.length > 0 && ['active', 'published', 'cancelled'].includes(newStatus)) {
+        await notificationService.notifyTripStatusChanged({
+          tripId: trip.id,
+          tripName: trip.name,
+          oldStatus,
+          newStatus,
+          clients: affectedClients,
+        })
+      }
+    }
+  }
 }
