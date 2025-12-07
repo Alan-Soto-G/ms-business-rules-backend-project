@@ -109,11 +109,11 @@ NOTIFICATIONS_ENABLED: Env.schema.string.optional(),
 
 ### 🚨 Anomalías
 
-| Tipo de Evento              | Descripción                     | Cuándo se emite                                           |
-| --------------------------- | ------------------------------- | --------------------------------------------------------- |
-| `itinerary.segment.delayed` | Retraso en tramo del itinerario | Vuelo retrasado, transporte demorado                      |
-| `vehicle.breakdown`         | Avería de vehículo              | Vehículo pasa a estado "averiado" durante servicio activo |
-| `vehicle.status.changed`    | Cambio de estado de vehículo    | Cualquier cambio de estado                                |
+| Tipo de Evento              | Descripción                     | Cuándo se emite                                                          |
+| --------------------------- | ------------------------------- | ------------------------------------------------------------------------ |
+| `itinerary.segment.delayed` | Retraso en tramo del itinerario | Vuelo retrasado, transporte demorado                                     |
+| `vehicle.breakdown`         | Avería de vehículo              | Vehículo pasa a estado "maintenance" o "retired" durante servicio activo |
+| `vehicle.status.changed`    | Cambio de estado de vehículo    | Cualquier cambio de estado                                               |
 
 ### ❌ Cancelaciones
 
@@ -269,7 +269,7 @@ static async notifyVehicleStatusChange(vehicle: Vehicle) {
 ```typescript
 // Solo cambias el estado
 const vehicle = await Vehicle.findOrFail(vehicleId)
-vehicle.status = 'averiado'
+vehicle.status = 'maintenance' // Estados válidos: available, in_use, maintenance, retired
 await vehicle.save()
 // ✅ Automáticamente notifica a los clientes de viajes activos
 ```

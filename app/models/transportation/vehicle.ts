@@ -78,17 +78,11 @@ export default class Vehicle extends BaseModel {
       const oldStatus = vehicle.$original.status
       const newStatus = vehicle.status
 
-      // Estados que indican problema (averías, reparaciones, etc.)
-      const problematicStatuses = [
-        'averiado',
-        'en_reparacion',
-        'fuera_de_servicio',
-        'maintenance',
-        'broken',
-      ]
+      // Estados que indican problema según el validador: maintenance, retired
+      const problematicStatuses = ['maintenance', 'retired']
 
       // Si el vehículo pasa a estado problemático, buscar servicios activos
-      if (problematicStatuses.includes(newStatus.toLowerCase())) {
+      if (problematicStatuses.includes(newStatus)) {
         // Buscar si el vehículo tiene servicios de transporte activos
         await vehicle.load('transportationServices', (query) => {
           query.preload('journey').preload('transportItineraries', (itineraryQuery) => {

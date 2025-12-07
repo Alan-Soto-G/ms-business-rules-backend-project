@@ -220,7 +220,7 @@ app/services/
                         ▼
 ┌─────────────────────────────────────────────────────────────────┐
 │ 2. CONTROLADOR ACTUALIZA VEHÍCULO                              │
-│    vehicle.status = 'averiado'                                 │
+│    vehicle.status = 'maintenance' // Estados válidos         │
 │    await vehicle.save()                                        │
 └───────────────────────┬─────────────────────────────────────────┘
                         │

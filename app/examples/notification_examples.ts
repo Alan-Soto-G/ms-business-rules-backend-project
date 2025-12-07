@@ -81,7 +81,7 @@ export async function reportVehicleBreakdownExample(vehicleId: number, _reason: 
   }
 
   // 2. Cambiar el estado (esto dispara automáticamente el hook @beforeUpdate)
-  vehicle.status = 'averiado'
+  vehicle.status = 'maintenance' // Estados válidos: available, in_use, maintenance, retired
   await vehicle.save()
 
   // El hook del modelo ya emitirá las notificaciones automáticamente

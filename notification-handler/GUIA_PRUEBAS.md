@@ -27,16 +27,16 @@ npm run dev
 
 ## 🎯 Escenarios de Prueba
 
-### 1️⃣ Prueba: Avería de Vehículo
+### 1️⃣ Prueba: Vehículo en Mantenimiento
 
 **Pasos:**
 
 1. Crea un cliente con email real (tu email)
 2. Crea un viaje con `status='activo'`
 3. Asigna ese cliente al viaje
-4. Crea un vehículo con `status='disponible'`
+4. Crea un vehículo con `status='available'`
 5. Crea un servicio de transporte que conecte el vehículo con el viaje
-6. **Actualiza el vehículo** a `status='averiado'`
+6. **Actualiza el vehículo** a `status='maintenance'` o `status='retired'`
 
 **Resultado esperado:**
 
@@ -47,7 +47,7 @@ npm run dev
 ```http
 PUT /vehicles/:id
 {
-  "status": "averiado"
+  "status": "maintenance"
 }
 ```
 
@@ -57,7 +57,7 @@ PUT /vehicles/:id
 
 **Pasos:**
 
-1. Usa el viaje creado anteriormente (debe tener `status='activo'` o `'planificado'`)
+1. Usa el viaje creado anteriormente (debe tener `status='active'` o `'published'`)
 2. Asegúrate de que tiene clientes asignados con emails reales
 3. **Actualiza el viaje** a `status='cancelled'`
 
@@ -74,13 +74,15 @@ PUT /trips/:id
 }
 ```
 
+**Estados válidos de Trip:** `draft`, `published`, `active`, `full`, `completed`, `cancelled`
+
 ---
 
 ### 3️⃣ Prueba: Viaje Completado con Resumen
 
 **Pasos:**
 
-1. Usa un viaje con clientes asignados
+1. Usa un viaje con `status='active'` y clientes asignados
 2. **Actualiza el viaje** a `status='completed'`
 
 **Resultado esperado:**
@@ -96,66 +98,56 @@ PUT /trips/:id
 }
 ```
 
----
-
-### 4️⃣ Prueba: Pago Aceptado
-
-**Pasos:**
-
-1. Crea una factura (`Invoice`) asociada a un viaje
-2. Asigna un cliente con email real
-3. **Llama manualmente** al servicio de notificación desde un controlador
-
-**Código de prueba en controller:**
-
-```typescript
-import notificationService from '#services/notification_service'
-
-// En tu método de confirmar pago:
-await notificationService.notifyPaymentAccepted({
-  invoiceId: invoice.id,
-  invoiceNumber: invoice.invoiceNumber,
-  amount: invoice.totalAmount,
-  paymentMethod: 'Tarjeta de crédito',
-  clientName: 'Juan Pérez',
-  clientEmail: 'tu-email@gmail.com',
-  tripId: trip.id,
-  tripName: trip.tripName,
-})
-```
-
-**Resultado esperado:**
-
-- 📧 Recibes: "✅ Pago confirmado - Factura INV-XXX"
+**Nota:** El hook solo envía resumen si el viaje pasa de `active` → `completed`
 
 ---
 
-### 5️⃣ Prueba: Confirmación de Reserva
+### 4️⃣ Prueba: Pago Aceptado (Automático)
 
 **Pasos:**
 
-1. Crea una reserva (`Booking`) en un hotel
-2. **Llama manualmente** al servicio de notificación
-
-**Código de prueba:**
-
-```typescript
-await notificationService.notifyBookingConfirmed({
-  bookingId: booking.id,
-  hotelName: 'Hotel Campestre',
-  roomType: 'Doble estándar',
-  checkInDate: '2024-12-15',
-  checkOutDate: '2024-12-18',
-  clientName: 'Ana Torres',
-  clientEmail: 'tu-email@gmail.com',
-  tripId: trip.id,
-  tripName: trip.tripName,
-})
-```
+1. Crea una factura (`Invoice`) sin fecha de pago
+2. **Actualiza la factura** agregando `paymentDate`
 
 **Resultado esperado:**
 
-- 📧 Recibes: "✅ Reserva confirmada - Hotel Campestre"
+- 📧 Cliente recibe: "✅ Pago confirmado - Factura INV-XXX"
+
+**Endpoint de prueba:**
+
+```http
+PUT /invoices/:id
+{
+  "paymentDate": "2024-12-07T10:30:00"
+}
+```
+
+**Hook automático:** El modelo Invoice detecta cuando se agrega `paymentDate` y envía la notificación
+
+---
+
+### 5️⃣ Prueba: Confirmación de Reserva (Automático)
+
+**Pasos:**
+
+1. Crea una reserva (`Booking`) en un hotel asociada a un viaje
+2. **La reserva se crea** con POST
+
+**Resultado esperado:**
+
+- 📧 Cliente recibe: "✅ Reserva confirmada - Hotel Campestre"
+
+**Endpoint de prueba:**
+
+```http
+POST /bookings
+{
+  "tripId": 1,
+  "roomId": 5
+}
+```
+
+**Hook automático:** El modelo Booking detecta la creación y envía la notificación automáticamente
 
 ---
 
@@ -236,17 +228,37 @@ curl -X POST http://localhost:5000/event \
 
 ---
 
+## 📋 Estados Válidos del Sistema
+
+### Vehicle (Vehículo)
+
+- `available` - Disponible
+- `in_use` - En uso
+- `maintenance` - En mantenimiento ⚠️ **Genera alerta**
+- `retired` - Retirado ⚠️ **Genera alerta**
+
+### Trip (Viaje)
+
+- `draft` - Borrador
+- `published` - Publicado
+- `active` - Activo
+- `full` - Completo (sin cupos)
+- `completed` - Completado 🎉 **Envía resumen**
+- `cancelled` - Cancelado ❌ **Genera alerta**
+
+---
+
 ## 📝 Checklist de Pruebas
 
 - [ ] MS de Notificaciones corriendo en puerto 5000
 - [ ] MS de Negocio corriendo en puerto 3333
 - [ ] Variables en `.env` configuradas
-- [ ] Prueba 1: Avería de vehículo ✅
-- [ ] Prueba 2: Cancelación de viaje ✅
-- [ ] Prueba 3: Viaje completado ✅
-- [ ] Prueba 4: Pago aceptado ✅
-- [ ] Prueba 5: Reserva confirmada ✅
-- [ ] Prueba 6: Cancelación de actividad ✅
+- [ ] Prueba 1: Vehículo en mantenimiento ✅ (Hook automático)
+- [ ] Prueba 2: Cancelación de viaje ✅ (Hook automático)
+- [ ] Prueba 3: Viaje completado ✅ (Hook automático)
+- [ ] Prueba 4: Pago aceptado ✅ (Hook automático)
+- [ ] Prueba 5: Reserva confirmada ✅ (Hook automático)
+- [ ] Prueba 6: Cancelación de actividad ✅ (Manual)
 - [ ] Correos recibidos correctamente ✅
 
 ---

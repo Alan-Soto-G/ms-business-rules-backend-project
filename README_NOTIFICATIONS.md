@@ -132,16 +132,16 @@ MS Negocio (AdonisJS)  →  NotificationService  →  HTTP POST  →  MS Notific
 
 ## 🎯 Casos de Uso
 
-### ✅ Caso 1: Vehículo se avería durante servicio activo
+### ✅ Caso 1: Vehículo en mantenimiento durante servicio activo
 
 ```typescript
 // En el controlador
 const vehicle = await Vehicle.findOrFail(vehicleId)
-vehicle.status = 'averiado'
+vehicle.status = 'maintenance' // Estados válidos: available, in_use, maintenance, retired
 await vehicle.save()
 
 // El hook detecta:
-// 1. Cambio de estado → averiado
+// 1. Cambio de estado → maintenance
 // 2. Busca servicios de transporte activos
 // 3. Identifica viajes en curso
 // 4. Obtiene clientes afectados

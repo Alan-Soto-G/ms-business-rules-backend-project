@@ -87,7 +87,7 @@ await trip.save()
 ### Reportar avería
 
 ```typescript
-vehicle.status = 'averiado'
+vehicle.status = 'maintenance' // Estados válidos: available, in_use, maintenance, retired
 await vehicle.save()
 ```
 

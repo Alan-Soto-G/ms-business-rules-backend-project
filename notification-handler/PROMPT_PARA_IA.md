@@ -74,7 +74,7 @@ Debe recibir eventos del MS de Negocio con esta estructura:
      "vehicleId": 42,
      "licensePlate": "ABC-123",
      "oldStatus": "disponible",
-     "newStatus": "en_reparacion",
+     "newStatus": "maintenance",
      "tripId": 123,
      "tripName": "Tour",
      "affectedClients": [...]  // puede estar vacío
@@ -210,8 +210,8 @@ Debe recibir eventos del MS de Negocio con esta estructura:
     {
       "tripId": 123,
       "tripName": "Tour Eje Cafetero",
-      "oldStatus": "planificado",
-      "newStatus": "activo",
+      "oldStatus": "published",
+      "newStatus": "active",
       "clients": [...]
     }
     ```

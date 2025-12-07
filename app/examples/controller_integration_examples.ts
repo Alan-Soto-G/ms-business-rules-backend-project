@@ -204,7 +204,7 @@ export class VehiclesController {
     return response.ok({
       message: `Estado del vehículo actualizado a: ${status}`,
       notification:
-        status === 'averiado' || status === 'fuera_de_servicio'
+        status === 'maintenance' || status === 'retired'
           ? 'Clientes de servicios activos han sido notificados'
           : 'Sin notificaciones enviadas',
       reason,
@@ -222,8 +222,8 @@ export class VehiclesController {
       'estimatedRepairTime',
     ])
 
-    // Cambiar a estado averiado (notificaciones automáticas)
-    vehicle.status = 'averiado'
+    // Cambiar a estado de mantenimiento (notificaciones automáticas)
+    vehicle.status = 'maintenance' // Estados válidos: available, in_use, maintenance, retired
     await vehicle.save()
 
     // Aquí podrías registrar más detalles en otra tabla

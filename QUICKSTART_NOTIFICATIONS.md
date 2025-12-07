@@ -22,7 +22,7 @@ await trip.save()
 // ✅ Las notificaciones se envían automáticamente
 
 const vehicle = await Vehicle.findOrFail(vehicleId)
-vehicle.status = 'averiado'
+vehicle.status = 'maintenance' // Estados válidos: available, in_use, maintenance, retired
 await vehicle.save()
 // ✅ Notifica a clientes de viajes activos automáticamente
 ```
