@@ -14,7 +14,7 @@ export default class Invoice extends BaseModel {
   declare feeId: number
 
   @column({ columnName: 'bank_card_id' })
-  declare bankCardId: number | null
+  declare bankCardId: number 
 
   // Specific attributes of Invoice
   @column({ columnName: 'invoice_number' })

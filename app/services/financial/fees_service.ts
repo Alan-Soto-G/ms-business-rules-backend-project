@@ -10,7 +10,7 @@ export default class FeesService {
     page?: number,
     limit?: number
   ): Promise<Fee[] | ModelPaginatorContract<Fee>> {
-    const query = Fee.query().preload('trip').preload('invoice').orderBy('id', 'asc')
+    const query = Fee.query().preload('tripClient').preload('invoice').orderBy('id', 'asc')
 
     if (page && limit) {
       return await query.paginate(page, limit)
@@ -23,14 +23,15 @@ export default class FeesService {
    * Get fee by ID
    */
   async getFeeById(id: number): Promise<Fee | null> {
-    return await Fee.query().where('id', id).preload('trip').preload('invoice').first()
+    return await Fee.query().where('id', id).preload('tripClient').preload('invoice').first()
   }
 
   /**
    * Create new fee
    */
   async createFee(data: {
-    tripId: number
+    tripClientId: number
+    installmentNumber: number
     amount: number
     description: string
     dueDate: DateTime
@@ -38,7 +39,7 @@ export default class FeesService {
   }): Promise<Fee> {
     const fee = await Fee.create(data)
 
-    await fee.load('trip')
+    await fee.load('tripClient')
     await fee.load('invoice')
 
     return fee
@@ -50,7 +51,8 @@ export default class FeesService {
   async updateFee(
     id: number,
     data: {
-      tripId?: number
+      tripClientId?: number
+      installmentNumber?: number
       amount?: number
       description?: string
       dueDate?: DateTime
@@ -66,7 +68,7 @@ export default class FeesService {
     fee.merge(data)
     await fee.save()
 
-    await fee.load('trip')
+    await fee.load('tripClient')
     await fee.load('invoice')
 
     return fee

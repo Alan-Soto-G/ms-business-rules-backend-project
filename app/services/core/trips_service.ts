@@ -11,10 +11,9 @@ export default class TripsService {
     limit?: number
   ): Promise<Trip[] | ModelPaginatorContract<Trip>> {
     const query = Trip.query()
-      .preload('fees')
       .preload('tripClients')
       .preload('tripPlans')
-      .preload('Bookings')
+      .preload('bookings')
       .preload('transportItineraries')
       .orderBy('id', 'asc')
 
@@ -31,10 +30,9 @@ export default class TripsService {
   async getTripById(id: number): Promise<Trip | null> {
     return await Trip.query()
       .where('id', id)
-      .preload('fees')
       .preload('tripClients')
       .preload('tripPlans')
-      .preload('Bookings')
+      .preload('bookings')
       .preload('transportItineraries')
       .first()
   }
@@ -55,10 +53,9 @@ export default class TripsService {
   }): Promise<Trip> {
     const trip = await Trip.create(data)
 
-    await trip.load('fees')
     await trip.load('tripClients')
     await trip.load('tripPlans')
-    await trip.load('Bookings')
+    await trip.load('bookings')
     await trip.load('transportItineraries')
 
     return trip
@@ -90,10 +87,9 @@ export default class TripsService {
     trip.merge(data)
     await trip.save()
 
-    await trip.load('fees')
     await trip.load('tripClients')
     await trip.load('tripPlans')
-    await trip.load('Bookings')
+    await trip.load('bookings')
     await trip.load('transportItineraries')
 
     return trip
@@ -113,4 +109,3 @@ export default class TripsService {
     return true
   }
 }
-

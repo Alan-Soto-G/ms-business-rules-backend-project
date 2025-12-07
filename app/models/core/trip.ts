@@ -2,7 +2,6 @@
 import { DateTime } from 'luxon'
 import { BaseModel, column, hasMany, beforeUpdate } from '@adonisjs/lucid/orm'
 import type { HasMany } from '@adonisjs/lucid/types/relations'
-import Fee from '#models/financial/fee'
 import Booking from '#models/accommodation/booking'
 import TripClient from '#models/pivots/trip_client'
 import TripPlan from '#models/pivots/trip_plan'
@@ -42,13 +41,7 @@ export default class Trip extends BaseModel {
   @column({ columnName: 'destination' })
   declare destination: string
 
-  // Relation 1 to N with Fee
-  @hasMany(() => Fee, {
-    foreignKey: 'tripId',
-  })
-  declare fees: HasMany<typeof Fee>
-
-  // Relation 1 to N with Trip Client
+  // ✅ Relation 1 to N with Trip Client
   @hasMany(() => TripClient, {
     foreignKey: 'tripId',
   })
@@ -64,7 +57,7 @@ export default class Trip extends BaseModel {
   @hasMany(() => Booking, {
     foreignKey: 'tripId',
   })
-  declare Bookings: HasMany<typeof Booking>
+  declare bookings: HasMany<typeof Booking>
 
   // Relation 1 to N with Transport Itinerary
   @hasMany(() => TransportItinerary, {

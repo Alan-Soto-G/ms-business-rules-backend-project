@@ -8,13 +8,22 @@ export default class extends BaseSchema {
     this.schema.createTable(this.tableName, (table) => {
       table.increments('id').primary()
 
+      // Foreign key - Apunta a TripClient (la orden)
       table
-        .integer('trip_id')
+        .integer('trip_client_id')
         .unsigned()
         .notNullable()
         .references('id')
-        .inTable('trips')
+        .inTable('trip_clients')
         .onDelete('CASCADE')
+
+      // Número de cuota (1ra, 2da, 3ra, etc.)
+      table
+        .integer('installment_number')
+        .unsigned()
+        .notNullable()
+        .defaultTo(1)
+        .comment('Número de cuota dentro del plan de pagos')
 
       // Strict validations
       table.decimal('amount', 10, 2).unsigned().notNullable().checkPositive() // Positive amount
@@ -26,7 +35,8 @@ export default class extends BaseSchema {
         .defaultTo('pending')
 
       // Indexes
-      table.index(['trip_id'])
+      table.index(['trip_client_id'])
+      table.index(['trip_client_id', 'installment_number'])
       table.index(['status'])
       table.index(['due_date'])
 
