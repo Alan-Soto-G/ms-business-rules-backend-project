@@ -281,4 +281,61 @@ export class ExampleController {
       message: 'Actividad cancelada y clientes notificados',
     })
   }
+
+  /**
+   * Ejemplo: Notificar retraso de vuelo manualmente
+   * Llamar cuando se detecte un retraso en un vuelo
+   */
+  async notifyFlightDelay({ request, response }: HttpContext) {
+    const { transportationServiceId, delayMinutes, reason } = request.only([
+      'transportationServiceId',
+      'delayMinutes',
+      'reason',
+    ])
+
+    // Cargar el servicio de transporte (que debe ser un vuelo)
+    const service = await TransportItinerary.query()
+      .where('transportation_service_id', transportationServiceId)
+      .preload('transportationService', (serviceQuery) => {
+        serviceQuery.preload('vehicle', (vehicleQuery) => {
+          vehicleQuery.preload('aircraft', (aircraftQuery) => {
+            aircraftQuery.preload('airline')
+          })
+        })
+      })
+      .preload('trip')
+      .first()
+
+    if (!service || !service.trip) {
+      return response.notFound({ message: 'Servicio o viaje no encontrado' })
+    }
+
+    const trip = service.trip
+    const aircraft = service.transportationService?.vehicle?.aircraft
+    const airline = aircraft?.airline
+
+    // Obtener clientes afectados
+    const affectedClients = await getAffectedClientsFromTrip(trip.id)
+
+    // Generar número de vuelo (ejemplo)
+    const flightNumber = airline
+      ? `${airline.name.substring(0, 2).toUpperCase()}${aircraft?.id}`
+      : 'XX000'
+
+    // Notificar retraso de vuelo
+    await notificationService.notifyFlightDelayed({
+      flightNumber,
+      delayMinutes,
+      reason,
+      tripId: trip.id,
+      tripName: trip.name,
+      affectedClients,
+    })
+
+    return response.ok({
+      message: 'Retraso de vuelo notificado a los clientes',
+      flightNumber,
+      affectedClients: affectedClients.length,
+    })
+  }
 }

@@ -84,6 +84,20 @@ export class NotificationService {
   }
 
   /**
+   * Notifica retraso de vuelo
+   */
+  async notifyFlightDelayed(data: {
+    flightNumber: string
+    delayMinutes: number
+    reason: string
+    tripId?: number
+    tripName?: string
+    affectedClients: Array<{ name: string; email: string; phone?: string }>
+  }): Promise<void> {
+    await this.emit('flight.delayed', data)
+  }
+
+  /**
    * Notifica avería de vehículo asignado a un servicio activo
    */
   async notifyVehicleBreakdown(data: {
