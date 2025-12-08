@@ -14,7 +14,7 @@ export default class Invoice extends BaseModel {
   declare feeId: number
 
   @column({ columnName: 'bank_card_id' })
-  declare bankCardId: number 
+  declare bankCardId: number
 
   // Specific attributes of Invoice
   @column({ columnName: 'invoice_number' })
@@ -64,24 +64,26 @@ export default class Invoice extends BaseModel {
   static async notifyPaymentConfirmed(invoice: Invoice) {
     // Solo notificar si se actualizó la fecha de pago (confirmación de pago)
     if (invoice.$dirty.paymentDate && invoice.paymentDate) {
-      // Cargar relaciones necesarias
+      // Cargar relaciones necesarias: fee → tripClient → client + trip
       await invoice.load('fee', (query) => {
-        query.preload('trip')
+        query.preload('tripClient', (tcQuery) => {
+          tcQuery.preload('client').preload('trip')
+        })
       })
 
-      // TODO: Obtener datos del cliente desde MS-security o Fee
-      const clientName = 'Cliente' // Obtener del Fee o MS-security
-      const clientEmail = 'cliente@placeholder.com' // Obtener del Fee o MS-security
+      // Obtener datos del cliente desde MS-security
+      const { formatClient } = await import('#services/helpers/notification_helpers')
+      const clientData = await formatClient(invoice.fee.tripClient.client)
 
       await notificationService.notifyPaymentAccepted({
         invoiceId: invoice.id,
         invoiceNumber: invoice.invoiceNumber,
         amount: invoice.totalAmount,
         paymentMethod: invoice.paymentMethod,
-        clientName,
-        clientEmail,
-        tripId: invoice.fee.tripId,
-        tripName: invoice.fee.trip.name,
+        clientName: clientData.name,
+        clientEmail: clientData.email,
+        tripId: invoice.fee.tripClient.tripId,
+        tripName: invoice.fee.tripClient.trip.name,
       })
     }
   }

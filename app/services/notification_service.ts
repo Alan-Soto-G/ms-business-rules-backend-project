@@ -10,7 +10,7 @@ import env from '#start/env'
 import logger from '@adonisjs/core/services/logger'
 
 export interface EventPayload {
-  event_type: string
+  eventType: string
   payload: Record<string, any>
   timestamp?: string
 }
@@ -21,7 +21,7 @@ export class NotificationService {
 
   constructor() {
     // URL del microservicio de notificaciones
-    const notificationServiceUrl = env.get('NOTIFICATION_SERVICE_URL', 'http://localhost:5000')
+    const notificationServiceUrl = env.get('MS_NOTIFICATIONS', 'http://localhost:5000')
 
     this.client = axios.create({
       baseURL: notificationServiceUrl,
@@ -31,8 +31,8 @@ export class NotificationService {
       },
     })
 
-    // Permitir deshabilitar notificaciones en desarrollo/testing
-    this.enabled = env.get('NOTIFICATIONS_ENABLED', 'true') === 'true'
+    // Siempre habilitado para que funcione con la configuración del equipo
+    this.enabled = true
   }
 
   /**
@@ -45,7 +45,7 @@ export class NotificationService {
     }
 
     const event: EventPayload = {
-      event_type: eventType,
+      eventType: eventType,
       payload: payload,
       timestamp: new Date().toISOString(),
     }

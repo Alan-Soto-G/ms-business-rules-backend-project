@@ -44,6 +44,5 @@ export default await Env.create(new URL('../', import.meta.url), {
   | Variables for notification service
   |----------------------------------------------------------
   */
-  NOTIFICATION_SERVICE_URL: Env.schema.string.optional(),
-  NOTIFICATIONS_ENABLED: Env.schema.string.optional(),
+  MS_NOTIFICATIONS: Env.schema.string.optional(),
 })

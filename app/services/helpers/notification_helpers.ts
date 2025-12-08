@@ -8,6 +8,9 @@ import Trip from '#models/core/trip'
 import TripClient from '#models/pivots/trip_client'
 import Client from '#models/core/client'
 import { AffectedClient } from '#services/types/notification_types'
+import SecurityService from '#services/core/security_service'
+
+const securityService = new SecurityService()
 
 /**
  * Obtiene la lista de clientes afectados de un viaje
@@ -17,14 +20,40 @@ export async function getAffectedClientsFromTrip(tripId: number): Promise<Affect
     // Cargar clientes del viaje a través de la tabla pivote
     const tripClients = await TripClient.query().where('trip_id', tripId).preload('client')
 
-    // NOTA: Client no tiene name/email/phone directamente (vienen del MS de seguridad)
-    // En producción, deberías hacer una llamada al MS de seguridad con el userId
-    // Por ahora, retornamos un placeholder
-    return tripClients.map((tripClient) => ({
-      name: `User ${tripClient.client.userId}`, // Placeholder - obtener del MS seguridad
-      email: `user${tripClient.client.userId}@placeholder.com`, // Placeholder
-      phone: undefined,
-    }))
+    // Obtener datos reales de cada cliente desde MS de seguridad
+    const clients: AffectedClient[] = []
+
+    for (const tripClient of tripClients) {
+      try {
+        const userData = await securityService.findById(tripClient.client.userId)
+
+        if (userData) {
+          clients.push({
+            name: userData.name || `Usuario ${userData._id}`,
+            email: userData.email || `user${userData._id}@placeholder.com`,
+            phone: undefined,
+          })
+        } else {
+          // Fallback si no se encuentra el usuario
+          console.warn(`Usuario ${tripClient.client.userId} no encontrado en MS de seguridad`)
+          clients.push({
+            name: `User ${tripClient.client.userId}`,
+            email: `user${tripClient.client.userId}@placeholder.com`,
+            phone: undefined,
+          })
+        }
+      } catch (error) {
+        console.error(`Error al obtener datos del usuario ${tripClient.client.userId}:`, error)
+        // Fallback en caso de error
+        clients.push({
+          name: `User ${tripClient.client.userId}`,
+          email: `user${tripClient.client.userId}@placeholder.com`,
+          phone: undefined,
+        })
+      }
+    }
+
+    return clients
   } catch (error) {
     console.error('Error al obtener clientes afectados:', error)
     return []
@@ -71,12 +100,26 @@ export function isVehicleInService(status: string): boolean {
 
 /**
  * Formatea datos de cliente individual
- * NOTA: Client solo tiene userId - los datos completos están en MS de seguridad
  */
-export function formatClient(client: Client): AffectedClient {
+export async function formatClient(client: Client): Promise<AffectedClient> {
+  try {
+    const userData = await securityService.findById(client.userId)
+
+    if (userData) {
+      return {
+        name: userData.name || `Usuario ${userData._id}`,
+        email: userData.email || `user${userData._id}@placeholder.com`,
+        phone: undefined,
+      }
+    }
+  } catch (error) {
+    console.error(`Error al obtener datos del usuario ${client.userId}:`, error)
+  }
+
+  // Fallback si hay error o no se encuentra
   return {
-    name: `User ${client.userId}`, // Placeholder - obtener del MS seguridad
-    email: `user${client.userId}@placeholder.com`, // Placeholder
+    name: `User ${client.userId}`,
+    email: `user${client.userId}@placeholder.com`,
     phone: undefined,
   }
 }

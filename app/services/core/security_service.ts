@@ -41,7 +41,7 @@ export default class SecurityService {
    */
   async findById(id: string): Promise<User | null> {
     try {
-      const response = await this.axiosInstance.get(`/users/${id}`)
+      const response = await this.axiosInstance.get(`/api/users/${id}`)
       const user = response.data as User
       // Hide password in response
       if (user.password) {

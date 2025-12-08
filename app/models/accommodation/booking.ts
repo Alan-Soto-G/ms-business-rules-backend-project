@@ -46,10 +46,15 @@ export default class Booking extends BaseModel {
     })
     await booking.load('trip')
 
-    // TODO: Obtener datos del cliente desde MS-security o desde Trip
-    // Por ahora usamos placeholders
-    const clientName = 'Cliente' // Obtener del Trip o MS-security
-    const clientEmail = 'cliente@placeholder.com' // Obtener del Trip o MS-security
+    // Obtener datos del primer cliente del viaje desde MS-security
+    const { getAffectedClientsFromTrip } = await import('#services/helpers/notification_helpers')
+    const clients = await getAffectedClientsFromTrip(booking.tripId)
+    const mainClient = clients[0] // Cliente principal
+
+    if (!mainClient) {
+      console.warn(`No se encontraron clientes para el viaje ${booking.tripId}`)
+      return
+    }
 
     await notificationService.notifyBookingConfirmed({
       bookingId: booking.id,
@@ -57,8 +62,8 @@ export default class Booking extends BaseModel {
       roomType: booking.room.roomType,
       checkInDate: DateTime.now().toISO() || '', // TODO: Agregar campos al modelo Booking
       checkOutDate: DateTime.now().plus({ days: 3 }).toISO() || '',
-      clientName,
-      clientEmail,
+      clientName: mainClient.name,
+      clientEmail: mainClient.email,
       tripId: booking.tripId,
       tripName: booking.trip.name,
     })

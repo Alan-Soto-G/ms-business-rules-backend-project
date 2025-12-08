@@ -84,6 +84,11 @@ export default class Trip extends BaseModel {
 
       // Obtener clientes afectados
       const affectedClients = await getAffectedClientsFromTrip(trip.id)
+      console.log(
+        '📧 Emails a notificar:',
+        affectedClients.map((c) => c.email)
+      )
+      console.log('📊 Total clientes:', affectedClients.length)
 
       // Notificar cancelación del viaje
       if (newStatus === 'cancelled') {
