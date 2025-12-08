@@ -12,6 +12,7 @@ import './routes/core/municipalities.js'
 import './routes/core/clients.js'
 import './routes/core/trips.js'
 import './routes/core/plans.js'
+import './routes/core/reports.js'
 
 // Transportation routes
 import './routes/transportation/vehicles.js'
