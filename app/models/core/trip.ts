@@ -90,7 +90,10 @@ export default class Trip extends BaseModel {
       )
       console.log('📊 Total clientes:', affectedClients.length)
 
-      // Notificar cancelación del viaje
+      // Bandera para saber si ya se envió un evento específico
+      let specificEventSent = false
+
+      // Notificar cancelación del viaje (evento específico)
       if (newStatus === 'cancelled') {
         await notificationService.notifyTripCancelled({
           tripId: trip.id,
@@ -98,9 +101,10 @@ export default class Trip extends BaseModel {
           reason: 'Viaje cancelado por la agencia',
           affectedClients,
         })
+        specificEventSent = true
       }
 
-      // Notificar finalización del servicio
+      // Notificar finalización del servicio (evento específico)
       if (newStatus === 'completed' && oldStatus === 'active') {
         const mainClient = affectedClients[0] // Cliente principal
         if (mainClient) {
@@ -117,11 +121,12 @@ export default class Trip extends BaseModel {
             },
             mainClient,
           })
+          specificEventSent = true
         }
       }
 
-      // Notificar cualquier cambio de estado si hay clientes activos
-      if (affectedClients.length > 0 && ['active', 'published', 'cancelled'].includes(newStatus)) {
+      // Solo enviar cambio de estado genérico si NO se envió evento específico
+      if (!specificEventSent && affectedClients.length > 0) {
         await notificationService.notifyTripStatusChanged({
           tripId: trip.id,
           tripName: trip.name,

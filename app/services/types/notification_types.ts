@@ -7,10 +7,12 @@
 
 export enum EventType {
   // ===========================
-  // ANOMALÍAS
+  // ANOMÁLÍAS
   // ===========================
   ITINERARY_SEGMENT_DELAYED = 'itinerary.segment.delayed',
   VEHICLE_BREAKDOWN = 'vehicle.breakdown',
+  VEHICLE_REPAIRED = 'vehicle.repaired',
+  VEHICLE_REPLACED = 'vehicle.replaced',
   VEHICLE_STATUS_CHANGED = 'vehicle.status.changed',
   DRIVER_UNAVAILABLE = 'driver.unavailable',
   FLIGHT_DELAYED = 'flight.delayed',
@@ -90,6 +92,28 @@ export interface VehicleStatusChangedPayload extends BaseEventPayload {
   tripId?: number
   tripName?: string
   affectedClients?: AffectedClient[]
+}
+
+export interface VehicleRepairedPayload extends BaseEventPayload {
+  vehicleId: number
+  licensePlate: string
+  vehicleType: string
+  tripId: number
+  tripName: string
+  affectedClients: AffectedClient[]
+}
+
+export interface VehicleReplacedPayload extends BaseEventPayload {
+  oldVehicleId: number
+  oldLicensePlate: string
+  oldVehicleType: string
+  newVehicleId: number
+  newLicensePlate: string
+  newVehicleType: string
+  reason: string
+  tripId: number
+  tripName: string
+  affectedClients: AffectedClient[]
 }
 
 export interface ActivityCancelledPayload extends BaseEventPayload {

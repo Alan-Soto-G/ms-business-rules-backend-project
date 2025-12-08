@@ -81,8 +81,13 @@ export default class Vehicle extends BaseModel {
       // Estados que indican problema según el validador: maintenance, retired
       const problematicStatuses = ['maintenance', 'retired']
 
-      // Si el vehículo pasa a estado problemático, buscar servicios activos
+      // Bandera para saber si ya se envió un evento específico
+      let specificEventSent = false
+
+      // Caso 1: Vehículo pasa a estado problemático (maintenance, retired)
       if (problematicStatuses.includes(newStatus)) {
+        console.log(`🔍 Vehículo ${vehicle.licensePlate} cambió a ${newStatus}`)
+
         // Buscar si el vehículo tiene servicios de transporte activos
         await vehicle.load('transportationServices', (query) => {
           query.preload('journey').preload('transportItineraries', (itineraryQuery) => {
@@ -90,20 +95,38 @@ export default class Vehicle extends BaseModel {
           })
         })
 
+        console.log(
+          `📦 Servicios de transporte encontrados: ${vehicle.transportationServices.length}`
+        )
+
         // Notificar para cada servicio activo
         for (const service of vehicle.transportationServices) {
           // Verificar si el servicio está activo (fecha de inicio <= hoy <= fecha fin)
           const now = DateTime.now()
           const isActive = service.startDate <= now && service.endDate >= now
 
+          console.log(
+            `⏰ Servicio ${service.id}: activo=${isActive}, itinerarios=${service.transportItineraries.length}`
+          )
+
           if (isActive && service.transportItineraries.length > 0) {
             // Obtener el viaje relacionado (si existe)
             const firstItinerary = service.transportItineraries[0]
+            console.log(`🗺️ Primer itinerario tiene viaje: ${!!firstItinerary.trip}`)
+
             if (firstItinerary.trip) {
               const trip = firstItinerary.trip
               const affectedClients = await getAffectedClientsFromTrip(trip.id)
 
-              // Notificar avería del vehículo
+              console.log('🚨 Alerta de vehículo detectada:')
+              console.log(
+                '📧 Emails a notificar:',
+                affectedClients.map((c) => c.email)
+              )
+              console.log('🚗 Vehículo:', vehicle.licensePlate)
+              console.log('📊 Total clientes:', affectedClients.length)
+
+              // Notificar avería del vehículo (evento específico)
               await notificationService.notifyVehicleBreakdown({
                 vehicleId: vehicle.id,
                 licensePlate: vehicle.licensePlate,
@@ -113,18 +136,63 @@ export default class Vehicle extends BaseModel {
                 tripName: trip.name,
                 affectedClients,
               })
+              specificEventSent = true // Marcamos que ya se envió evento específico
             }
           }
         }
       }
 
-      // Siempre notificar el cambio de estado (sin clientes si no hay viajes activos)
-      await notificationService.notifyVehicleStatusChanged({
-        vehicleId: vehicle.id,
-        licensePlate: vehicle.licensePlate,
-        oldStatus,
-        newStatus,
-      })
+      // Caso 2: Vehículo sale de estado problemático → vuelve a estar disponible
+      if (problematicStatuses.includes(oldStatus) && newStatus === 'available') {
+        console.log(`✅ Vehículo ${vehicle.licensePlate} reparado: ${oldStatus} → ${newStatus}`)
+
+        // Buscar servicios activos que estaban afectados
+        await vehicle.load('transportationServices', (query) => {
+          query.preload('journey').preload('transportItineraries', (itineraryQuery) => {
+            itineraryQuery.preload('trip')
+          })
+        })
+
+        for (const service of vehicle.transportationServices) {
+          const now = DateTime.now()
+          const isActive = service.startDate <= now && service.endDate >= now
+
+          if (isActive && service.transportItineraries.length > 0) {
+            const firstItinerary = service.transportItineraries[0]
+            if (firstItinerary.trip) {
+              const trip = firstItinerary.trip
+              const affectedClients = await getAffectedClientsFromTrip(trip.id)
+
+              console.log('✅ Vehículo reparado - notificando clientes:')
+              console.log(
+                '📧 Emails:',
+                affectedClients.map((c) => c.email)
+              )
+
+              // Notificar que el vehículo fue reparado
+              await notificationService.notifyVehicleRepaired({
+                vehicleId: vehicle.id,
+                licensePlate: vehicle.licensePlate,
+                vehicleType: vehicle.vehicleType,
+                tripId: trip.id,
+                tripName: trip.name,
+                affectedClients,
+              })
+              specificEventSent = true
+            }
+          }
+        }
+      }
+
+      // Solo enviar cambio de estado genérico si NO se envió evento específico
+      if (!specificEventSent) {
+        await notificationService.notifyVehicleStatusChanged({
+          vehicleId: vehicle.id,
+          licensePlate: vehicle.licensePlate,
+          oldStatus,
+          newStatus,
+        })
+      }
     }
   }
 }

@@ -114,6 +114,38 @@ export class NotificationService {
   }
 
   /**
+   * Notifica cuando un vehículo ha sido reparado y vuelve a estar disponible
+   */
+  async notifyVehicleRepaired(data: {
+    vehicleId: number
+    licensePlate: string
+    vehicleType: string
+    tripId: number
+    tripName: string
+    affectedClients: Array<{ name: string; email: string; phone?: string }>
+  }): Promise<void> {
+    await this.emit('vehicle.repaired', data)
+  }
+
+  /**
+   * Notifica cuando se reemplaza un vehículo en un servicio activo
+   */
+  async notifyVehicleReplaced(data: {
+    oldVehicleId: number
+    oldLicensePlate: string
+    oldVehicleType: string
+    newVehicleId: number
+    newLicensePlate: string
+    newVehicleType: string
+    reason: string
+    tripId: number
+    tripName: string
+    affectedClients: Array<{ name: string; email: string; phone?: string }>
+  }): Promise<void> {
+    await this.emit('vehicle.replaced', data)
+  }
+
+  /**
    * ===========================
    * CANCELACIONES
    * ===========================
