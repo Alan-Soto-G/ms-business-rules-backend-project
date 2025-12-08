@@ -38,4 +38,11 @@ export default await Env.create(new URL('../', import.meta.url), {
   |----------------------------------------------------------
   */
   MS_SECURITY: Env.schema.string.optional(),
+
+  /*
+  |----------------------------------------------------------
+  | Variables for notification service
+  |----------------------------------------------------------
+  */
+  MS_NOTIFICATIONS: Env.schema.string.optional(),
 })

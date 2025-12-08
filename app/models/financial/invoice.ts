@@ -1,8 +1,9 @@
 import { DateTime } from 'luxon'
-import { BaseModel, column, belongsTo } from '@adonisjs/lucid/orm'
+import { BaseModel, column, belongsTo, beforeUpdate } from '@adonisjs/lucid/orm'
 import type { BelongsTo } from '@adonisjs/lucid/types/relations'
 import Fee from '#models/financial/fee'
 import BankCard from '#models/financial/bank_card'
+import notificationService from '#services/notification_service'
 
 export default class Invoice extends BaseModel {
   @column({ isPrimary: true })
@@ -13,7 +14,7 @@ export default class Invoice extends BaseModel {
   declare feeId: number
 
   @column({ columnName: 'bank_card_id' })
-  declare bankCardId: number 
+  declare bankCardId: number
 
   // Specific attributes of Invoice
   @column({ columnName: 'invoice_number' })
@@ -55,4 +56,35 @@ export default class Invoice extends BaseModel {
 
   @column.dateTime({ autoCreate: true, autoUpdate: true, columnName: 'updated_at' })
   declare updatedAt: DateTime
+
+  /**
+   * Hook: Notifica automáticamente cuando se confirma un pago
+   */
+  @beforeUpdate()
+  static async notifyPaymentConfirmed(invoice: Invoice) {
+    // Solo notificar si se actualizó la fecha de pago (confirmación de pago)
+    if (invoice.$dirty.paymentDate && invoice.paymentDate) {
+      // Cargar relaciones necesarias: fee → tripClient → client + trip
+      await invoice.load('fee', (query) => {
+        query.preload('tripClient', (tcQuery) => {
+          tcQuery.preload('client').preload('trip')
+        })
+      })
+
+      // Obtener datos del cliente desde MS-security
+      const { formatClient } = await import('#services/helpers/notification_helpers')
+      const clientData = await formatClient(invoice.fee.tripClient.client)
+
+      await notificationService.notifyPaymentAccepted({
+        invoiceId: invoice.id,
+        invoiceNumber: invoice.invoiceNumber,
+        amount: invoice.totalAmount,
+        paymentMethod: invoice.paymentMethod,
+        clientName: clientData.name,
+        clientEmail: clientData.email,
+        tripId: invoice.fee.tripClient.tripId,
+        tripName: invoice.fee.tripClient.trip.name,
+      })
+    }
+  }
 }
