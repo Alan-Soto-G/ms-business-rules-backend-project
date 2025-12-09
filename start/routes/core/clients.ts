@@ -4,6 +4,9 @@ const ClientsController = () => import('#controllers/core/clients_controller')
 
 export default router
   .group(() => {
+    // ✅ NUEVA RUTA - Debe ir PRIMERO antes de /:id
+    router.get('/by-user', [ClientsController, 'getByUserId'])
+    
     router.get('/', [ClientsController, 'index'])
     router.get('/:id', [ClientsController, 'show'])
     router.post('/', [ClientsController, 'store'])

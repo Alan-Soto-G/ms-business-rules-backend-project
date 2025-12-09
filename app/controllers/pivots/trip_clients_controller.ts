@@ -37,51 +37,58 @@ export default class TripClientsController {
   }
 
   /**
-   * GET /trip-clients/:id
-   * Get trip client by ID
+   * GET /trip-clients/my-orders
+   * Get orders for authenticated user
    */
-  async show({ params, response }: HttpContext) {
-    try {
-      const tripClient = await this.tripClientsService.getTripClientById(params.id)
-
-      if (!tripClient) {
-        return response.notFound({
-          message: 'Trip client not found',
-        })
-      }
-
+  async getMyOrders({ request, response }: HttpContext) {
+  try {
+    const authHeader = request.header('Authorization')
+    
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return response.ok({
-        message: 'Trip client retrieved successfully',
-        data: tripClient,
-      })
-    } catch (error) {
-      return response.internalServerError({
-        message: 'Error retrieving trip client',
-        error: error.message,
+        message: 'No authenticated user',
+        data: []
       })
     }
-  }
 
-  /**
-   * GET /trip-clients/trip/:tripId
-   * Get all clients by trip
-   */
-  async getByTrip({ params, response }: HttpContext) {
+    const token = authHeader.replace('Bearer ', '')
+    
+    // ✅ SOLO DECODIFICAR, NO VERIFICAR
+    let decoded: any
     try {
-      const clients = await this.tripClientsService.getClientsByTrip(params.tripId)
-
-      return response.ok({
-        message: 'Clients by trip retrieved successfully',
-        data: clients,
-      })
+      const payload = token.split('.')[1]
+      const decodedPayload = Buffer.from(payload, 'base64').toString('utf-8')
+      decoded = JSON.parse(decodedPayload)
     } catch (error) {
-      return response.internalServerError({
-        message: 'Error retrieving clients by trip',
-        error: error.message,
+      return response.unauthorized({
+        message: 'Invalid token format'
       })
     }
-  }
 
+    const userId = decoded._id
+    const Client = (await import('#models/core/client')).default
+    const client = await Client.query().where('userId', userId).first()
+
+    if (!client) {
+      return response.ok({
+        message: 'User is not a client',
+        data: []
+      })
+    }
+
+    const orders = await this.tripClientsService.getOrdersByClient(client.id)
+
+    return response.ok({
+      message: 'Orders retrieved successfully',
+      data: orders
+    })
+  } catch (error) {
+    return response.internalServerError({
+      message: 'Error retrieving orders',
+      error: error.message
+    })
+  }
+}
   /**
    * GET /trip-clients/client/:clientId
    * Get all trips by client
@@ -97,6 +104,27 @@ export default class TripClientsController {
     } catch (error) {
       return response.internalServerError({
         message: 'Error retrieving trips by client',
+        error: error.message,
+      })
+    }
+  }
+    async show({ params, response }: HttpContext) {
+    try {
+      const tripClient = await this.tripClientsService.getTripClientById(params.id)
+
+      if (!tripClient) {
+        return response.notFound({
+          message: 'Trip plan not found',
+        })
+      }
+
+      return response.ok({
+        message: 'Trip plan retrieved successfully',
+        data: tripClient,
+      })
+    } catch (error) {
+      return response.internalServerError({
+        message: 'Error retrieving trip plan',
         error: error.message,
       })
     }
@@ -264,23 +292,33 @@ export default class TripClientsController {
    * Delete trip client
    */
   async destroy({ params, response }: HttpContext) {
-    try {
-      const deleted = await this.tripClientsService.deleteTripClient(params.id)
+  try {
+    const result = await this.tripClientsService.deleteTripClient(params.id)
 
-      if (!deleted) {
-        return response.notFound({
-          message: 'Trip client not found',
-        })
-      }
-
-      return response.ok({
-        message: 'Trip client deleted successfully',
-      })
-    } catch (error) {
-      return response.internalServerError({
-        message: 'Error deleting trip client',
-        error: error.message,
+    // ¿No se encontró?
+    if (result.error === 'not_found') {
+      return response.notFound({
+        message: 'Orden no encontrada',
       })
     }
+    
+    // ¿Tiene pagos?
+    if (result.error === 'payment_exists') {
+      return response.badRequest({
+        message: result.message,
+        error: 'PAYMENT_EXISTS'
+      })
+    }
+
+    // Todo bien, eliminado
+    return response.ok({
+      message: 'Orden eliminada exitosamente',
+    })
+  } catch (error) {
+    return response.internalServerError({
+      message: 'Error al eliminar',
+      error: error.message,
+    })
   }
+}
 }

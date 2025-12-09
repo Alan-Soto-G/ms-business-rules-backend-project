@@ -34,6 +34,18 @@ export default class TripClientsService {
   }
 
   /**
+   * Get orders for a specific client (user)
+   */
+  async getOrdersByClient(clientId: number) {
+    return await TripClient.query()
+      .where('client_id', clientId)
+      .preload('trip')
+      .preload('client')
+      .preload('fees')
+      .orderBy('created_at', 'desc')
+  }
+
+  /**
    * Get all clients by trip
    */
   async getClientsByTrip(tripId: number) {
@@ -61,52 +73,41 @@ export default class TripClientsService {
    * B) Prevents duplicates
    * C) Inserts cleanly into pivot table
    */
-  async createTripClient(data: { 
-    trip_id: number
-    client_id: number
-    travelers?: number
-    quantity?: number
-    installments?: number
-    total_amount: number
-    total_with_interest?: number
-    interest_rate?: number
-    payment_status?: 'pending' | 'processing' | 'partial' | 'completed' | 'cancelled' | 'refunded'
-    epayco_ref?: string
-  }) {
+  async createTripClient(data: Partial<TripClient>) {
     // A) Validate existence of Trip
-    const trip = await Trip.find(data.trip_id)
+    const trip = await Trip.find(data.tripId)
     if (!trip) {
-      throw new Error(`Trip with ID ${data.trip_id} does not exist`)
+      throw new Error(`Trip with ID ${data.tripId} does not exist`)
     }
 
     // A) Validate existence of Client
-    const client = await Client.find(data.client_id)
+    const client = await Client.find(data.clientId)
     if (!client) {
-      throw new Error(`Client with ID ${data.client_id} does not exist`)
+      throw new Error(`Client with ID ${data.clientId} does not exist`)
     }
 
     // B) Check for duplicate assignment
     const existingAssignment = await TripClient.query()
-      .where('trip_id', data.trip_id)
-      .where('client_id', data.client_id)
+      .where('trip_id', data.tripId!)
+      .where('client_id', data.clientId!)
       .first()
 
     if (existingAssignment) {
-      throw new Error(`Client ${data.client_id} is already assigned to trip ${data.trip_id}`)
+      throw new Error(`Client ${data.clientId} is already assigned to trip ${data.tripId}`)
     }
 
     // C) Insert cleanly into pivot table
     const tripClient = await TripClient.create({
-      tripId: data.trip_id,
-      clientId: data.client_id,
+      tripId: data.tripId!,
+      clientId: data.clientId!,
       travelers: data.travelers || 1,
       quantity: data.quantity || 1,
       installments: data.installments || 1,
-      totalAmount: data.total_amount,
-      totalWithInterest: data.total_with_interest || data.total_amount,
-      interestRate: data.interest_rate || 0,
-      paymentStatus: data.payment_status || 'pending',
-      epaycoRef: data.epayco_ref || null,
+      totalAmount: data.totalAmount!,
+      totalWithInterest: data.totalWithInterest || data.totalAmount!,
+      interestRate: data.interestRate || 0,
+      paymentStatus: data.paymentStatus || 'pending',
+      epaycoRef: data.epaycoRef || null,
     })
 
     await tripClient.load('trip')
@@ -120,19 +121,7 @@ export default class TripClientsService {
    * Assign a client to a trip
    * D) Allows multiple assignments (multiple clients per trip or multiple trips per client)
    */
-  async assignTripClient(data: { 
-    trip_id: number
-    client_id: number
-    travelers?: number
-    quantity?: number
-    installments?: number
-    total_amount: number
-    total_with_interest?: number
-    interest_rate?: number
-    payment_status?: 'pending' | 'processing' | 'partial' | 'completed' | 'cancelled' | 'refunded'
-    epayco_ref?: string
-  }) {
-    // Reuse the same logic as create (validates, prevents duplicates, inserts cleanly)
+  async assignTripClient(data: Partial<TripClient>) {
     return await this.createTripClient(data)
   }
 
@@ -156,80 +145,66 @@ export default class TripClientsService {
   /**
    * Update a trip client
    */
-  async updateTripClient(
-    id: number,
-    data: {
-      trip_id?: number
-      client_id?: number
-      travelers?: number
-      quantity?: number
-      installments?: number
-      total_amount?: number
-      total_with_interest?: number
-      interest_rate?: number
-      payment_status?: 'pending' | 'processing' | 'partial' | 'completed' | 'cancelled' | 'refunded'
-      epayco_ref?: string
-    }
-  ) {
+  async updateTripClient(id: number, data: Partial<TripClient>) {
     const tripClient = await TripClient.find(id)
 
     if (!tripClient) {
       return null
     }
 
-    // Validate new trip_id if provided
-    if (data.trip_id && data.trip_id !== tripClient.tripId) {
-      const trip = await Trip.find(data.trip_id)
+    // Validate new tripId if provided
+    if (data.tripId && data.tripId !== tripClient.tripId) {
+      const trip = await Trip.find(data.tripId)
       if (!trip) {
-        throw new Error(`Trip with ID ${data.trip_id} does not exist`)
+        throw new Error(`Trip with ID ${data.tripId} does not exist`)
       }
 
-      // Check for duplicate with new trip_id
+      // Check for duplicate with new tripId
       const existingAssignment = await TripClient.query()
-        .where('trip_id', data.trip_id)
-        .where('client_id', data.client_id || tripClient.clientId)
+        .where('trip_id', data.tripId)
+        .where('client_id', data.clientId || tripClient.clientId)
         .whereNot('id', id)
         .first()
 
       if (existingAssignment) {
         throw new Error(
-          `Client ${data.client_id || tripClient.clientId} is already assigned to trip ${data.trip_id}`
+          `Client ${data.clientId || tripClient.clientId} is already assigned to trip ${data.tripId}`
         )
       }
     }
 
-    // Validate new client_id if provided
-    if (data.client_id && data.client_id !== tripClient.clientId) {
-      const client = await Client.find(data.client_id)
+    // Validate new clientId if provided
+    if (data.clientId && data.clientId !== tripClient.clientId) {
+      const client = await Client.find(data.clientId)
       if (!client) {
-        throw new Error(`Client with ID ${data.client_id} does not exist`)
+        throw new Error(`Client with ID ${data.clientId} does not exist`)
       }
 
-      // Check for duplicate with new client_id
+      // Check for duplicate with new clientId
       const existingAssignment = await TripClient.query()
-        .where('trip_id', data.trip_id || tripClient.tripId)
-        .where('client_id', data.client_id)
+        .where('trip_id', data.tripId || tripClient.tripId)
+        .where('client_id', data.clientId)
         .whereNot('id', id)
         .first()
 
       if (existingAssignment) {
         throw new Error(
-          `Client ${data.client_id} is already assigned to trip ${data.trip_id || tripClient.tripId}`
+          `Client ${data.clientId} is already assigned to trip ${data.tripId || tripClient.tripId}`
         )
       }
     }
 
     // Update fields
-    if (data.trip_id) tripClient.tripId = data.trip_id
-    if (data.client_id) tripClient.clientId = data.client_id
+    if (data.tripId !== undefined) tripClient.tripId = data.tripId
+    if (data.clientId !== undefined) tripClient.clientId = data.clientId
     if (data.travelers !== undefined) tripClient.travelers = data.travelers
     if (data.quantity !== undefined) tripClient.quantity = data.quantity
     if (data.installments !== undefined) tripClient.installments = data.installments
-    if (data.total_amount !== undefined) tripClient.totalAmount = data.total_amount
-    if (data.total_with_interest !== undefined) tripClient.totalWithInterest = data.total_with_interest
-    if (data.interest_rate !== undefined) tripClient.interestRate = data.interest_rate
-    if (data.payment_status) tripClient.paymentStatus = data.payment_status
-    if (data.epayco_ref !== undefined) tripClient.epaycoRef = data.epayco_ref
+    if (data.totalAmount !== undefined) tripClient.totalAmount = data.totalAmount
+    if (data.totalWithInterest !== undefined) tripClient.totalWithInterest = data.totalWithInterest
+    if (data.interestRate !== undefined) tripClient.interestRate = data.interestRate
+    if (data.paymentStatus !== undefined) tripClient.paymentStatus = data.paymentStatus
+    if (data.epaycoRef !== undefined) tripClient.epaycoRef = data.epaycoRef
 
     await tripClient.save()
     await tripClient.load('trip')
@@ -242,14 +217,43 @@ export default class TripClientsService {
   /**
    * Delete a trip client
    */
-  async deleteTripClient(id: number) {
-    const tripClient = await TripClient.find(id)
+async deleteTripClient(id: number) {
+  // 1. Buscar la orden
+  const tripClient = await TripClient.query()
+    .where('id', id)
+    .preload('fees')
+    .first()
 
-    if (!tripClient) {
-      return false
-    }
-
-    await tripClient.delete()
-    return true
+  // 2. ¿Existe?
+  if (!tripClient) {
+    return { success: false, error: 'not_found' }
   }
+
+  // 3. ¿Ya se pagó algo?
+  const yaSePago = tripClient.paymentStatus !== 'pending'
+  
+  if (yaSePago) {
+    return { 
+      success: false, 
+      error: 'payment_exists',
+      message: 'No se puede eliminar una orden que ya tiene pagos'
+    }
+  }
+
+  // 4. ¿Tiene cuotas creadas? (seguridad extra)
+  const tieneCuotas = tripClient.fees && tripClient.fees.length > 0
+  
+  if (tieneCuotas) {
+    return { 
+      success: false, 
+      error: 'payment_exists',
+      message: 'No se puede eliminar una orden con cuotas registradas'
+    }
+  }
+
+  // 5. Todo OK, eliminar
+  await tripClient.delete()
+  return { success: true }
+}
+
 }
