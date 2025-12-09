@@ -1,0 +1,143 @@
+{
+  "info": {
+    "name": "MS Business - Reports & Dashboard",
+    "_postman_id": "reports-dashboard-collection",
+    "description": "Colección de endpoints para el módulo de reportes y dashboard del microservicio de negocio",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Dashboard Completo",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/reports/dashboard",
+          "host": ["{{base_url}}"],
+          "path": ["api", "reports", "dashboard"]
+        },
+        "description": "Obtiene todos los datos del dashboard en una sola llamada (histórico de ingresos, viajes por municipio, distribución de transporte)"
+      },
+      "response": []
+    },
+    {
+      "name": "Histórico de Ingresos",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/reports/revenue-history",
+          "host": ["{{base_url}}"],
+          "path": ["api", "reports", "revenue-history"]
+        },
+        "description": "Obtiene el histórico de dinero recolectado en todos los viajes vendidos, agrupado por mes (formato YYYY-MM)"
+      },
+      "response": []
+    },
+    {
+      "name": "Viajes por Municipio",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/reports/municipality-trips",
+          "host": ["{{base_url}}"],
+          "path": ["api", "reports", "municipality-trips"]
+        },
+        "description": "Obtiene la cantidad de viajes que ha recibido cada municipio como destino. Útil para gráfica de barras."
+      },
+      "response": []
+    },
+    {
+      "name": "Distribución de Transporte",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/reports/transport-distribution",
+          "host": ["{{base_url}}"],
+          "path": ["api", "reports", "transport-distribution"]
+        },
+        "description": "Obtiene el porcentaje de veces que se utilizó transporte aéreo vs terrestre. Útil para gráfica circular (pie chart)."
+      },
+      "response": []
+    },
+    {
+      "name": "Estadísticas Generales",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/reports/statistics",
+          "host": ["{{base_url}}"],
+          "path": ["api", "reports", "statistics"]
+        },
+        "description": "Obtiene estadísticas generales del sistema: total de viajes, viajes activos, completados, ingresos totales y precio promedio. Útil para mostrar KPIs en cards."
+      },
+      "response": []
+    },
+    {
+      "name": "Top Destinos (Top 5)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/reports/top-destinations?limit=5",
+          "host": ["{{base_url}}"],
+          "path": ["api", "reports", "top-destinations"],
+          "query": [
+            {
+              "key": "limit",
+              "value": "5",
+              "description": "Número de destinos a retornar (default: 5)"
+            }
+          ]
+        },
+        "description": "Obtiene los destinos más populares. El parámetro 'limit' es opcional (default: 5)."
+      },
+      "response": []
+    },
+    {
+      "name": "Top Destinos (Top 10)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/reports/top-destinations?limit=10",
+          "host": ["{{base_url}}"],
+          "path": ["api", "reports", "top-destinations"],
+          "query": [
+            {
+              "key": "limit",
+              "value": "10",
+              "description": "Número de destinos a retornar"
+            }
+          ]
+        },
+        "description": "Obtiene los top 10 destinos más populares."
+      },
+      "response": []
+    },
+    {
+      "name": "Ingresos Mensuales del Año Actual",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/reports/monthly-revenue",
+          "host": ["{{base_url}}"],
+          "path": ["api", "reports", "monthly-revenue"]
+        },
+        "description": "Obtiene los ingresos mensuales del año en curso (todos los 12 meses). Útil para gráfica de barras o líneas del año actual."
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3333",
+      "type": "string"
+    }
+  ]
+}
