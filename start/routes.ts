@@ -40,6 +40,7 @@ import './routes/tourism/plan_activities.js'
 import './routes/financial/bank_cards.js'
 import './routes/financial/fees.js'
 import './routes/financial/invoices.js'
+import './routes/financial/payments.js'
 
 // Pivots routes
 import './routes/pivots/trip_clients.js'

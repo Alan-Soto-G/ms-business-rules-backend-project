@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import ClientsService from '#services/core/clients_service'
 import { createClientValidator, updateClientValidator } from '#validators/core/client'
+import Client from '#models/core/client'
 
 export default class ClientsController {
   private clientsService: ClientsService
@@ -32,6 +33,58 @@ export default class ClientsController {
     }
   }
 
+  /**
+   * GET /clients/by-user
+   * Get client by user_id from JWT token
+   */
+async getByUserId({ request, response }: HttpContext) {
+  try {
+    const authHeader = request.header('Authorization')
+    
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return response.unauthorized({
+        message: 'No token provided',
+      })
+    }
+
+    const token = authHeader.replace('Bearer ', '')
+    
+    // ✅ SOLO DECODIFICAR, NO VERIFICAR
+    let decoded: any
+    try {
+      const payload = token.split('.')[1]
+      const decodedPayload = Buffer.from(payload, 'base64').toString('utf-8')
+      decoded = JSON.parse(decodedPayload)
+    } catch (error) {
+      return response.unauthorized({
+        message: 'Invalid token format'
+      })
+    }
+    
+    const userId = decoded._id
+
+    const client = await Client.query().where('userId', userId).first()
+
+    if (!client) {
+      return response.notFound({
+        message: 'User is not a client',
+      })
+    }
+
+    return response.ok({
+      message: 'Client found',
+      data: {
+        clientId: client.id,
+        client: client,
+      },
+    })
+  } catch (error) {
+    return response.internalServerError({
+      message: 'Error retrieving client',
+      error: error.message,
+    })
+  }
+}
   /**
    * GET /clients/:id
    * Get client by ID

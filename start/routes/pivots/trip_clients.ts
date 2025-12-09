@@ -6,11 +6,11 @@ const TripClientsController = () => import('#controllers/pivots/trip_clients_con
 // CRUD routes for trip clients
 router
   .group(() => {
+    // ✅ RUTAS ESPECÍFICAS PRIMERO (antes de cualquier /:id o /:param)
+    router.get('/my-orders', [TripClientsController, 'getMyOrders'])
+    
     // GET all trip clients (with optional pagination)
     router.get('/', [TripClientsController, 'index'])
-
-    // GET trip clients by trip
-    router.get('/trip/:tripId', [TripClientsController, 'getByTrip'])
 
     // GET trip clients by client
     router.get('/client/:clientId', [TripClientsController, 'getByClient'])
@@ -21,6 +21,7 @@ router
     // DELETE unassign client from trip
     router.delete('/unassign/:tripId/:clientId', [TripClientsController, 'unassign'])
 
+    // ⚠️ RUTAS CON PARÁMETROS AL FINAL
     // GET trip client by ID
     router.get('/:id', [TripClientsController, 'show'])
 

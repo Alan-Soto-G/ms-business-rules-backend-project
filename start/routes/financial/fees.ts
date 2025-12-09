@@ -1,11 +1,18 @@
 // start/routes.ts
+import { middleware } from '#start/kernel'
 import router from '@adonisjs/core/services/router'
-//import { middleware } from '#start/kernel'
 
 const FeesController = () => import('#controllers/financial/fees_controller')
 
 export default router
   .group(() => {
+    // ✅ NUEVA RUTA - Obtener cuotas del usuario autenticado
+    router.get('/my-installments', [FeesController, 'myInstallments'])
+    
+    // ✅ NUEVA RUTA - Obtener cuotas por TripClient
+    router.get('/trip-client/:tripClientId', [FeesController, 'getByTripClient'])
+    
+    // Rutas existentes
     router.get('/', [FeesController, 'index'])
     router.get('/:id', [FeesController, 'show'])
     router.post('/', [FeesController, 'store'])
@@ -13,12 +20,4 @@ export default router
     router.delete('/:id', [FeesController, 'destroy'])
   })
   .prefix('/api/fees')
-//.use([middleware.Security()])
-
-/*/ Ruta especial: Obtener cuotas de un viaje específico
-router
-  .group(() => {
-    router.get('/:tripId/fees', [FeesController, 'findByTrip'])
-  })
-  .prefix('/api/trips')
-  .use(middleware.Security)*/
+  //.use(middleware.Security)
