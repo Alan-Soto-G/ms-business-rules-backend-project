@@ -7,11 +7,9 @@ export default class Gps extends BaseModel {
   @column({ isPrimary: true })
   declare id: number
 
-  // Foreign keys
   @column({ columnName: 'vehicle_id' })
   declare vehicleId: number
 
-  // Specific attributes of Gps
   @column({ columnName: 'serial_number' })
   declare serialNumber: string
 
@@ -24,13 +22,27 @@ export default class Gps extends BaseModel {
   @column({ columnName: 'is_active' })
   declare isActive: boolean
 
-  // Relation 1 to 1 with Vehicle
+  // **CAMPOS DE UBICACIÓN**
+  @column()
+  declare latitude: number | null
+
+  @column()
+  declare longitude: number | null
+
+  @column()
+  declare speed: number | null
+
+  @column.dateTime({ columnName: 'last_location_update' })
+  declare lastLocationUpdate: DateTime | null
+
+  @column({ columnName: 'connection_status' })
+  declare connectionStatus: 'online' | 'offline' | 'error'
+
   @belongsTo(() => Vehicle, {
     foreignKey: 'vehicleId',
   })
   declare vehicle: BelongsTo<typeof Vehicle>
 
-  // Timestamps
   @column.dateTime({ autoCreate: true, columnName: 'created_at' })
   declare createdAt: DateTime
 

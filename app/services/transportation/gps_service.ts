@@ -1,5 +1,7 @@
 import Gps from '#models/transportation/gps'
 import { ModelPaginatorContract } from '@adonisjs/lucid/types/model'
+import { DateTime } from 'luxon'
+import transmit from '@adonisjs/transmit/services/main'
 
 export default class GpsService {
   /**
@@ -26,6 +28,78 @@ export default class GpsService {
   }
 
   /**
+   * Get GPS device by Vehicle ID
+   */
+  async getGpsByVehicleId(vehicleId: number): Promise<Gps | null> {
+    return await Gps.query().where('vehicle_id', vehicleId).preload('vehicle').first()
+  }
+
+  /**
+   * Get current location of a vehicle
+   */
+  async getCurrentLocation(vehicleId: number): Promise<{
+    latitude: number | null
+    longitude: number | null
+    speed: number | null
+    lastUpdate: DateTime | null
+    connectionStatus: string
+  } | null> {
+    const gps = await this.getGpsByVehicleId(vehicleId)
+
+    if (!gps) {
+      return null
+    }
+
+    return {
+      latitude: gps.latitude,
+      longitude: gps.longitude,
+      speed: gps.speed,
+      lastUpdate: gps.lastLocationUpdate,
+      connectionStatus: gps.connectionStatus,
+    }
+  }
+
+  /**
+   * Update GPS location (for tracking)
+   */
+  async updateLocation(
+    vehicleId: number,
+    data: {
+      latitude: number
+      longitude: number
+      speed?: number
+    }
+  ): Promise<Gps | null> {
+    const gps = await this.getGpsByVehicleId(vehicleId)
+
+    if (!gps) {
+      return null
+    }
+
+    // Update location data
+    gps.latitude = data.latitude
+    gps.longitude = data.longitude
+    gps.speed = data.speed || null
+    gps.lastLocationUpdate = DateTime.now()
+    gps.connectionStatus = 'online'
+
+    await gps.save()
+    await gps.load('vehicle')
+
+    // Emit real-time update via WebSocket
+    transmit.broadcast(`gps/vehicle/${vehicleId}`, {
+      vehicleId: vehicleId,
+      latitude: gps.latitude,
+      longitude: gps.longitude,
+      speed: gps.speed,
+      timestamp: gps.lastLocationUpdate.toISO(),
+      connectionStatus: gps.connectionStatus,
+    })
+
+    return gps
+  }
+
+  /**
    * Create new GPS device
    */
   async createGps(data: {
@@ -35,7 +109,10 @@ export default class GpsService {
     model: string
     isActive?: boolean
   }): Promise<Gps> {
-    const gps = await Gps.create(data)
+    const gps = await Gps.create({
+      ...data,
+      connectionStatus: 'offline',
+    })
     await gps.load('vehicle')
     return gps
   }
@@ -78,5 +155,24 @@ export default class GpsService {
 
     await gps.delete()
     return true
+  }
+
+  /**
+   * Mark GPS as offline
+   */
+  async markAsOffline(vehicleId: number): Promise<void> {
+    const gps = await this.getGpsByVehicleId(vehicleId)
+
+    if (gps) {
+      gps.connectionStatus = 'offline'
+      await gps.save()
+
+      // Notify via WebSocket
+      transmit.broadcast(`gps/vehicle/${vehicleId}`, {
+        vehicleId: vehicleId,
+        connectionStatus: 'offline',
+        timestamp: DateTime.now().toISO(),
+      })
+    }
   }
 }

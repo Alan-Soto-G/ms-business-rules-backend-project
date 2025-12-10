@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import GpsService from '#services/transportation/gps_service'
 import { createGpsValidator, updateGpsValidator } from '#validators/transportation/gps'
+import vine from '@vinejs/vine'
 
 export default class GpsController {
   private gpsService: GpsService
@@ -53,6 +54,82 @@ export default class GpsController {
     } catch (error) {
       return response.internalServerError({
         message: 'Error retrieving GPS device',
+        error: error.message,
+      })
+    }
+  }
+
+  /**
+   * GET /gps/vehicle/:vehicleId/location
+   * Get current location of a vehicle
+   */
+  async getLocation({ params, response }: HttpContext) {
+    try {
+      const location = await this.gpsService.getCurrentLocation(params.vehicleId)
+
+      if (!location) {
+        return response.notFound({
+          message: 'GPS device not found for this vehicle',
+        })
+      }
+
+      return response.ok({
+        message: 'Location retrieved successfully',
+        data: location,
+      })
+    } catch (error) {
+      return response.internalServerError({
+        message: 'Error retrieving location',
+        error: error.message,
+      })
+    }
+  }
+
+  /**
+   * POST /gps/vehicle/:vehicleId/location
+   * Update GPS location (used by GPS device/simulator)
+   */
+  async updateLocation({ params, request, response }: HttpContext) {
+    try {
+      // Validate location data
+      const locationValidator = vine.compile(
+        vine.object({
+          latitude: vine.number().min(-90).max(90),
+          longitude: vine.number().min(-180).max(180),
+          speed: vine.number().min(0).optional(),
+        })
+      )
+
+      const data = await request.validateUsing(locationValidator)
+
+      const gps = await this.gpsService.updateLocation(params.vehicleId, data)
+
+      if (!gps) {
+        return response.notFound({
+          message: 'GPS device not found for this vehicle',
+        })
+      }
+
+      return response.ok({
+        message: 'Location updated successfully',
+        data: {
+          vehicleId: params.vehicleId,
+          latitude: gps.latitude,
+          longitude: gps.longitude,
+          speed: gps.speed,
+          timestamp: gps.lastLocationUpdate,
+        },
+      })
+    } catch (error) {
+      if (error.messages) {
+        return response.badRequest({
+          message: 'Validation error',
+          errors: error.messages,
+        })
+      }
+
+      return response.internalServerError({
+        message: 'Error updating location',
         error: error.message,
       })
     }
